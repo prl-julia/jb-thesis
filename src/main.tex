@@ -1,0 +1,22 @@
+\RequirePackage{silence} % :-\
+  \WarningFilter{scrreprt}{Usage of package `titlesec'}
+  \WarningFilter{titlesec}{Non standard sectioning command}
+\documentclass[11pt,
+  footinclude,headinclude,
+  abstract=on
+]{scrreprt}
+%paper=b5
+
+\input{preamble.tex}
+
+\begin{document}
+
+  \input{macros.tex}
+
+  \input{metainfo.tex}
+  
+  \chapter{Introduction}
+  \section{A Section}
+  \TODO{text} dsadsa
+
+\end{document}

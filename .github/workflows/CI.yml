@@ -17,3 +17,4 @@ jobs:
         with:
           format: pdf
           filename: main.tex
+          working-directory: src

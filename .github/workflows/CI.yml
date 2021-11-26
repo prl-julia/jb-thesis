@@ -16,4 +16,4 @@ jobs:
         uses: hspaans/latexmk-action@v1.1.0
         with:
           format: pdf
-          filename: article.tex
+          filename: main.tex

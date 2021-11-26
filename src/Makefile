@@ -1,8 +1,18 @@
+.PHONY: clean pdf
+
+MAIN=main
+
 all:
-	pdflatex main
-	bibtex main
-	pdflatex main
-	pdflatex main
+	latexmk -pdf $(MAIN)
 
 clean:
-	rm *.log *.aux *.bbl *.blg *~ *.fdb_latexmk *.fls *.out *.gz
+	latexmk -c $(MAIN)
+
+pdf:
+	pdflatex $(MAIN)
+	bibtex $(MAIN)
+	pdflatex $(MAIN)
+	pdflatex $(MAIN)
+
+#clean:
+#	rm *.log *.aux *.bbl *.blg *~ *.fdb_latexmk *.fls *.out *.gz

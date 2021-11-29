@@ -2,7 +2,72 @@
 
 \section{A Section}
 
-\TODO{text} dsadsa
+\TODO{text}
 
-In this section, we will discuss the \emph{first} topic.
-TOTO12
+Julia is a dynamic, high-level language for scientific computing.
+Its primary paradigm is \emph{multiple dynamic dispatch}, which allows for
+high code reuse and extensibility. Although Julia does not have a static type
+system, it does have an expressive language of types: both concrete user-defined
+types that describe values, and abstract types that can be used in method type
+annotations to specify multiple dispatch. Dispatch is implemented using
+subtyping in this language of types.
+The language of types is surprisingly complex, and there is no clean
+specification of subtyping available to Julia users. The only reference is
+effectively the implementation of subtyping, which is written in obscure C (or
+C++?) code and meant to be efficient. The implementation is not very readable,
+and the reason it needs to be fast is that subtyping is used at run-time.
+As any function call in Julia is a dynamically dispatched call, and dispatch
+relies on subtyping, it needs to be fast.
+
+However, even the most efficient implementation of subtyping is not enough to
+make the language fast. Dispatched calls can hinder optimizations. Therefore,
+Julia's JIT compiler tries to remove dispatched calls and perform further
+optimizations. In doing so, Julia heavily relies on type inference at run-time.
+When inferred types are precise enough to ``statically'' dispatch calls, the JIT
+will do so. Again, this means that subtyping is used. But furthermore, the types
+are used by the type inference algorithm to guide optimizations.
+
+As the primary purpose of types in Julia at the surface level is to describe
+behaviors, the language of types is an unusual one. For example, it provides
+impredicative exsitential types with bounded quantification. Furthermore,
+covariant tuples and unions are distributive in Julia, which is similar to
+semantic subtyping. Additionally, Julia supports a special kind of existential
+types to allow for a common use case of dispatched methods: so-called diagonal
+rule, where an existential variable is allowed to be instantiated only with a
+concrete type. Given all this, there are concerns of understandability and
+properties of the type language and subtyping in Julia.
+
+As the first step in understanding the language of types, we tried to reverse
+engineer the implementation of subtyping and provide a more readable
+specification. This work is reported in \TODO{OOPSLA 18}.
+While we did come up with subtyping rules that describe subtyping, we found
+several issues: for example, subtyping was not transitive. There were also
+several bugs in the implementation of subtyping. Furthermore, we found that the
+diagonal rule works in such a way that the meaning of a type changes depending
+on a subtyping relation it is checked against.
+Most importantly, subtyping turns out to be undecidable in Julia. This means
+that in practice, the user may face with a stack overflow at run-time because
+subtyping is used for dispatching.
+Another problem is that the rules we provided are hard to reason about to prove
+transitivity, for example.
+Thus, our first goal is to develop a specification of subtyping that is
+decidable and can be reasoned about.
+
+The way existential types are used in Julia are reminiscent of models of Java
+wildcards. The key difference is that Julia's existential types are
+impredicative. Interestingly, in the hope to avoid undecidability, Julia
+developers intentionally restricted bounded quantification to, for example,
+forbid recursive constraints on type variables.
+Thus, some approaches to making subtyping decidable are not applicable, e.g.
+material-shape separation \TODO{understand and explain}.
+
+Ideally, subtyping should also be intuitive for the users. So we explore the
+applicability of a semantic subtyping approach to the type language. We will
+identify a property that we call tag-based semantic subtyping, and we will
+strive to support this property.
+
+Because efficiency is important for Julia, and the way it is achieved is by JIT
+compilation, we explore the role of types in the JIT compiler. It turns out that
+the JIT heavily relies on type inference \TODO{OOPSLA 21}. Therefore, we need to
+understand what happens with types and which operations needs to be supported on
+types. This will be our final guiding principle.

@@ -1,3 +1,30 @@
 \chapter{Background}
 
-\section{A Section}
+\section{Overview of the Julia Language}
+
+Julia is a high-level, dynamic programming language for scientific computing~\cite{TODO}.
+It was designed to provide good performance as well as productivity features and
+the ease of use~\cite{TODO}.
+For performance, Julia relies on an optimizing JIT compiler.
+For productivity, the language provides garbage collection, dynamic typing, and
+multiple dispatch. 
+
+\tdef{Multiple dynamic dispatch}~\cite{TODO} is the core paradigm of the Julia
+language. The dispatch mechanism allows a function (called \emph{generic
+function}) to have multiple implementations (called \emph{methods}) tailored to
+different argument types. For example, the following code snippet shows several
+method definitions of the addition function \cjl{(+)}:
+\begin{julia}
++(x::Float64, y::Float64) = Base.add_float(x, y)
++(z::Complex, w::Complex) = Complex(real(z) + real(w), imag(z) + imag(w))
++(m::Missing, n::Number)  = missing
++(r1::LinRange{T}, r2::LinRange{T}) where T = ...
+\end{julia}
+For every function call, using \emph{run-time} types of the arguments,
+the dispatch mechanism either selects the \emph{most specific applicable} method,
+or throws an error if such a single best method does not exist.
+\secref{TODO} describes this process in more details.
+
+TODO: talk about types.
+
+%Notably, 

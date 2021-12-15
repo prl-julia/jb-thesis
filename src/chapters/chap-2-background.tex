@@ -9,22 +9,38 @@ For performance, Julia relies on an optimizing JIT compiler.
 For productivity, the language provides garbage collection, dynamic typing, and
 multiple dispatch. 
 
-\tdef{Multiple dynamic dispatch}~\cite{TODO} is the core paradigm of the Julia
-language. The dispatch mechanism allows a function (called \emph{generic
-function}) to have multiple implementations (called \emph{methods}) tailored to
-different argument types. For example, the following code snippet shows several
-method definitions of the addition function \cjl{(+)}:
+\begin{figure}[t]
+%-(x::Date, y::Week) = Date(UTD(value(x) - 7*value(y)))    
 \begin{julia}
-+(x::Float64, y::Float64) = Base.add_float(x, y)
-+(z::Complex, w::Complex) = Complex(real(z) + real(w), imag(z) + imag(w))
-+(m::Missing, n::Number)  = missing
-+(r1::LinRange{T}, r2::LinRange{T}) where T = ...
+-(x::BigInt) = MPZ.neg(x, y)
+-(x::BigInt, y::BigInt) = MPZ.sub(x, y)
+-(x::T, y::T) where T<:Union{Int16, Int32, ..., UInt128} = sub_int(x, y)
+-(m::Missing, n::Number) = missing
+-(A::AbstractArray{T,N} where {T,N}) = broadcast_preserving_zero_d(-, A)
 \end{julia}
-For every function call, using \emph{run-time} types of the arguments,
-the dispatch mechanism either selects the \emph{most specific applicable} method,
-or throws an error if such a single best method does not exist.
-\secref{TODO} describes this process in more details.
+\caption{Several method definitions of generic function~\cjl{(-)}
+in~Julia}\label{fig:code:subtraction}
+\end{figure}
 
-TODO: talk about types.
+\tdef{Multiple dynamic dispatch}~\cite{TODO} is the core paradigm of the Julia
+language. The dispatch mechanism allows a function, called \emph{generic
+function}, to have multiple implementations, called \emph{methods}, that are
+tailored to different argument types. For example, \figref{fig:code:subtraction}
+shows several method definitions of \cjl{(-)}, which is used as both unary
+negation (lines~1 and 5) and binary subtraction (lines 2--4).
+At \emph{run time}\footnote{Statically typed languages often support
+\emph{method overloading}. The difference between method overloading and method
+dispatch is that overloading is resolved at compile time, using static types of
+the arguments, whereas dispatch is resolved at run-time.},
+every function call in the program is dispatched to the
+\emph{most specific applicable} method, which is determined based on the
+types of the argument values. If such a single best method does not exist,
+an error is raised.
+\secref{TODO} describes this process in more detail.
+Notably, Julia does not allow the user to call a method of a generic function
+directly: the only way to reach a method is via the dispatch mechanism.
+Therefore, whenever a method is called, its arguments are guaranteed to be
+compatible with the declared type annotations.
+%Thus, types impact the semantics of a program despite the language being dynamically typed.
 
-%Notably, 
+

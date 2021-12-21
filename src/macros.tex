@@ -1,3 +1,6 @@
+%% General
+%% ======================================================================
+
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
 
 \newcommand{\figref}[1]{Fig.~\ref{#1}\xspace}
@@ -10,9 +13,31 @@
 
 \newcommand{\tdef}[1]{\textbf{#1}}
 
+%% Code
+%% *********************************************************
+
 \newcommand{\code}[1]{\texttt{\small#1}\xspace}
 \newcommand{\cjl}[1]{\lstinline[language=Julia]!#1!\xspace}
 
 \lstnewenvironment{julia}
     {\lstset{language=Julia,numbers=left,}}
     {}
+
+
+%% Math
+%% *********************************************************
+
+%% make sure we are in math mode
+\newcommand{\EM}[1]{\ensuremath{#1}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+%% Formalization
+%% ======================================================================
+
+%% Metavariables
+%% *********************************************************
+
+\newcommand{\ty}{\EM{\tau}}                 %% type annotation τ
+\newcommand{\gty}{\EM{\sigma}}              %% type tag σ

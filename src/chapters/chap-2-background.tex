@@ -55,7 +55,8 @@ invariant parametric types (e.g. \cjl{Vector\{T\}}),
 and so-called union-all types, which are written with \cjl{where} (lines~3 and 5).
 A union-all type \cjl{t where T} represents a union of types \cjl{t} for all
 valid instantiations of the type variable \cjl{T}. \citet{TODO} provide a detailed
-account of Julia types and their subtyping relation.
+account of Julia types and their subtyping relation, and we give a brief
+overview of subtyping in \secref{sec:2:subtyping}.
 
 One of the key notions related to types in Julia is the distinction between
 \emph{concrete} and \emph{abstract} types. A concrete type \gty is a type that
@@ -175,8 +176,61 @@ While there are ways to optimize dispatch resolution to limit the number of
 subtyping checks, the key takeaway from this section is that
 in Julia, \emph{subtyping happens at run time} as a part of dynamic dispatch.
 Furthermore, the following section will show that because of invariant
-constructors, even subtyping with a concrete type on the left
+constructors and union-all types, even subtyping with a concrete type on the left
 (i.e., $\gty <: \ty$) can require an arbitrary subtyping check $\ty_1 <: \ty_2$.
 
 \section{Julia subtyping}\label{sec:2:subtyping}
 %% ======================================================================
+
+Subtyping in Julia largely follows the combination of
+\tdef{nominal subtyping} between user-defined nominal types and
+\tdef{semantic subtyping} for covariant tuple and union types.
+Thus, using types from \figref{fig:code:user-def-types} as an example,
+\cjl{Int128} is a subtype of \cjl{Signed}, and, transitively, of \cjl{Integer};
+\cjl{BitSet} is a subtype of \cjl{AbstractSet\{Int\}} but not
+\cjl{AbstractSet\{String\}}.
+A~union type \cjl{Union\{t1, t2, ...\}} describes a set-theoretic union of
+types \cjl{t1}, \cjl{t2}, \cjl{...}, so, for example, \cjl{Int} is a subtype of
+\cjl{Union\{Signed, String\}}, and \cjl{Union\{t1, t2, ...\} <: t} if all
+components \cjl{t1 <: t, t2 <: t, ...}.
+Tuples in Julia are immutable, and tuple types are covariant:
+\cjl{Tuple\{t1, t2, ...\}} is a subtype of \cjl{Tuple\{t1', t2'...\}} if
+their corresponding components are subtypes, i.e., \cjl{t1 <: t1', t2 <: t2', ...}.
+Following semantic subtyping, tuple types distribute over unions,
+so types \cjl{Tuple\{Union\{Int,String\}\}} and
+\cjl{Union\{Tuple\{Int\},Tuple\{String\}\}} are equivalent.
+
+User-defined parametric types are invariant regardless of whether the type is
+mutable or immutable, meaning that \cjl{Name\{t11, t12, ...\}} is a subtype of 
+\cjl{Name\{t21, t22, ...\}} only if corresponding type parameters are equivalent,
+i.e., \cjl{t11 <:> t21, t21 <:> t22, ...}.
+Thus, while covariant \cjl{Tuple\{Int\} <: Tuple\{Signed\}},
+invariant \cjl{Rational\{Int\}} is \emph{not}
+a subtype of \cjl{Rational\{Signed\}}.
+
+Union-all types \cjl{t where tl<:T<:tu} are better known in literature as
+\tdef{bounded existential types}, which also model
+Java wildcards~\cite{TODO}\footnote{In Julia syntax, a Java wildcard type
+\cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}.}.
+In what follows, we will call \cjl{t where tl<:T<:tu} an existential type;
+if lower (upper) bound on the type variable is omitted, it defaults to the
+bottom type \cjl{Union\{\}} (top type \cjl{Any}).
+Intuitively, an existential type denotes a union of \cjl{t[t'/T]} for all
+instantiations of \cjl{T} such that \cjl{tl <: t' <: tu}.
+Similarly to subtyping for union types,
+\begin{itemize}
+  \item \cjl{(t where tl<:T<:tu) <: t2} if \emph{for all} valid instantiations
+    \cjl{t'} it holds that \cjl{t[t'/T] <: t2}, and
+  \item \cjl{t1 <: (t where tl<:T<:tu)} if \emph{there exists} at least one 
+    \cjl{t'} such that \cjl{t1 <: t[t'/T]}.
+\end{itemize}
+For example, \cjl{Vector\{Int\}} is a subtype of \cjl{Vector\{T\} where T}
+because \cjl{T} can be instantiated with \cjl{Int}.
+Just like with unions, tuple types distribute over existential types:
+for example, types \cjl{Tuple\{Vector\{T\} where T\}}
+and \cjl{Tuple\{Vector\{T\}\} where T} are equivalent.
+
+Type signatures of parametric method definitions are represented as existential
+types. Just like with Java wildcards, there are no explicit packing and
+unpacking operations: \TODO{somethig about implicit packing}.
+

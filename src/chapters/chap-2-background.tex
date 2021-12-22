@@ -202,7 +202,7 @@ so types \cjl{Tuple\{Union\{Int,String\}\}} and
 
 User-defined parametric types are invariant regardless of whether the type is
 mutable or immutable, meaning that \cjl{Name\{t11, t12, ...\}} is a subtype of 
-\cjl{Name\{t21, t22, ...\}} only if corresponding type parameters are equivalent,
+\cjl{Name\{t21, t22, ...\}} only if corresponding type arguments are equivalent,
 i.e., \cjl{t11 <:> t21, t21 <:> t22, ...}.
 Thus, while covariant \cjl{Tuple\{Int\} <: Tuple\{Signed\}},
 invariant \cjl{Rational\{Int\}} is \emph{not}
@@ -229,8 +229,28 @@ because \cjl{T} can be instantiated with \cjl{Int}.
 Just like with unions, tuple types distribute over existential types:
 for example, types \cjl{Tuple\{Vector\{T\} where T\}}
 and \cjl{Tuple\{Vector\{T\}\} where T} are equivalent.
+Existential types are abstract.
 
-Type signatures of parametric method definitions are represented as existential
-types. Just like with Java wildcards, there are no explicit packing and
+Julia's existential types are \emph{impredicative}:
+existential quantifiers can appear anywhere in a type.
+For example, type \cjl{Vector\{Matrix\{T\} where T\}} denotes a vector
+of matrices with arbitrary element types.
+In contrast, \cjl{Vector\{Matrix\{S\}\} where S} denotes a set vectors where
+elements are matrices with the same element type.
+Thus, a vector of integer matrices \cjl{Vector\{Matrix\{Int\}\}} is a subtype
+of the latter, existential type, because \cjl{S} can be instantiated with
+\cjl{Int}. But it is not a subtype of the former, invariant parametric type
+\cjl{Vector\{Matrix\{T\} where T\}}, because type arguments \cjl{Matrix\{Int\}}
+and \cjl{Matrix\{T\} where T} are not equivalent.
+
+Types that involve existentials, such as \cjl{Vector\{Matrix\{T\} where T\}},
+are useful for representing heterogeneous data, but existential types
+also describe type signatures of parametric method definitions.
+It may be surprising that Julia uses existential rather than universal types,
+but recall that the primary purpose of types is to serve multiple dispatch.
+It is not possible to directly invoke a parametric method definition with the
+desired type argument. Instead, an instantiation of the type variable is found
+when subtyping between a concrete argument type and existential method type
+signature succeeds. \TODO{example}
+Just like with Java wildcards, there are no explicit packing and
 unpacking operations: \TODO{somethig about implicit packing}.
-

@@ -1,0 +1,35 @@
+%% Java Wildcards
+%% ======================================================================
+
+@inproceedings{torgesen:wildcards:2004,
+    author = {Torgersen, Mads and Hansen, Christian Plesner and Ernst, Erik and von der Ah\'{e}, Peter and Bracha, Gilad and Gafter, Neal},
+    title = {Adding Wildcards to the Java Programming Language},
+    year = {2004},
+    isbn = {1581138121},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/967900.968162},
+    doi = {10.1145/967900.968162},
+    abstract = {This paper describes wildcards, a new language construct designed to increase the flexibility of object-oriented type systems with parameterized classes. Based on the notion of use-site variance, wildcards provide a type safe abstraction over different instantiations of parameterized classes, by using '?' to denote unspecified type arguments. Thus they essentially unify the distinct families of classes often introduced by parametric polymorphism. Wildcards are implemented as part of the upcoming addition of generics to the Java™ programming language, and will thus be deployed world-wide as part of the reference implementation of the Java compiler javac available from Sun Microsystems, Inc. By providing a richer type system, wildcards allow for an improved type inference scheme for polymorphic method calls. Moreover, by means of a novel notion of wildcard capture, polymorphic methods can be used to give symbolic names to unspecified types, in a manner similar to the "open" construct known from existential types. Wildcards show up in numerous places in the Java Platform APIs of the upcoming release, and some of the examples in this paper are taken from these APIs.},
+    booktitle = {Proceedings of the 2004 ACM Symposium on Applied Computing},
+    pages = {1289–1296},
+    numpages = {8},
+    keywords = {wildcards, genericity, parameterized types},
+    location = {Nicosia, Cyprus},
+    series = {SAC '04}
+}
+
+@InProceedings{cameron:wildcards:2008,
+    author="Cameron, Nicholas
+    and Drossopoulou, Sophia
+    and Ernst, Erik",
+    editor="Vitek, Jan",
+    title="A Model for Java with Wildcards",
+    booktitle="ECOOP 2008 -- Object-Oriented Programming",
+    year="2008",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="2--26",
+    abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
+    isbn="978-3-540-70592-5"
+}

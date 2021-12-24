@@ -13,6 +13,8 @@
 
 \newcommand{\tdef}[1]{\textbf{#1}}
 
+\newcommand{\CSharp}{C\texttt{\small\#}\xspace}
+
 %% Code
 %% *********************************************************
 
@@ -22,7 +24,15 @@
 \lstnewenvironment{julia}
     {\lstset{language=Julia,numbers=left,}}
     {}
-
+\newenvironment{codeenvd}
+    {
+    \begin{center}
+    \begin{minipage}{8cm}
+    }
+    {
+    \end{minipage}
+    \end{center}
+    }
 
 %% Math
 %% *********************************************************

@@ -1,4 +1,4 @@
-\chapter{Background}
+\chapter{Background: Julia}
 
 \section{Overview of the Julia Language}
 %% ======================================================================
@@ -244,6 +244,10 @@ of the latter, existential type, because \cjl{S} can be instantiated with
 \cjl{Int}. But it is not a subtype of the former, invariant parametric type
 \cjl{Vector\{Matrix\{T\} where T\}}, because type arguments \cjl{Matrix\{Int\}}
 and \cjl{Matrix\{T\} where T} are not equivalent.
+Note that because of the impredicativity, type arguments of invariant type
+constructors such as \cjl{Vector} are arbitrarily complex. Thus, even though any
+particular \cjl{Vector\{t\}} is a concrete type, its subtyping check may reduce
+to subtyping of a non-concrete \cjl{t}.
 
 Types that involve existentials, such as \cjl{Vector\{Matrix\{T\} where T\}},
 are useful for representing heterogeneous data, but existential types
@@ -256,15 +260,13 @@ subtyping for the corresponding existential type succeeded. Then, in the body of
 the method, the existential type is implicitly unpacked, and its witness type
 is set to the instantiation induced by subtyping.
 Consider the following code snippet as an example:
-\begin{center}
-\begin{minipage}{8cm}  
+\begin{codeenvd}
 \begin{julia}
 f(v :: Vector{T}) where T = Set{T}(v)
 
 f([5, 7, 5]) # Set{Int} with 2 elements: 5, 7
 \end{julia}
-\end{minipage}
-\end{center}
+\end{codeenvd}
 Because \cjl{[5, 7, 5]} is a \cjl{Vector\{Int\}} and
 \cjl{Tuple\{Vector\{Int\}\}} is a subtype of \cjl{Tuple\{Vector\{T\}\} where T}
 as witnessed by the instantiation of \cjl{T} with \cjl{Int},
@@ -272,13 +274,54 @@ the call \cjl{f([5, 7, 5])} dispatches to the method in line~1,
 and \cjl{T} in the body of the method becomes \cjl{Int}.
 
 To support a generic programming pattern where method arguments are expected
-to be of the same concrete type, Julia introduced a so-called \tdef{diagonal
+to be of the same concrete type, Julia provides a so-called \tdef{diagonal
 rule}. Consider the following method definition, which defines equality
-\cjl{()==)} in terms of equality of representations \cjl{(===)}:
-\begin{center}
-\begin{minipage}{8cm}  
+\cjl{(==)} in terms of the built-in equality of representations \cjl{(===)}:
+\begin{codeenvd}
 \begin{julia}
 ==(x::T, y::T) where T<:Number = x === y
 \end{julia}
-\end{minipage}
-\end{center}
+\end{codeenvd}
+If it were possible to instantiate \cjl{T} with an abstract type such as
+\cjl{Integer}, the method could be called with a pair of a signed and unsigned
+integer. This would be an incorrect implementation of equality, for the same bit
+representation corresponds to different numbers when interpreted with and
+without the sign.
+To prevent such behavior, the diagonal rule states that if a type variable
+appears in the type only covariantly and more than once, it can be instantiated
+only with concrete types.\footnote{A similar rule applies for static resolution
+of method overloading in \CSharp. An example can be found on
+\href{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}{this page}.}
+Thus, the type signature of \cjl{(==)} above,
+\cjl{Tuple\{T, T\} where T<:Number} represents a restricted existential type:
+it is a union of tuples \cjl{Tuple\{t, t\}} where \cjl{t} is a concrete subtype
+of \cjl{Number}. The same rule applies in line~3
+of~\figref{fig:code:subtraction}: built-in integer subtraction \cjl{sub_int} is
+guaranteed to be called only with primitive integers of the same concrete type.
+
+\section{Undecidability of Julia subtyping}\label{sec:2:undecidable}
+%% ======================================================================
+
+It is not unusual for subtyping in a complex type language to be undecidable,
+as happened to Java and Scala~\cite{TODO}.
+In practice, for a statically-typed language, this means that the
+compiler might not terminate on some programs. Although undesirable,
+such undecidability, if it manifests rarely, remains an acceptable trade-off
+for the sake of an expressive type system.
+
+In a dynamically typed Julia where subtyping is used at run time for dispatch
+resolution, undecidability would mean that a program might not terminate
+on a function call. Even on rare occasions, such run-time effect of
+undecidability is of greater concern than the compile-time one.
+Therefore, decidability of subtyping was one of the explicit goals
+in the original Julia design~\cite{TODO}.
+To this end, Julia disallows several features that are known to cause
+undecidability: recursive constraints on type variables and
+circularities in the inheritance hierarchy~\cite{TODO}.
+
+Despite the aim of decidability, Julia subtyping is \emph{undecidable}.
+As discovered by Ben Chung and Ross Tate, Julia can encode system
+$F^N_{\leq}$, which is known to be undecidable~\cite{}.
+\figref{TODO} shows the encoding of $F^N_{\leq}$ types\footnote{Function
+type is dropped as irrelevant to the undecidabiltiy result.},
+with $d$ \TODO{subtyping reversed}

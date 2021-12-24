@@ -321,7 +321,26 @@ circularities in the inheritance hierarchy~\cite{TODO}.
 
 Despite the aim of decidability, Julia subtyping is \emph{undecidable}.
 As discovered by Ben Chung and Ross Tate, Julia can encode system
-$F^N_{\leq}$, which is known to be undecidable~\cite{}.
-\figref{TODO} shows the encoding of $F^N_{\leq}$ types\footnote{Function
+\FSub, which is known to be undecidable~\cite{TODO}.
+\figref{TODO} shows the encoding of \FSub types\footnote{Arrow
 type is dropped as irrelevant to the undecidabiltiy result.},
-with $d$ \TODO{subtyping reversed}
+with $\ty_1 \leq \ty_2$ of \FSub defined as
+$\interp{\ty_2} <: \interp{\ty_1}$ in Julia.
+Internally, Julia keeps a dedicated stack for checking subtyping
+and terminates the program when the stack reaches a certain limit.
+Thus, in practice, subtyping checks that showcase undecidability, such as
+the Ghelli example, manifest with a \cjl{StackOverflowError} in Julia.
+
+
+\begin{figure}
+\[
+\begin{array}{rcl}
+  \interp{\mathit{Top}} &=& \text{\cjl{Union\{\}}}\\
+  \interp{\alpha} &=& \alpha\\
+  \interp{\forall\alpha\leq\ty.\ty'} &=&
+    \text{\cjl{Tuple\{Ref\{}}\alpha\text{\cjl{\}, }}
+    \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
+\end{array}
+\]
+\caption{Encoding of \FSub types in Julia}\label{fig:FSub-encoding}
+\end{figure}

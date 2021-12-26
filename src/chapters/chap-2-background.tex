@@ -1,4 +1,4 @@
-\chapter{Background: Julia}
+\chapter{Background: Julia}\label{chap:2}
 
 \section{Overview of the Julia Language}
 %% ======================================================================
@@ -302,6 +302,19 @@ guaranteed to be called only with primitive integers of the same concrete type.
 \section{Undecidability of Julia subtyping}\label{sec:2:undecidable}
 %% ======================================================================
 
+\begin{figure}
+\[
+\begin{array}{rcl}
+  \interp{\mathit{Top}} &=& \text{\cjl{Union\{\}}}\\
+  \interp{\alpha} &=& \alpha\\
+  \interp{\forall\alpha\leq\ty.\ty'} &=&
+    \text{\cjl{Tuple\{Ref\{}}\alpha\text{\cjl{\}, }}
+    \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
+\end{array}
+\]
+\caption{Encoding of \FSub types in Julia}\label{fig:FSub-encoding}
+\end{figure}
+
 It is not unusual for subtyping in a complex type language to be undecidable,
 as happened to Java and Scala~\cite{TODO}.
 In practice, for a statically-typed language, this means that the
@@ -309,10 +322,9 @@ compiler might not terminate on some programs. Although undesirable,
 such undecidability, if it manifests rarely, remains an acceptable trade-off
 for the sake of an expressive type system.
 
-In a dynamically typed Julia where subtyping is used at run time for dispatch
-resolution, undecidability would mean that a program might not terminate
-on a function call. Even on rare occasions, such run-time effect of
-undecidability is of greater concern than the compile-time one.
+In a dynamically typed Julia subtyping is used at run time for dispatch
+resolution. Even on rare occasions, run-time effects of
+undecidability are of greater concern than the compile-time one.
 Therefore, decidability of subtyping was one of the explicit goals
 in the original Julia design~\cite{TODO}.
 To this end, Julia disallows several features that are known to cause
@@ -329,18 +341,5 @@ $\interp{\ty_2} <: \interp{\ty_1}$ in Julia.
 Internally, Julia keeps a dedicated stack for checking subtyping
 and terminates the program when the stack reaches a certain limit.
 Thus, in practice, subtyping checks that showcase undecidability, such as
-the Ghelli example, manifest with a \cjl{StackOverflowError} in Julia.
-
-
-\begin{figure}
-\[
-\begin{array}{rcl}
-  \interp{\mathit{Top}} &=& \text{\cjl{Union\{\}}}\\
-  \interp{\alpha} &=& \alpha\\
-  \interp{\forall\alpha\leq\ty.\ty'} &=&
-    \text{\cjl{Tuple\{Ref\{}}\alpha\text{\cjl{\}, }}
-    \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
-\end{array}
-\]
-\caption{Encoding of \FSub types in Julia}\label{fig:FSub-encoding}
-\end{figure}
+the Ghelli example, often manifest with a \cjl{StackOverflowError}
+rather than non-termination.

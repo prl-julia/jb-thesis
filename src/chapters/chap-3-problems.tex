@@ -1,0 +1,22 @@
+\chapter{Research problems}
+
+As discussed in \chapref{chap:2}, Julia relies on a complex language of types
+and subtyping for multiple dynamic dispatch, and subtyping turns out to be
+undecidable. In practice, this can manifest with a \cjl{StackOverflowError}
+during program execution, as subtyping is used at run time for several purposes:
+to resolve function calls, to process new method definitions, and even during
+JIT compilation.
+
+There are a number of issues related to subtyping on the Julia bug tracker.
+For example,
+\href{https://github.com/JuliaLang/julia/issues/41948}{\code{\#41948}}\footnote{
+    \url{https://github.com/JuliaLang/julia/issues/41948}
+} reports \cjl{StackOverflowError} caused by a function definition,
+and
+\href{https://github.com/JuliaLang/julia/issues/33137}{\code{\#33137}}\footnote{
+    \url{https://github.com/JuliaLang/julia/issues/33137}
+} points out surprising behavior related to the diagonal rule.
+As of December 2021, there are 22 open and 114 closed issues labeled with ``bug''
+and ``types and dispatch''. For context, ``bug'' and ``codegen'' are assigned to
+6 open and 76 closed issues, and just ``bug'' is assigned to 213 open and 2477
+closed issues.

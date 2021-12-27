@@ -1,4 +1,4 @@
-\chapter{Research problems}
+\chapter{Research problem}
 
 As discussed in \chapref{chap:2}, Julia relies on a complex language of types
 and subtyping for multiple dynamic dispatch, and subtyping turns out to be
@@ -20,3 +20,23 @@ As of December 2021, there are 22 open and 114 closed issues labeled with ``bug'
 and ``types and dispatch''. For context, ``bug'' and ``codegen'' are assigned to
 6 open and 76 closed issues, and just ``bug'' is assigned to 213 open and 2477
 closed issues.
+
+The main research problem I am going to tackle in this work is
+\emph{decidable subtyping for the Julia language}.
+The goal is to develop a language of types and a corresponding specification
+of subtyping that is decidable but not unreasonably restrictive for the language.
+The latter means that the majority of types in the existing Julia packages
+are supported by the proposal.
+Furthermore, the proposed type language should be usable by the rest of the
+Julia compiler.
+To tackle the problem, I will answer the following questions:
+\begin{enumerate}
+    \item \emph{How are types used and what operations on types need to be supported?}
+      Clearly, types are used as type annotations in method definitions, with
+      subtyping being part of the dispatch resolution.
+      Beyond that, Julia is known to rely on type inference for optimizations
+      during JIT compilation. Thus, for example, \citet{TODO}, which describes the
+      original Julia design, mentions that besides subtyping, the type inference
+      algorithm needs meet, join, and widening operators.
+      As \cite{TODO} is generally outdated, I plan to 
+\end{enumerate}

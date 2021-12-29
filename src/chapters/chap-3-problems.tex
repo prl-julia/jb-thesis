@@ -41,7 +41,11 @@ To tackle the problem, I will answer the following questions:
       during JIT compilation. According to \citet{TODO}, which describes the
       original Julia design, the type inference algorithm needs subtyping
       but also meet, join, and widening operators.
-      As \cite{TODO} is generally outdated, I need to review the current state
-      of Julia to identify the types API that the compiler relies on.
-    \item \emph{TODO}
+      As \cite{TODO} is generally outdated, the current state of Julia needs
+      to be reviewed to identify what operations on types the compiler relies on.
+    \item \emph{How complicated are types used in practice?}
+      To make subtyping decidable, I will likely need to restrict the type
+      language in some way. At the same time, the restriction should not be
+      prohibitively strong for the existing code base. Thus, an analysis of types
+      currently used in practice can provide guidance for possible restrictions.
 \end{enumerate}

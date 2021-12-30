@@ -52,23 +52,23 @@ Although subtyping in Julia is intended to follow the semantic subtyping
 intuition, there is no formal set-theoretic model of Julia types.
 In \cite{TODO}, I proposed a semantic interpretation of (a subset of) Julia
 types \ty as sets of type tags \gty, which correspond to concrete types.
-For a language of non-parametric nominal types, tuples, and unions,
+Then, for a language of non-parametric nominal types, tuples, and unions,
 subtyping can be defined as the set inclusion of interpretations
 $\interp{\ty} \subseteq \interp{\ty'}$.
-While the treatment of tuples and unions is completely standard, nominal types
-are not as straightforward: interpreting an abstract type as a set of
-its concrete subtypes (e.g. $\interp{\text{\cjl{Signed}}} =
-\{\text{\cjl{Int8, Int16, ..., Int128}}\}$) would lead to brittle programs.
-Namely, defining a new concrete subtype of an abstract type could cause
-the existing code to execute differently because of the changed subtyping relation,
-for it is used at run time to process method definitions and dynamic dispatch.
+% While the treatment of tuples and unions is completely standard, nominal types
+% are not as straightforward: interpreting an abstract type as a set of
+% its concrete subtypes (e.g. $\interp{\text{\cjl{Signed}}} =
+% \{\text{\cjl{Int8, Int16, ..., Int128}}\}$) would lead to brittle programs.
+% Namely, because subtyping is used at run time to process method definitions and 
+% dynamic dispatch, defining a new concrete subtype of an abstract type would
+% change the subtyping relation and
+% could cause the existing code to execute differently.
 %It is worth emphasizing that Julia subtyping contradicts the set-theoretic
 %interpretation in its treatment of the bottom type \cjl{Union\{\}}.
 %Semantically, both \cjl{Union\{\}} and \cjl{Tuple\{Union\{\}\}} represent the
 %empty set and are thus equivalent. However, in Julia,
 %\cjl{Tuple\{Union\{\}\}} is not a subtype of \cjl{Union\{\}}.
-
-In the presence of invariant type constructors such as \cjl{Vector\{...\}},
+However, in the presence of invariant type constructors such as \cjl{Vector\{...\}},
 types are given an indexed interpretation $\interp{\cdot}_n$.
 In particular, a concrete type constructor \cjl{Name\{...\}} is interpreted as
 \[
@@ -86,11 +86,22 @@ a singleton set $\{ \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}$
 is that type tags $\text{\cjl{Name\{}}\ty\text{\cjl{\}}}$ and
 $\text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$ can have syntactically different
 but semantically equivalent type parameters \ty and $\ty'$.
-Despite the more complicated indexed interpretation, the subtyping relation has
-a simple, equivalent syntactic definition $\ty \leq \ty'$ where
+Despite the more complicated indexed interpretation, subtyping has
+an equivalent, standard syntactic definition $\ty \leq \ty'$ where
 $\text{\cjl{Name\{}}\ty\text{\cjl{\}}} \leq
 \text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$
 holds if $\ty \leq \ty'$ and $\ty' \leq \ty$.
 
-\paragraph{A model of Julia JIT~\cite{TODO}.}
-The importance of concrete types.
+\paragraph{A model of Julia's JIT~\cite{TODO}.}
+Using an abstract machine modeled after Julia's JIT compiler, this work formally
+defines the property of a method definition that impacts the ability of
+the compiler to optimize the code: the property is called type stability.
+Although type stability is not directly related to the topic of this thesis
+proposal, having defined a model of the JIT compiler, I found that
+(1)~the correctness of JIT compilation depends on the soundness of type
+inference, and (2)~concrete types and the ability of type inference to infer
+concrete types of expressions are conducive to optimizations.
+These observations emphasize that despite Julia being a dynamic language,
+subtyping and the type language are an integral part of the compiler
+and Julia's performance.
+

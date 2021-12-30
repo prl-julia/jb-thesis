@@ -1,2 +1,21 @@
 \chapter{Research plan}\label{chap:6}
 
+I plan to work on developing a decidable subtyping specification for the Julia
+language and write a research paper on that.
+As outlined in \chapref{chap:3}, I envision the type language to be close to the
+one currently used in Julia, with some restrictions that ensure decidability
+but support the majority of the existing code base.
+As a first step, I will look into restricting lower bounds of existential type
+variables, for lower bounds make it possible to encode the undecidable
+system \FSub in Julia. Furthermore, taking into account the inconsistent
+treatment of types due to the diagonal rule,
+and the importance of concrete types for optimizations in the JIT compiler,
+I propose to explicitly distinguish between regular existential types
+and existential types where the type variable ranges over only concrete types.
+
+I intend to do the technical work on decidable subtyping and submit a paper
+for POPL 2023, with the deadline in July 2022.
+After that, I intend to collaborate with the Julia developers on incorporating
+decidable subtyping into the Julia language and work on the thesis.
+I expect that the thesis will be completed in a year from the proposal time,
+around February 2023.

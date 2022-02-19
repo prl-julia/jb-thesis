@@ -19,3 +19,138 @@ After that, I intend to collaborate with the Julia developers on incorporating
 decidable subtyping into the Julia language and work on the thesis.
 I expect that the thesis will be completed in a year from the proposal time,
 around February 2023.
+
+
+\begin{figure}
+\small
+\makebox[\textwidth]{
+\begin{tabular}{l@{\hspace{4mm}}l}
+  $\begin{array}{rcll}
+    \ty
+      &::=& & \textit{Type annotations} \\
+      &\Alt& \tyany & \text{top type} \\
+      &\Alt& \tybot & \text{bottom type} \\
+      &\Alt& \typair{\ty_1}{\ty_2}
+                    & \text{covariant pair} \\
+      &\Alt& \tyinv\iname\tys
+                    & \text{invariant constr.} \\
+      &\Alt& \tyexist{X}{\cty_l}{\ty_u}{\ty}
+                    & \text{existential type} \\
+      &\Alt& \tvx   & \text{type variable} \\
+      &\Alt& \gtyexist{X}{\ty_u}{\ty}
+                    & \text{concretely-exist. type} \\
+      &\Alt& \gvx   & \text{concrete type var.} \\
+      &\Alt& \tyunion{\ty_1}{\ty_2}
+                    & \text{union type} \\
+    \\
+    \cty  &::=& \ty  \Alt \fv\ty  = \varnothing & \textit{Closed types} \\
+  \end{array}$
+&
+  $\begin{array}{rcll}
+    \gty
+      &::=& & \textit{Type tags} \\
+      &\Alt& \tyinv\cname\tys
+                    & \text{concr. inv. constr.} \\
+      &\Alt& \typair{\gty_1}{\gty_2}
+                    & \text{concrete pair} \\
+      &\Alt& \gvx   & \text{concrete type var.} \\
+    \\\\
+    \iname
+      &::=& & \textit{User-defined names} \\
+      &\Alt& \cname & \text{concrete} \\
+      &\Alt& \aname & \text{abstract} \\
+      
+    \\\\
+    \cgty &::=& \gty \Alt \fv\gty = \varnothing & \textit{Closed tags} \\
+  \end{array}$
+\end{tabular}
+}\caption{Syntax}\label{fig:syntax}
+\end{figure}
+
+\begin{figure}
+\small
+
+  \[ \VEnv ::= \EmptyEnv \Alt \VEnv, \var{X} \]
+
+\begin{mathpar}
+  \fbox{\wlscpd{\ty}}
+  \\
+
+  \inferrule{ }
+  { \wlscpd{\tyany} }
+
+  \inferrule{ }
+  { \wlscpd{\tybot} }
+  \\
+
+  \inferrule
+  { \wlscpd{\ty_1} \and \wlscpd{\ty_2} }
+  { \wlscpd{ \typair{\ty_1}{\ty_2} } }
+
+  \inferrule
+  { \forall i.\ \cfbox{light-gray}{\wlfrscpd{\ty_i}} }
+  { \wlscpd{ \tyinv\iname\tys } }
+
+  \inferrule
+  { \wlscpd{\ty_1} \and \wlscpd{\ty_2} }
+  { \wlscpd{ \tyunion{\ty_1}{\ty_2} } }
+  \\
+
+  \inferrule
+  { \wlscp{\EmptyEnv}{\cty_l} \and \wlscpd{\ty_u} \and \wlscp{\VEnv,\vx}{\ty} }
+  { \wlscpd{ \tyexist{X}{\cty_l}{\ty_u}{\ty} } }
+
+  \inferrule
+  { \wlscpd{\ty_u} \and \wlscp{\VEnv,\vx}{\ty} }
+  { \wlscpd{ \gtyexist{X}{\ty_u}{\ty} } }
+  
+  \inferrule
+  { \vx \in \dom\VEnv }
+  { \wlscpd{\avx} }
+  \\
+
+  \fbox{\wlfrscpd{\ty}}
+  \\
+
+  \inferrule{ }
+  { \wlfrscpd{\tyany} }
+
+  \inferrule{ }
+  { \wlfrscpd{\tybot} }
+  \\
+
+  \inferrule
+  { \wlfrscpd{\ty_1} \and \wlfrscpd{\ty_2} }
+  { \wlfrscpd{ \typair{\ty_1}{\ty_2} } }
+
+  \inferrule
+  { \forall i.\ \wlfrscpd{\ty_i} }
+  { \wlfrscpd{ \tyinv\iname\tys } }
+
+  \inferrule
+  { \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\EmptyEnv}}{\ty_1}$} \and
+    \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\EmptyEnv}}{\ty_2}$} }
+  { \wlfrscpd{ \tyunion{\ty_1}{\ty_2} } }
+  \\
+
+  \inferrule
+  { \cfbox{light-gray}{\wlscp{\EmptyEnv}{\cty_l}} \and
+    \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\EmptyEnv}}{\ty_u}$} \and
+    \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\vx}}{\ty}$} }
+  { \wlfrscpd{ \tyexist{X}{\cty_l}{\ty_u}{\ty} } }
+
+  \inferrule
+  { \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\EmptyEnv}}{\ty_u}$} \and
+    \cfbox{light-gray}{$\wlscp{\colorbox{light-gray}{\vx}}{\ty}$} }
+  { \wlfrscpd{ \gtyexist{X}{\ty_u}{\ty} } }
+
+  \inferrule
+  { \vx \in \dom\VEnv }
+  { \wlfrscpd{\avx} }
+  
+\end{mathpar}
+
+\caption{Well scopedness}\label{fig:well-scope}
+\end{figure}
+
+

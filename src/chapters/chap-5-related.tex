@@ -1,3 +1,32 @@
 \chapter{Related work}\label{chap:5}
 
 \TODO{Semantic subtyping and Java wildcards (several paragraphs).}
+
+Subtyping is typically associated with object-oriented programming languages and
+static typing. Within a type system, subtyping enables more flexibility by
+allowing an expression of a subtype to be used in place where an expression of a
+supertype is expected.
+
+
+Subtyping and decidability of subtyping are clearly a problem in various languages,
+but we will focus on several related subsets.
+
+Decidable and undecidable systems. Subtyping in PL.
+
+\section{Semantic subtyping}
+%% ======================================================================
+
+In Julia, subtyping of union and tuple types (maybe also invariant ones?) build
+on top of \TODO{Voulon} and has similarities to XDuce/CDuce.
+There is a large body of work on semantic subtyping, which extends it to
+function and polymorphic types. However, such systems do not deal with
+impredicative types.
+For example, \citet{frih:sem-sub:2008} describe a framework for defining semantic
+subtyping without building a model of the entire language, and then define
+decidable subtyping and type checking for a language with dynamic dispatch,
+unions, functions, and negation types.\TODO{clean up the description}
+
+In the semantic subtyping approach, types are interpreted as subsets of the
+model of the programming
+
+\TODO{\cite{hosoya:xduce:2003, bezanken:cduce:2003}}

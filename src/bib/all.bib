@@ -33,3 +33,64 @@
     abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
     isbn="978-3-540-70592-5"
 }
+
+%% Semantic Subtyping
+%% ======================================================================
+
+@article{frih:sem-sub:2008,
+    author = {Frisch, Alain and Castagna, Giuseppe and Benzaken, V\'{e}ronique},
+    title = {Semantic Subtyping: Dealing Set-Theoretically with Function, Union, Intersection, and Negation Types},
+    year = {2008},
+    issue_date = {September 2008},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {55},
+    number = {4},
+    issn = {0004-5411},
+    url = {https://doi.org/10.1145/1391289.1391293},
+    doi = {10.1145/1391289.1391293},
+    abstract = {Subtyping relations are usually defined either syntactically by a formal system or semantically by an interpretation of types into an untyped denotational model. This work shows how to define a subtyping relation semantically in the presence of Boolean connectives, functional types and dynamic dispatch on types, without the complexity of denotational models, and how to derive a complete subtyping algorithm.},
+    journal = {J. ACM},
+    month = {sep},
+    articleno = {19},
+    numpages = {64},
+    keywords = {union types, intersection types, negation types, higher-order functions, Subtyping}
+}
+
+@article{hosoya:xduce:2003,
+    author = {Hosoya, Haruo and Pierce, Benjamin C.},
+    title = {XDuce: A Statically Typed XML Processing Language},
+    year = {2003},
+    issue_date = {May 2003},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {3},
+    number = {2},
+    issn = {1533-5399},
+    url = {https://doi.org/10.1145/767193.767195},
+    doi = {10.1145/767193.767195},
+    abstract = {XDuce is a statically typed programming language for XML processing. Its basic data values are XML documents, and its types (so-called regular expression types) directly correspond to document schemas. XDuce also provides a flexible form of regular expression pattern matching, integrating conditional branching, tag checking, and subtree extraction, as well as dynamic typechecking. We survey the principles of XDuce's design, develop examples illustrating its key features, describe its foundations in the theory of regular tree automata, and present a complete formal definition of its core, along with a proof of type safety.},
+    journal = {ACM Trans. Internet Technol.},
+    month = {may},
+    pages = {117–148},
+    numpages = {32},
+    keywords = {XML, subtyping, Type systems, tree automata}
+}
+
+@inproceedings{bezanken:cduce:2003,
+    author = {Benzaken, V\'{e}ronique and Castagna, Giuseppe and Frisch, Alain},
+    title = {CDuce: An XML-Centric General-Purpose Language},
+    year = {2003},
+    isbn = {1581137567},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/944705.944711},
+    doi = {10.1145/944705.944711},
+    abstract = {We present the functional language CDuce, discuss some design issues, and show its adequacy for working with XML documents. Distinctive features of CDuce are a powerful pattern matching, first class functions, overloaded functions, a very rich type system (arrows, sequences, pairs, records, intersections, unions, differences), precise type inference for patterns and error localization, and a natural interpretation of types as sets of values. We also outline some important implementation issues; in particular, a dispatch algorithm that demonstrates how static type information can be used to obtain very efficient compilation schemas..},
+    booktitle = {Proceedings of the Eighth ACM SIGPLAN International Conference on Functional Programming},
+    pages = {51–63},
+    numpages = {13},
+    keywords = {type systems, XML, CDuce, XML-processing},
+    location = {Uppsala, Sweden},
+    series = {ICFP '03}
+}

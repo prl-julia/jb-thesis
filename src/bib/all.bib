@@ -1,3 +1,90 @@
+%% Decidability of subtyping
+%% ======================================================================
+
+@inproceedings{kennedy:nom-sub-var-dec:2007,
+    author = {Kennedy, Andrew and Pierce, Benjamin C.},
+    title = {On Decidability of Nominal Subtyping with Variance},
+    booktitle = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
+    year = {2007},
+    month = {January},
+    abstract = {We investigate the algorithmics of subtyping in the presence of nominal inheritance and variance for generic types, as found in Java 5, Scala 2.0, and the .NET 2.0 Intermediate Language. We prove that the general problem is undecidable and characterize three different decidable fragments. From the latter, we conjecture that undecidability critically depends on the combination of three features that are not found together in any of these languages: contravariant type constructors, class hierarchies in which the set of types reachable from a given type by inheritance and decomposition is not always finite, and class hierarchies in which a type may have multiple supertypes with the same head constructor. These results settle one case of practical interest: subtyping between ground types in the .NET intermediate language is decidable; we conjecture that our proof can also be extended to show full decidability of subtyping in .NET. For Java and Scala, the decidability questions remain open; however, the proofs of our preliminary results introduce a number of novel techniques that we hope may be useful in further attacks on these questions.},
+    url = {https://www.microsoft.com/en-us/research/publication/on-decidability-of-nominal-subtyping-with-variance/},
+    edition = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
+}
+
+@inproceedings{grigore:java-undec:2017,
+    author = {Grigore, Radu},
+    title = {Java Generics Are Turing Complete},
+    year = {2017},
+    isbn = {9781450346603},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3009837.3009871},
+    doi = {10.1145/3009837.3009871},
+    abstract = { This paper describes a reduction from the halting problem of Turing machines to subtype checking in Java. It follows that subtype checking in Java is undecidable, which answers a question posed by Kennedy and Pierce in 2007. It also follows that Java's type checker can recognize any recursive language, which improves a result of Gill and Levy from 2016. The latter point is illustrated by a parser generator for fluent interfaces. },
+    booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
+    pages = {73–85},
+    numpages = {13},
+    keywords = {subtype checking, Java, fluent interface, parser generator, Turing machine, decidability},
+    location = {Paris, France},
+    series = {POPL 2017}
+}
+
+@article{hu:dot-undec:2020,
+    author = {Hu, Jason Z. S. and Lhot\'{a}k, Ond\v{r}ej},
+    title = {Undecidability of D<: And Its Decidable Fragments},
+    year = {2019},
+    issue_date = {January 2020},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {4},
+    number = {POPL},
+    url = {https://doi.org/10.1145/3371077},
+    doi = {10.1145/3371077},
+    abstract = {Dependent Object Types (DOT) is a calculus with path dependent types, intersection types, and object self-references, which serves as the core calculus of Scala 3. Although the calculus has been proven sound, it remains open whether type checking in DOT is decidable. In this paper, we establish undecidability proofs of type checking and subtyping of D<:, a syntactic subset of DOT. It turns out that even for D<:, undecidability is surprisingly difficult to show, as evidenced by counterexamples for past attempts. To prove undecidability, we discover an equivalent definition of the D<: subtyping rules in normal form. Besides being easier to reason about, this definition makes the phenomenon of subtyping reflection explicit as a single inference rule. After removing this rule, we discover two decidable fragments of D<: subtyping and identify algorithms to decide them. We prove soundness and completeness of the algorithms with respect to the fragments, and we prove that the algorithms terminate. Our proofs are mechanized in a combination of Coq and Agda.},
+    journal = {Proc. ACM Program. Lang.},
+    month = {dec},
+    articleno = {9},
+    numpages = {30},
+    keywords = {$D_{<:}$, Undecidability, Algorithmic Typing, Dependent Object Types}
+}
+
+@article{mackay:path-dep-dec:2020,
+    author = {Mackay, Julian and Potanin, Alex and Aldrich, Jonathan and Groves, Lindsay},
+    title = {Decidable Subtyping for Path Dependent Types},
+    year = {2019},
+    issue_date = {January 2020},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {4},
+    number = {POPL},
+    url = {https://doi.org/10.1145/3371134},
+    doi = {10.1145/3371134},
+    abstract = {Path dependent types have long served as an expressive component of the Scala programming language. They allow for the modelling of both bounded polymorphism and a degree of nominal subtyping. Nominality in turn provides the ability to capture first class modules. Thus a single language feature gives rise to a rich array of expressiveness. Recent work has proven path dependent types sound in the presence of both intersection and recursive types, but unfortunately typing remains undecidable, posing problems for programmers who rely on the results of type checkers. The Wyvern programming language is an object oriented language with path dependent types, recursive types and first class modules. In this paper we define two variants of Wyvern that feature decidable typing, along with machine checked proofs of decidability. Despite the restrictions, our approaches retain the ability to encode the parameteric polymorphism of Java generics along with many idioms of the Scala module system.},
+    journal = {Proc. ACM Program. Lang.},
+    month = {dec},
+    articleno = {66},
+    numpages = {27},
+    keywords = {Scala, Path Dependent Types, Structural Subtyping, Nominal Subtyping, Functional Languages, Language Design, Decidability, Subtyping, Object Oriented Languages, Wyvern}
+}
+
+@inproceedings{mackay:bound-poly-sub-dec:2020,
+    author = {Mackay, Julian and Potanin, Alex and Aldrich, Jonathan and Groves, Lindsay},
+    title = {Syntactically Restricting Bounded Polymorphism for Decidable Subtyping},
+    year = {2020},
+    isbn = {978-3-030-64436-9},
+    publisher = {Springer-Verlag},
+    address = {Berlin, Heidelberg},
+    url = {https://doi.org/10.1007/978-3-030-64437-6_7},
+    doi = {10.1007/978-3-030-64437-6_7},
+    abstract = {Subtyping of Bounded Polymorphism has long been known to be undecidable when coupled with contra-variance. While decidable forms of bounded polymorphism exist, they all sacrifice either useful properties such as contra-variance (Kernel F<:), or useful metatheoretic properties (F<:⊤). In this paper we show how, by syntactically separating contra-variance from the recursive aspects of subtyping in System F<:, decidable subtyping can be ensured while also allowing for both contra-variant subtyping of certain instances of bounded polymorphism, and many of System F<:’s desirable metatheoretic properties. We then show that this approach can be applied to the related polymorphism present in D<:, a minimal calculus that models core features of the Scala type system.},
+    booktitle = {Programming Languages and Systems: 18th Asian Symposium, APLAS 2020, Fukuoka, Japan, November 30 – December 2, 2020, Proceedings},
+    pages = {125–144},
+    numpages = {20},
+    keywords = {Object oriented languages, Functional languages, Language design, Polymorphism},
+    location = {Fukuoka, Japan}
+}
+
 %% Java Wildcards
 %% ======================================================================
 

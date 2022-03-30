@@ -1,17 +1,44 @@
 \chapter{Related work}\label{chap:5}
 
-\TODO{Semantic subtyping and Java wildcards (several paragraphs).}
-
 Subtyping is typically associated with object-oriented programming languages and
-static typing. Within a type system, subtyping enables more flexibility by
-allowing an expression of a subtype to be used in place where an expression of a
-supertype is expected.
+static type systems. As a part of a type system, subtyping allows
+an expression of a more specific type (subtype) to be used in place
+where an expression of a more general type (supertype) is expected,
+enabling more benign programs to be typable.
+
+Although decidability is desirable for a static type system,
+benefits of having a more expressive type system might outweigh the cost of
+undecidability: if the undecidability manifests itself only in rare,
+contrived cases, with the type checker terminating on most practical programs,
+being able to type more programs with an undecidable system might be preferable
+to being able to always type fewer programs with a less expressive decidable one.
+Furthermore, it might be unclear from the outset whether
+the system is decidable. For example, the undecidability of Java was 
+established only fairly recently by~\citet{grigore:java-undec:2017},
+and the previously suspected undecidability of the core calculus of Scala 3
+was proven by~\citet{hu:dot-undec:2020}.
+Once the undecidability is established, identifying decidable fragments of
+the system remains an important challenge~\cite{mackay:path-dep-dec:2020,
+hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
+
+Apart from a static type system,
+subtyping can also be used at run time for type tests and casts,
+in which case its decidability becomes more important.
+Run-time types can be more restrictive than static types, which, in turn,
+simplifies the corresponding subtyping problem.
+For example, with the type erasure mechanism in Java generics,
+its run-time subtyping is decidable,
+and so is subtyping between ground types in the .NET intermediate
+language~\cite{kennedy:nom-sub-var-dec:2007}.
+
+
+\TODO{Semantic subtyping and Java wildcards (several paragraphs).}
 
 
 Subtyping and decidability of subtyping are clearly a problem in various languages,
 but we will focus on several related subsets.
 
-Decidable and undecidable systems. Subtyping in PL.
+Decidable and undecidable systems. Subtyping in PL..
 
 \section{Semantic subtyping}
 %% ======================================================================

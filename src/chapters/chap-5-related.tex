@@ -6,31 +6,37 @@ an expression of a more specific type (subtype) to be used in place
 where an expression of a more general type (supertype) is expected,
 enabling more benign programs to be typable.
 
-Although decidability is desirable for a static type system,
-benefits of having a more expressive type system might outweigh the cost of
-undecidability: if the undecidability manifests itself only in rare,
-contrived cases, with the type checker terminating on most practical programs,
-being able to type more programs with an undecidable system might be preferable
-to being able to always type fewer programs with a less expressive decidable one.
-Furthermore, it might be unclear from the outset whether
-the system is decidable. For example, the undecidability of Java was 
+Although decidability is desirable for a static type system, establishing
+decidability can be challenging and may take years.
+For example, the \emph{un}decidability of Java generics was 
 established only fairly recently by~\citet{grigore:java-undec:2017},
-and the previously suspected undecidability of the core calculus of Scala 3
-was proven by~\citet{hu:dot-undec:2020}.
-Once the undecidability is established, identifying decidable fragments of
-the system remains an important challenge~\cite{mackay:path-dep-dec:2020,
+and the previously suspected undecidability of the core calculus of Scala 3,
+DOT, was proven by~\citet{hu:dot-undec:2020}.
+In both cases, the undecidability of the type system is a consequence of
+undecidable subtyping.
+Practically, the undecidability of a type system manifests itself with
+the compiler crashing or not terminating. In some cases,
+benefits of having a more expressive type system might outweigh the cost of
+undecidability: if the undecidability arises only in rare, contrived cases,
+being able to type more benign programs at the cost of rare compiler crashes
+might be preferable to being able to type fewer programs
+with a decidable but less expressive type system.
+Identifying decidable fragments of undecidable type systems remains
+an important challenge~\cite{mackay:path-dep-dec:2020,
 hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
 
 Apart from a static type system,
 subtyping can also be used at run time for type tests and casts,
-in which case its decidability becomes more important.
-Run-time types can be more restrictive than static types, which, in turn,
+in which case its decidability becomes more important: otherwise, a crash or
+non-termination could happen during program execution rather than compilation.
+Run-time types can be more restrictive than static types, which
 simplifies the corresponding subtyping problem.
-For example, with the type erasure mechanism in Java generics,
-its run-time subtyping is decidable,
-and so is subtyping between ground types in the .NET intermediate
-language~\cite{kennedy:nom-sub-var-dec:2007}.
+For example, subtyping between ground types in the .NET intermediate
+language is decidable~\cite{kennedy:nom-sub-var-dec:2007},
+and with the type erasure mechanism in Java generics,
+its run-time subtyping is decidable too.
 
+\TODO{Talk about issues that cause undecidability and F-bounded polymorphism.}
 
 \TODO{Semantic subtyping and Java wildcards (several paragraphs).}
 

@@ -1,35 +1,6 @@
 %% Decidability of subtyping
 %% ======================================================================
 
-@inproceedings{kennedy:nom-sub-var-dec:2007,
-    author = {Kennedy, Andrew and Pierce, Benjamin C.},
-    title = {On Decidability of Nominal Subtyping with Variance},
-    booktitle = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
-    year = {2007},
-    month = {January},
-    abstract = {We investigate the algorithmics of subtyping in the presence of nominal inheritance and variance for generic types, as found in Java 5, Scala 2.0, and the .NET 2.0 Intermediate Language. We prove that the general problem is undecidable and characterize three different decidable fragments. From the latter, we conjecture that undecidability critically depends on the combination of three features that are not found together in any of these languages: contravariant type constructors, class hierarchies in which the set of types reachable from a given type by inheritance and decomposition is not always finite, and class hierarchies in which a type may have multiple supertypes with the same head constructor. These results settle one case of practical interest: subtyping between ground types in the .NET intermediate language is decidable; we conjecture that our proof can also be extended to show full decidability of subtyping in .NET. For Java and Scala, the decidability questions remain open; however, the proofs of our preliminary results introduce a number of novel techniques that we hope may be useful in further attacks on these questions.},
-    url = {https://www.microsoft.com/en-us/research/publication/on-decidability-of-nominal-subtyping-with-variance/},
-    edition = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
-}
-
-@inproceedings{grigore:java-undec:2017,
-    author = {Grigore, Radu},
-    title = {Java Generics Are Turing Complete},
-    year = {2017},
-    isbn = {9781450346603},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    url = {https://doi.org/10.1145/3009837.3009871},
-    doi = {10.1145/3009837.3009871},
-    abstract = { This paper describes a reduction from the halting problem of Turing machines to subtype checking in Java. It follows that subtype checking in Java is undecidable, which answers a question posed by Kennedy and Pierce in 2007. It also follows that Java's type checker can recognize any recursive language, which improves a result of Gill and Levy from 2016. The latter point is illustrated by a parser generator for fluent interfaces. },
-    booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
-    pages = {73–85},
-    numpages = {13},
-    keywords = {subtype checking, Java, fluent interface, parser generator, Turing machine, decidability},
-    location = {Paris, France},
-    series = {POPL 2017}
-}
-
 @article{hu:dot-undec:2020,
     author = {Hu, Jason Z. S. and Lhot\'{a}k, Ond\v{r}ej},
     title = {Undecidability of D<: And Its Decidable Fragments},
@@ -47,6 +18,23 @@
     articleno = {9},
     numpages = {30},
     keywords = {$D_{<:}$, Undecidability, Algorithmic Typing, Dependent Object Types}
+}
+
+@inproceedings{mackay:bound-poly-sub-dec:2020,
+    author = {Mackay, Julian and Potanin, Alex and Aldrich, Jonathan and Groves, Lindsay},
+    title = {Syntactically Restricting Bounded Polymorphism for Decidable Subtyping},
+    year = {2020},
+    isbn = {978-3-030-64436-9},
+    publisher = {Springer-Verlag},
+    address = {Berlin, Heidelberg},
+    url = {https://doi.org/10.1007/978-3-030-64437-6_7},
+    doi = {10.1007/978-3-030-64437-6_7},
+    abstract = {Subtyping of Bounded Polymorphism has long been known to be undecidable when coupled with contra-variance. While decidable forms of bounded polymorphism exist, they all sacrifice either useful properties such as contra-variance (Kernel F<:), or useful metatheoretic properties (F<:⊤). In this paper we show how, by syntactically separating contra-variance from the recursive aspects of subtyping in System F<:, decidable subtyping can be ensured while also allowing for both contra-variant subtyping of certain instances of bounded polymorphism, and many of System F<:’s desirable metatheoretic properties. We then show that this approach can be applied to the related polymorphism present in D<:, a minimal calculus that models core features of the Scala type system.},
+    booktitle = {Programming Languages and Systems: 18th Asian Symposium, APLAS 2020, Fukuoka, Japan, November 30 – December 2, 2020, Proceedings},
+    pages = {125–144},
+    numpages = {20},
+    keywords = {Object oriented languages, Functional languages, Language design, Polymorphism},
+    location = {Fukuoka, Japan}
 }
 
 @article{mackay:path-dep-dec:2020,
@@ -68,25 +56,88 @@
     keywords = {Scala, Path Dependent Types, Structural Subtyping, Nominal Subtyping, Functional Languages, Language Design, Decidability, Subtyping, Object Oriented Languages, Wyvern}
 }
 
-@inproceedings{mackay:bound-poly-sub-dec:2020,
-    author = {Mackay, Julian and Potanin, Alex and Aldrich, Jonathan and Groves, Lindsay},
-    title = {Syntactically Restricting Bounded Polymorphism for Decidable Subtyping},
-    year = {2020},
-    isbn = {978-3-030-64436-9},
-    publisher = {Springer-Verlag},
-    address = {Berlin, Heidelberg},
-    url = {https://doi.org/10.1007/978-3-030-64437-6_7},
-    doi = {10.1007/978-3-030-64437-6_7},
-    abstract = {Subtyping of Bounded Polymorphism has long been known to be undecidable when coupled with contra-variance. While decidable forms of bounded polymorphism exist, they all sacrifice either useful properties such as contra-variance (Kernel F<:), or useful metatheoretic properties (F<:⊤). In this paper we show how, by syntactically separating contra-variance from the recursive aspects of subtyping in System F<:, decidable subtyping can be ensured while also allowing for both contra-variant subtyping of certain instances of bounded polymorphism, and many of System F<:’s desirable metatheoretic properties. We then show that this approach can be applied to the related polymorphism present in D<:, a minimal calculus that models core features of the Scala type system.},
-    booktitle = {Programming Languages and Systems: 18th Asian Symposium, APLAS 2020, Fukuoka, Japan, November 30 – December 2, 2020, Proceedings},
-    pages = {125–144},
-    numpages = {20},
-    keywords = {Object oriented languages, Functional languages, Language design, Polymorphism},
-    location = {Fukuoka, Japan}
+@inproceedings{grigore:java-undec:2017,
+    author = {Grigore, Radu},
+    title = {Java Generics Are Turing Complete},
+    year = {2017},
+    isbn = {9781450346603},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3009837.3009871},
+    doi = {10.1145/3009837.3009871},
+    abstract = { This paper describes a reduction from the halting problem of Turing machines to subtype checking in Java. It follows that subtype checking in Java is undecidable, which answers a question posed by Kennedy and Pierce in 2007. It also follows that Java's type checker can recognize any recursive language, which improves a result of Gill and Levy from 2016. The latter point is illustrated by a parser generator for fluent interfaces. },
+    booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
+    pages = {73–85},
+    numpages = {13},
+    keywords = {subtype checking, Java, fluent interface, parser generator, Turing machine, decidability},
+    location = {Paris, France},
+    series = {POPL 2017}
 }
 
-%% Java Wildcards
+@inproceedings{kennedy:nom-sub-var-dec:2007,
+    author = {Kennedy, Andrew and Pierce, Benjamin C.},
+    title = {On Decidability of Nominal Subtyping with Variance},
+    booktitle = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
+    year = {2007},
+    month = {January},
+    abstract = {We investigate the algorithmics of subtyping in the presence of nominal inheritance and variance for generic types, as found in Java 5, Scala 2.0, and the .NET 2.0 Intermediate Language. We prove that the general problem is undecidable and characterize three different decidable fragments. From the latter, we conjecture that undecidability critically depends on the combination of three features that are not found together in any of these languages: contravariant type constructors, class hierarchies in which the set of types reachable from a given type by inheritance and decomposition is not always finite, and class hierarchies in which a type may have multiple supertypes with the same head constructor. These results settle one case of practical interest: subtyping between ground types in the .NET intermediate language is decidable; we conjecture that our proof can also be extended to show full decidability of subtyping in .NET. For Java and Scala, the decidability questions remain open; however, the proofs of our preliminary results introduce a number of novel techniques that we hope may be useful in further attacks on these questions.},
+    url = {https://www.microsoft.com/en-us/research/publication/on-decidability-of-nominal-subtyping-with-variance/},
+    edition = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
+}
+
+@inproceedings{pierce:bound-sub-undec:1992,
+    author = {Pierce, Benjamin C.},
+    title = {Bounded Quantification is Undecidable},
+    year = {1992},
+    isbn = {0897914538},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/143165.143228},
+    doi = {10.1145/143165.143228},
+    abstract = {F≤ is a typed λ-calculus with subtyping and bounded second-order polymorphism. First proposed by Cardelli and Wegner, it has been widely studied as a core calculus for type systems with subtyping.Curien and Ghelli proved the partial correctness of a recursive procedure for computing minimal types of F≤ terms and showed that the termination of this procedure is equivalent to the termination of this procedure is equivalent to the termination of its major component, a procedure for checking the subtype relation between F≤ types. This procedure was thought to terminate on all inputs, but the discovery of a subtle bug in a purported proof of this claim recently reopened the question of the decidability of  subtyping, and hence of typechecking.This question is settled here in the negative, using a reduction from the halting problem for two-counter Turing machines to show that the subtype relation of F≤ is undecidable.},
+    booktitle = {Proceedings of the 19th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+    pages = {305–315},
+    numpages = {11},
+    location = {Albuquerque, New Mexico, USA},
+    series = {POPL '92}
+}
+
+
+%% Java subtyping
 %% ======================================================================
+
+@inproceedings{greenman:f-bound-material-shape:2014,
+    author = {Greenman, Ben and Muehlboeck, Fabian and Tate, Ross},
+    title = {Getting F-Bounded Polymorphism into Shape},
+    year = {2014},
+    isbn = {9781450327848},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/2594291.2594308},
+    doi = {10.1145/2594291.2594308},
+    abstract = {We present a way to restrict recursive inheritance without sacrificing the benefits of F-bounded polymorphism. In particular, we distinguish two new concepts, materials and shapes, and demonstrate through a survey of 13.5 million lines of open-source generic-Java code that these two concepts never actually overlap in practice. With this Material-Shape Separation, we prove that even na\"{\i}ve type-checking algorithms are sound and complete, some of which address problems that were unsolvable even under the existing proposals for restricting inheritance. We illustrate how the simplicity of our design reflects the design intuitions employed by programmers and potentially enables new features coming into demand for upcoming programming languages.},
+    booktitle = {Proceedings of the 35th ACM SIGPLAN Conference on Programming Language Design and Implementation},
+    pages = {89–99},
+    numpages = {11},
+    keywords = {F-bounded polymorphism, variance, higher-kinded types, separation, joins, decidability, materials, subtyping, shapes},
+    location = {Edinburgh, United Kingdom},
+    series = {PLDI '14}
+}
+
+@InProceedings{cameron:wildcards:2008,
+    author="Cameron, Nicholas
+    and Drossopoulou, Sophia
+    and Ernst, Erik",
+    editor="Vitek, Jan",
+    title="A Model for Java with Wildcards",
+    booktitle="ECOOP 2008 -- Object-Oriented Programming",
+    year="2008",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="2--26",
+    abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
+    isbn="978-3-540-70592-5"
+}
 
 @inproceedings{torgesen:wildcards:2004,
     author = {Torgersen, Mads and Hansen, Christian Plesner and Ernst, Erik and von der Ah\'{e}, Peter and Bracha, Gilad and Gafter, Neal},
@@ -106,20 +157,6 @@
     series = {SAC '04}
 }
 
-@InProceedings{cameron:wildcards:2008,
-    author="Cameron, Nicholas
-    and Drossopoulou, Sophia
-    and Ernst, Erik",
-    editor="Vitek, Jan",
-    title="A Model for Java with Wildcards",
-    booktitle="ECOOP 2008 -- Object-Oriented Programming",
-    year="2008",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="2--26",
-    abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
-    isbn="978-3-540-70592-5"
-}
 
 %% Semantic Subtyping
 %% ======================================================================
@@ -180,4 +217,78 @@
     keywords = {type systems, XML, CDuce, XML-processing},
     location = {Uppsala, Sweden},
     series = {ICFP '03}
+}
+
+
+%% Subtyping Misc
+%% ======================================================================
+
+@InProceedings{cardelli:fsub:1991,
+    author="Cardelli, Luca
+    and Martini, Simone
+    and Mitchell, John C.
+    and Scedrov, Andre",
+    editor="Ito, Takayasu
+    and Meyer, Albert R.",
+    title="An extension of system F with subtyping",
+    booktitle="Theoretical Aspects of Computer Software",
+    year="1991",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="750--770",
+    abstract="System F is a well-known typed $\lambda$-calculus with polymorphic types, which provides a basis for polymorphic programming languages. We study an extension of F, called F<:, that combines parametric polymorphism with subtyping.",
+    isbn="978-3-540-47617-7"
+}
+
+% F<:
+@InProceedings{curien:coh-subsumption:1990,
+    author="Curien, Pierre-Louis
+    and Ghelli, Giorgio",
+    editor="Arnold, A.",
+    title="Coherence of subsumption",
+    booktitle="CAAP '90",
+    year="1990",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="132--146",
+    abstract="Subsumption used in subtyping breaks the term-as-proofs paradigm. Semantics most naturally are associated with proofs. Thus a problem of coherence arises: different typing proofs of the same term must have related meanings. We propose a proof-theoretical, rewriting approach to this problem. We focus on F≤, a second order lambda calculus with bounded quantification, which is rich enough to make the problem interesting. We define a normalizing rewrite system on the proofs, in which different proofs of the same typing judgement are transformed in a unique normal proof, and in which normal proofs of judgements assigning different types to the same term are strongly related. This rewriting system is not defined on the proofs themselves but on the terms of an auxiliary type system, in which the terms carry a complete information about their typing proof. This technique gives also a simple proof of the existence of a minimum type for each term. From an analysis of the proofs in normal form we obtain a deterministic type-checking algorithm, which is sound and complete by construction.",
+    isbn="978-3-540-47042-7"
+}
+
+% F<:
+@INPROCEEDINGS{bruce:inheritance-bound:1988,
+  author={Bruce, K.B. and Longo, G.},
+  booktitle={[1988] Proceedings. Third Annual Symposium on Logic in Computer Science}, 
+  title={A modest model of records, inheritance and bounded quantification}, 
+  year={1988},
+  volume={},
+  number={},
+  pages={38-50},
+  doi={10.1109/LICS.1988.5099}
+}
+
+
+%% Scala
+%% ======================================================================
+
+@Inbook{amin:dot:2016,
+    author="Amin, Nada
+        and Gr{\"u}tter, Samuel
+        and Odersky, Martin
+        and Rompf, Tiark
+        and Stucki, Sandro",
+    editor="Lindley, Sam
+        and McBride, Conor
+        and Trinder, Phil
+        and Sannella, Don",
+    title="The Essence of Dependent Object Types",
+    bookTitle="A List of Successes That Can Change the World: Essays Dedicated to Philip Wadler on the Occasion of His 60th Birthday",
+    year="2016",
+    publisher="Springer International Publishing",
+    address="Cham",
+    pages="249--272",
+    abstract="Focusing on path-dependent types, the paper develops foundations for Scala from first principles. Starting from a simple calculus D{\$}{\$}{\_}{\{}<:{\}}{\$}{\$}<:of dependent functions, it adds records, intersections and recursion to arrive at DOT, a calculus for dependent object types. The paper shows an encoding of System F with subtyping in D{\$}{\$}{\_}{\{}<:{\}}{\$}{\$}<:and demonstrates the expressiveness of DOT by modeling a range of Scala constructs in it.",
+    isbn="978-3-319-30936-1",
+    doi="10.1007/978-3-319-30936-1_14",
+    url="https://doi.org/10.1007/978-3-319-30936-1_14"
 }

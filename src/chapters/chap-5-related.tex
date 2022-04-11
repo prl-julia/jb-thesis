@@ -6,24 +6,38 @@ an expression of a more specific type (subtype) to be used in place
 where an expression of a more general type (supertype) is expected,
 enabling more benign programs to be typable.
 
+\section{Decidability}
+%% ======================================================================
+
 Although decidability is desirable for a static type system, establishing
-decidability can be challenging and may take years.
+decidability can be challenging.
 For example, the \emph{un}decidability of Java generics was 
 established only fairly recently by~\citet{grigore:java-undec:2017},
-and the previously suspected undecidability of the core calculus of Scala 3,
-DOT, was proven by~\citet{hu:dot-undec:2020}.
-In both cases, the undecidability of the type system is a consequence of
-undecidable subtyping.
-Practically, the undecidability of a type system manifests itself with
-the compiler crashing or not terminating. In some cases,
+and the previously suspected undecidability~\cite{amin:dot:2016}
+of the core calculus of Scala 3, DOT (Dependent Object Calculus),
+was proven by~\citet{hu:dot-undec:2020}. In both cases, the undecidability
+of the type system is a consequence of undecidable subtyping. Earlier,
+\citet{kennedy:nom-sub-var-dec:2007} identified several features of subtyping
+and nominal inheritance that lead to undecidability.
+
+Practically, undecidability of a type system manifests itself with
+the compiler not terminating or crashing. In some cases,
 benefits of having a more expressive type system might outweigh the cost of
 undecidability: if the undecidability arises only in rare, contrived cases,
 being able to type more benign programs at the cost of rare compiler crashes
 might be preferable to being able to type fewer programs
 with a decidable but less expressive type system.
-Identifying decidable fragments of undecidable type systems remains
-an important challenge~\cite{mackay:path-dep-dec:2020,
-hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
+
+It might be possible to recover decidability by restricting the type system in a
+way that does not affect most practical programs. Therefore, identifying
+decidable fragments of undecidable systems remains an important challenge in
+programming languages. For example, material-shape separation for Java
+generics~\cite{greenman:f-bound-material-shape:2014} enables decidability
+by restricting F-bounded polymorphism. \citet{mackay:path-dep-dec:2020} extend 
+the material-shape separation in the context of path-dependent types, which
+appear in Wyvern, Scala, and DOT.
+
+\cite{hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
 
 Apart from a static type system,
 subtyping can also be used at run time for type tests and casts,
@@ -36,7 +50,17 @@ language is decidable~\cite{kennedy:nom-sub-var-dec:2007},
 and with the type erasure mechanism in Java generics,
 its run-time subtyping is decidable too.
 
+Subtyping can be undecidable for various reasons.
+One of the early examples of undecidable subtyping is
+\FSub~\cite{cardelli:fsub:1991,pierce:bound-sub-undec:1992},
+which features universal types with upper bounds on type variables;
+there, rebounding of type variables in the rule for subtyping universal types
+leads to the growth of type variable context.
+
+
 \TODO{Talk about issues that cause undecidability and F-bounded polymorphism.}
+
+
 
 \TODO{Semantic subtyping and Java wildcards (several paragraphs).}
 

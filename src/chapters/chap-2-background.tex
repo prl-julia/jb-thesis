@@ -316,7 +316,7 @@ guaranteed to be called only with primitive integers of the same concrete type.
 \end{figure}
 
 It is not unusual for subtyping in a complex type language to be undecidable,
-as happened to Java and Scala~\cite{TODO}.
+as happened to Java and Scala~\cite{grigore:java-undec:2017,hu:dot-undec:2020}.
 In practice, for a statically-typed language, this means that the
 compiler might not terminate on some programs. Although undesirable,
 such undecidability, if it manifests rarely, remains an acceptable trade-off
@@ -333,7 +333,7 @@ circularities in the inheritance hierarchy~\cite{TODO}.
 
 Despite the aim of decidability, Julia subtyping is \emph{undecidable}.
 As discovered by Ben Chung and Ross Tate, Julia can encode system
-\FSub, which is known to be undecidable~\cite{TODO}.
+\FSubN, which is known to be undecidable~\cite{pierce:bound-sub-undec:1992}.
 \figref{fig:FSub-encoding} shows the encoding of \FSub types\footnote{Arrow
 type is dropped as irrelevant to the undecidabiltiy result.},
 with $\ty_1 \leq \ty_2$ of \FSub defined as

@@ -22,23 +22,22 @@ DOT (Dependent Object Calculus)~\cite{amin:dot:2016},
 was proven by~\citet{hu:dot-undec:2020}.
 
 Typically, undecidability is shown by a reduction from a known undecidable
-problem. For example, the halting problem for Turing machines was used in the
-case of Java generics~\cite{grigore:java-undec:2017}
+problem. For example, the halting problem for Turing machines was used
+to prove the undecidability of Java generics~\cite{grigore:java-undec:2017}
 % the culprit is recursive inheritance in Java generics
-as well as \FSub~\cite{cardelli:fsub:1991}, where subtyping
-was proven undecidable by~\citet{pierce:bound-sub-undec:1992}.
+as well as System \FSub~\cite{pierce:bound-sub-undec:1992}.
 %There, rebounding of type variables in the rule for subtyping universal types
 %leads to the growth of type variable context.
-\FSub is a language with bounded universal types, and proofs by reduction
-from \FSub are commonly used to establish undecidability in type languages
-with some form of bounded quantification.
-For instance, the undecidability of DOT~\citet{hu:dot-undec:2020} was shown
+\FSub~\cite{cardelli:fsub:1991} is a language with bounded universal types,
+and proofs by reduction from \FSub are commonly used to establish
+undecidability in languages with some form of bounded quantification.
+For instance, the undecidability of DOT~\cite{hu:dot-undec:2020} was shown
 by reducing a variant of \FSub to \DSub, a restriction of DOT featuring type
 members and path-dependent types. A similar approach was used
 by~\citet{mackay:path-dep-dec:2020} for \WyvCore, another simplification of
 DOT featuring path-dependent and recursive types.
-In the case of Julia, the undecidability of subtyping also follows from the
-ability to encode a variant of \FSub,
+In the case of Julia, the undecidability of subtyping also follows from its
+power to encode a variant of \FSub,
 as discussed in~\secref{sec:2:undecidable}.
 %In the context of languages with nominal inheritance and variance,
 %\citet{kennedy:nom-sub-var-dec:2007} showed the undecidability of subtyping
@@ -53,52 +52,70 @@ being able to successfully type check more benign programs
 might be preferable to reliably rejecting those
 programs with a decidable but less expressive type system.
 
-When a system is shown to be undecidable, identifying its decidable fragments
-remains an important challenge: in some cases, it might be possible to recover
-decidability by restricting the system in a way that does not affect most
-practical programs. For example, material-shape separation for Java
-generics~\cite{greenman:f-bound-material-shape:2014} enables decidability
-by limiting F-bounded polymorphism (recursive constraints) to a subset of types
-that are used exclusively as constraints.
-\citet{mackay:path-dep-dec:2020} extend 
-the material-shape separation in the context of path-dependent types, which
-appear in Wyvern, Scala, and DOT.
+When subtyping is used at run time, the cost of undecidability is higher
+because a crash or non-termination could happen during program execution
+rather than compilation.
+In mainstream programming languages that require run-time subtyping checks,
+run-time types are often more restrictive than static ones,
+which simplifies the corresponding subtyping problem.
+For example, in the .NET intermediate language,
+the decidability of subtyping was shown for ground types,
+which are used at run time~\cite{kennedy:nom-sub-var-dec:2007}\footnote{Due
+to the lack of documentation, it is not clear whether subtyping between ground
+types is still decidable in \CSharp as of 2022.}.
+In the case of Java generics where static subtyping is undecidable,
+the type erasure mechanism allows for decidable run-time subtyping.
+In Julia, however, it is the \emph{run-time} subtyping that is undecidable,
+yet subtyping is heavily used by the dynamic semantics for resolving dispatch.
 
+Identifying decidable fragments of undecidable type systems
+remains an important challenge.
+In some cases, it might be possible to recover
+decidability by restricting the system in a way that does not affect most
+practical programs. For example, the material-shape separation for Java
+generics~\cite{greenman:f-bound-material-shape:2014}
+enables decidability of subtyping by limiting F-bounded polymorphism %~\cite{canning:f-bound:1989}
+(i.e., recursive constraints on type variables)
+to the subset of types, called shapes, that are used exclusively as constraints;
+this separation appears to be in agreement with an industry-wide practice.
+\citet{mackay:path-dep-dec:2020} extended the material-shape separation
+to the context of path-dependent and recursive types. %, with additional
+%restrictions to ensure decidability.
+Earlier, \citet{kennedy:nom-sub-var-dec:2007} identified three decidable
+fragments of undecidable subtyping in the context of nominal inheritance
+and variance without F-bounded polymorphism: the fragments can be obtained by
+restricting either contravariance, or expansive class tables,
+or multiple instantiation inheritance.
+Aiming for decidable subtyping, Julia designers deliberately restricted
+the language from F-bounded polymorphism, contravariant constructors,
+and multiple inheritance.
+Based on those restrictions, \citet{bezanson:julia:2015} conjectured
+the decidability but pointed out that
+the combination of invariant constructors
+and contravariance in lower bounds of existential types
+is akin to one of the undecidability ingredients of \FSub.
+Indeed, this combination turned out to be powerful enough to encode \FSub.
+
+A number of decidable subtyping relations adopt subtyping rules
+inspired by a decidable variant of \FSub
+called Kernel \FSub~\cite{cardelli:types-poly:1985}.
+
+One of the decidable variants of
+subtyping they proposed, \WyvFix, uses two different contexts for
+type variables from the left- and right-hand sides of a subtyping relation.
+
+%to achieve decidability, they propose to either restrict the use of
+%recursive types in materials or to remove environment narrowing,
+%where a recursive subtyping call uses an environment with more precise
+%type information.
 
 
 \cite{hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
 \TODO{D<: and two contexts}
 
-Earlier, \citet{kennedy:nom-sub-var-dec:2007} identified several features of subtyping
-and nominal inheritance that lead to undecidability.
-\TODO{How decidability is shown and that we do the same.}
-
-
-Apart from a static type system,
-subtyping can also be used at run time for type tests and casts,
-in which case its decidability becomes more important: otherwise, a crash or
-non-termination could happen during program execution rather than compilation.
-Run-time types can be more restrictive than static types, which
-simplifies the corresponding subtyping problem.
-For example, subtyping between ground types in the .NET intermediate
-language is decidable~\cite{kennedy:nom-sub-var-dec:2007},
-and with the type erasure mechanism in Java generics,
-its run-time subtyping is decidable too.
-
-Subtyping can be undecidable for various reasons.
-One of the early examples of undecidable subtyping is
-\FSub~\cite{cardelli:fsub:1991,pierce:bound-sub-undec:1992},
-which features universal types with upper bounds on type variables;
-there, rebounding of type variables in the rule for subtyping universal types
-leads to the growth of type variable context.
-
-
 \TODO{Talk about issues that cause undecidability and F-bounded polymorphism.}
 
-
-
 \TODO{Semantic subtyping and Java wildcards (several paragraphs).}
-
 
 Subtyping and decidability of subtyping are clearly a problem in various languages,
 but we will focus on several related subsets.

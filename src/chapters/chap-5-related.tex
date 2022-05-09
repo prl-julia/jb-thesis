@@ -26,10 +26,12 @@ problem. For example, the halting problem for Turing machines was used
 to prove the undecidability of Java generics~\cite{grigore:java-undec:2017}
 % the culprit is recursive inheritance in Java generics
 as well as System \FSub~\cite{pierce:bound-sub-undec:1992}.
+\FSub~\cite{cardelli:fsub:1991} is a language with bounded universal types,
+where the undecidability of subtyping is caused by the combination of
+contravariance and rebounding of type variables in the context.
 %There, rebounding of type variables in the rule for subtyping universal types
 %leads to the growth of type variable context.
-\FSub~\cite{cardelli:fsub:1991} is a language with bounded universal types,
-and proofs by reduction from \FSub are commonly used to establish
+Proofs by reduction from \FSub are commonly used to establish
 undecidability in languages with some form of bounded quantification.
 For instance, the undecidability of DOT~\cite{hu:dot-undec:2020} was shown
 by reducing a variant of \FSub to \DSub, a restriction of DOT featuring type
@@ -59,11 +61,11 @@ In mainstream programming languages that require run-time subtyping checks,
 run-time types are often more restrictive than static ones,
 which simplifies the corresponding subtyping problem.
 For example, in the .NET intermediate language,
-the decidability of subtyping was shown for ground types,
+the decidability of subtyping was shown for ground types
 which are used at run time~\cite{kennedy:nom-sub-var-dec:2007}\footnote{Due
 to the lack of documentation, it is not clear whether subtyping between ground
 types is still decidable in \CSharp as of 2022.}.
-In the case of Java generics where static subtyping is undecidable,
+In the case of Java generics, where static subtyping is undecidable,
 the type erasure mechanism allows for decidable run-time subtyping.
 In Julia, however, it is the \emph{run-time} subtyping that is undecidable,
 yet subtyping is heavily used by the dynamic semantics for resolving dispatch.
@@ -90,30 +92,44 @@ Aiming for decidable subtyping, Julia designers deliberately restricted
 the language from F-bounded polymorphism, contravariant constructors,
 and multiple inheritance.
 Based on those restrictions, \citet{bezanson:julia:2015} conjectured
-the decidability but pointed out that
+the decidability of subtyping but pointed out that
 the combination of invariant constructors
 and contravariance in lower bounds of existential types
-is akin to one of the undecidability ingredients of \FSub.
-Indeed, this combination turned out to be powerful enough to encode \FSub.
+%one of the undecidability ingredients of \FSub.
+is akin to the source of undecidability in~\FSub;
+the conjecture relied on the fact that left- and right-hand side variables
+are treated assymetrically in Julia.
+Still, Julia subtyping turned out to be powerful enough to encode
+undecidable \FSub.
 
-A number of decidable subtyping relations adopt subtyping rules
-inspired by a decidable variant of \FSub
-called Kernel \FSub~\cite{cardelli:types-poly:1985}.
+A number of decidable subtyping relations,
+e.g. \WyvSelf~\cite{mackay:path-dep-dec:2020}
+and Kernel \DSub~\cite{hu:dot-undec:2020},
+adopt subtyping rules inspired by a decidable, restricted variant of \FSub
+called Kernel~\FSub~\cite{cardelli:types-poly:1985}.
+The downside of such relations is their rejecting more subtyping judgments
+than is desirable in practice.
+Strong Kernel \DSub~\cite{hu:dot-undec:2020} is also decidable
+but strictly more powerful than Kernel \DSub.
+This relation splits the type variable context into two parts, for the left-
+and right-hand sides of the subtyping judgment, thus avoiding the problematic
+rebounding of type variables in a single context;
+the same idea applies to \FSub to obtain decidable, Strong Kernel \FSub.
+A similar approach with context splitting was used
+by~\citet{mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
+In both \WyvFix and Strong Kernel systems,
+an undesired consequence of maintaining two separate contexts
+is that the resulting subtyping relations lack transitivity.
+In Julia, subtyping also relies on two contexts, but the right-hand side
+variables can refer to the left-hand side ones, thus preventing
+complete separation of the contexts.
+Another decidable variant of \FSub, called \FSubR, was proposed
+by~\citet{mackay:bound-poly-sub-dec:2020}. There, contravariance is allowed
+only for type bounds that do not themselves contain bounded quantification,
+with more complex types resorting to the Kernel subtyping.
+With this syntactic restriction, \FSubR admits some useful judgments
+rejected by Kernel \FSub, yet does not lose transitivity.
 
-One of the decidable variants of
-subtyping they proposed, \WyvFix, uses two different contexts for
-type variables from the left- and right-hand sides of a subtyping relation.
-
-%to achieve decidability, they propose to either restrict the use of
-%recursive types in materials or to remove environment narrowing,
-%where a recursive subtyping call uses an environment with more precise
-%type information.
-
-
-\cite{hu:dot-undec:2020,mackay:bound-poly-sub-dec:2020,kennedy:nom-sub-var-dec:2007}.
-\TODO{D<: and two contexts}
-
-\TODO{Talk about issues that cause undecidability and F-bounded polymorphism.}
 
 \TODO{Semantic subtyping and Java wildcards (several paragraphs).}
 

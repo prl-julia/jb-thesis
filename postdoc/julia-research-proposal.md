@@ -68,7 +68,30 @@ understanding the IR and manually querying the compiler.
 To make the development of type-stable and efficient Julia code more accessible,
 we propose to devise a source code analysis, as well as
 program transformations to turn unstable code into type-stable one.
-The analysis and transformations can be both incorporated
+For example, type-unstable `pos` can be fixed by replacing
+the integer literal `0` with `zero(x)`, which returns a zero value of the same
+type as `x`.
+
+In some cases, even in the presence of unstable code, performance of the
+program can be improved by introducing so-called function barriers (ref).
+This transformation factors out the code depending on type-unstable variables
+into a function of the corresponding arguments. 
+Thus, in the following example,
+```
+                                h(x) = g1(x) + g2(x)
+                                
+x = f_unstable(...)     =>      x = f_unstable(...)
+g1(x) + g2(x)                   h(x)
+```
+dispatch cannot be eliminated for `g1(x) + g2(x)`
+in the original program.
+After a function-barrier transformation that introduces a new function `h`,
+the expression `g1(x) + g2(x)` can be optimized in a version of `h` specialized for the
+run-time type of `x`.
+Thus, the new program will have one dynamically dispatched call to `h`
+instead of the three dynamic calls to `g1`, `g2`, and `+`.
+
+The aforementioned analysis and transformations can be all incorporated
 into an interactive IDE tool.
 To guide the design of the tool,
 we will interview Julia programmers with different levels

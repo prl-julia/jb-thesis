@@ -4,7 +4,7 @@
 
 Julia (ref) is a dynamic, high-level, yet high-performance programming language,
 originally designed for scientific computing.
-Julia aims to solve the two-language problem, combining the ease of use of
+Julia aims to solve the two-language problem, combining the convenience of
 productivity languages such as Python and R, and performance of languages such
 as Fortran and C (ref).
 
@@ -15,12 +15,13 @@ Multiple dispatch allows a function to have multiple implementations, called
 methods, tailored to different argument types; at run time, a function
 call is dispatched to the most specific method for the given arguments.
 To deliver performance, Julia relies on a type-specializing just-in-time
-compiler: with a few exceptions (ref), every time a method is called with a new
+compiler: with few exceptions (ref), every time a method is called with a new
 set of argument types, it is specialized for those types.
 
 The key to efficient compilation of Julia programs is dispatch elimination:
 dispatched calls are expensive, especially for functions like `(*)` that have
-hundreds of methods, and they prevent further optimizations, e.g. inlining.
+hundreds of methods and often appear in hot loops,
+and they prevent further optimizations, e.g. inlining.
 With type specialization and dispatch elimination, a function like
 `mul42(x) = x * 42`
 when called with an integer, is efficiently compiled to the following LLVM code:
@@ -56,20 +57,22 @@ Furthermore, stability is not a property of the source language but rather of an
 intermediate representation targeted by the type inference algorithm.
 To debug type stability,
 Julia programmers need to inspect type-inferred IR produced by the compiler.
-Although the compiler provides easy access to compiled code
-(e.g., `code_warntype(pos, (Float64,))` would show the result of type inference
-for a call to `pos` with a float),
-type-stable development can be a tedious process that requires
+For this, the compiler provides easy access to compiled code:
+for instance, `code_warntype(pos, (Float64,))` would show the result of type
+inference for a call to `pos` with a float.
+Nevertheless, type-stable development can be a tedious process that requires
 understanding the IR and manually querying the compiler.
 
 ## Proposed work
 
 To make the development of type-stable and efficient Julia code more accessible,
-we propose to design an IDE tool for type stability analysis.
-To guide the design, we will interview Julia programmers with different levels
+we propose to devise a source code analysis, as well as
+program transformations to turn unstable code into type-stable one.
+The analysis and transformations can be both incorporated
+into an interactive IDE tool.
+To guide the design of the tool,
+we will interview Julia programmers with different levels
 of expertise in Julia and familiarity with compilers.
-Basing off the analysis, we will further expand the tool to provide
-suggestions for transforming existing unstable code into type-stable one.
 
 ## References
 

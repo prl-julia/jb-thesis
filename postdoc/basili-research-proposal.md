@@ -1,4 +1,4 @@
-# Title
+#  A Cure for Type-Unstable Code
 
 ## Background
 
@@ -19,12 +19,12 @@ compiler: with few exceptions (ref), every time a method is called with a new
 set of argument types, it is specialized for those types.
 
 The key to efficient compilation of Julia programs is dispatch elimination:
-dispatched calls are expensive, especially for functions like `(*)` that have
-hundreds of methods and often appear in hot loops,
-and they prevent further optimizations, e.g. inlining.
+dispatched calls are expensive, especially for functions like multiplication
+that have hundreds of methods and often appear in hot loops,
+preventing further optimizations.
 With type specialization and dispatch elimination, a function like
 `mul42(x) = x * 42`
-when called with an integer, is efficiently compiled to the following LLVM code:
+when called with an integer, is compiled to the following LLVM code:
 ```
 define i64 @julia_mul42_503(i64 signext %0) #0
 { %1 = mul i64 %0, 42
@@ -47,7 +47,8 @@ Type-unstable functions impede optimizations of their callers: in particular,
 instability prevents dispatch elimination.
 For example, a `Float64`-specialized version of
 `h(x) = f(pos(x))` can optimize only the call to `pos` but not to `f`:
-because of `pos`'s instability, the run-time type of `pos(x)` cannot be predicted, and thus, dispatch cannot be resolved for `f` ahead of time.
+because of `pos`'s instability, the run-time type of `pos(x)` cannot be
+predicted, and thus, dispatch cannot be resolved for `f` ahead of time.
 
 As discussed in our paper (ref), type stability is a compiler-dependent
 property: formally, a function is type stable for the given input types
@@ -97,7 +98,6 @@ the expression `g1(x) + g2(x)` can be optimized
 in a version of `h` specialized for the run-time type of `x`.
 Thus, the new program will have one dynamically dispatched call to `h`
 instead of the three dynamic calls to `g1`, `g2`, and `+`.
-Currently, Julia does not provide an automated way of creating function barriers.
 
 ## References
 
@@ -105,3 +105,4 @@ Currently, Julia does not provide an automated way of creating function barriers
     https://docs.julialang.org/en/v1/manual/performance-tips/#Be-aware-of-when-Julia-avoids-specializing
 [2]: https://docs.julialang.org/en/v1/manual/performance-tips/#kernel-functions
 [3]: https://julialang.org/blog/2020/08/invalidations/
+[4]: https://design.tidyverse.org/out-type-stability.html

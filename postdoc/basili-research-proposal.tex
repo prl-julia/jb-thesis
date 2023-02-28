@@ -57,8 +57,8 @@
 % specialized for those types.
 
 The key to effective compilation of \href{https://julialang.org/}{Julia}
-programs, where every function call is resolved by multiple dynamic dispatch
-with non-trivial subtyping~\cite{subtyping},
+programs, where every function call is resolved by multiple dynamic dispatch,
+%with non-trivial subtyping~\cite{subtyping},
 is dispatch elimination.
 Dispatched calls prevent further optimizations and are especially expensive
 for functions like multiplication that have hundreds of methods
@@ -72,9 +72,9 @@ a type-specializing just-in-time compiler; a function like
 when called with an integer, is compiled to the following
 LLVM code without any dynamic dispatch:
 \begin{lstlisting}[language=LLVM]
-i64 @julia_mul42_503(i64 signext %0) #0
-{ %1 = mul i64 %0, 42
-  ret i64 %1 }
+  i64 @julia_mul42_503(i64 signext %0) 
+  { %1 = mul i64 %0, 42
+    ret i64 %1 }
 \end{lstlisting}
 
 % \subsection{Type stability}\label{type-stability}
@@ -86,12 +86,14 @@ Julia programmers are
 \href{https://docs.julialang.org/en/v1/manual/performance-tips/#Write-%22type-stable%22-functions}{encouraged}
 to write so-called \textbf{type-stable} code. Informally, a
 function is type stable if the type of its output can be predicted from
-the input types. For instance, function
+the input types. For instance, consider
 \begin{lstlisting}[language=Julia]
-pos(x::Number) = x < 0 ? 0 : x
+  pos(x::Number) = x < 0 ? 0 : x
 \end{lstlisting}
 %\texttt{pos(x::Number)\ =\ x\ \textless{}\ 0\ ?\ 0\ :\ x}
-is not type stable: when called with a float, it returns either a float or an
+which can be called with any subtype~\cite{subtyping} of \jlc{Number}.
+This function is not type stable: when called with a float,
+it returns either a float or an
 integer depending on the \emph{value} of the argument \texttt{x}.
 
 Type-unstable functions impede optimizations of their callers: in
@@ -102,12 +104,12 @@ optimize only the call to \texttt{pos} but not to \texttt{f}: because of
 be predicted, and thus, dispatch cannot be resolved for \texttt{f} ahead
 of time.
 
-As discussed in our paper~\cite{stability},
-type stability is a compiler-dependent
-property: formally, a function is type stable for the given input types
+Notably, type stability is a compiler-dependent property~\cite{stability}:
+%formally,
+a~function is type stable for the given input types
 if for these types, the compiler is able to infer a \emph{concrete}
 return type, such as \jlc{Int64} or \jlc{Vector\{Float64\}}.
-Furthermore, stability is not a property of the source language but
+Furthermore, type stability is not a property of the source language but
 rather of an intermediate representation targeted by the type inference
 algorithm. To debug type stability, Julia programmers need to inspect
 type-inferred IR produced by the compiler. For this, the compiler
@@ -141,9 +143,9 @@ A function barrier factors out the code
 depending on a type-unstable call into a separate function. Thus, in the
 following example,
 \begin{verbatim}
-x = pos(...)     =>    h(x) = g1(x) + g2(x)
-g1(x) + g2(x)          x = pos(...)
-                       h(x)
+  x = pos(...)     =>    h(x) = g1(x) + g2(x)
+  g1(x) + g2(x)          x = pos(...)
+                         h(x)
 \end{verbatim}
 dispatch cannot be eliminated for \texttt{g1(x)\ +\ g2(x)} in the
 original program because of the call to unstable \texttt{pos}. After a

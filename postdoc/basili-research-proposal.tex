@@ -146,14 +146,15 @@ A function barrier factors out the code
 depending on a type-unstable call into a separate function. Thus, in the
 following example,
 \begin{verbatim}
-  x = pos(...)     =>    h(x) = g1(x) + g2(x)
-  g1(x) + g2(x)          x = pos(...)
+  x = pos(...)           h(x) = g1(x) + g2(x)
+  g1(x) + g2(x)    =>    x = pos(...)
                          h(x)
 \end{verbatim}
 dispatch cannot be eliminated for \texttt{g1(x)\ +\ g2(x)} in the
-original program because of the call to unstable \texttt{pos}. After a
+original program (on the left)
+because of the call to unstable \texttt{pos}. After a
 function-barrier transformation that introduces a new function
-\texttt{h}, the expression \texttt{g1(x)\ +\ g2(x)} can be optimized in
+\texttt{h} (on the right), the expression \texttt{g1(x)~+~g2(x)} can be optimized in
 a version of \texttt{h} specialized for the run-time type of \texttt{x}.
 Thus, the new program will have one dynamically dispatched call to
 \texttt{h} instead of the three dynamic calls to \texttt{g1},

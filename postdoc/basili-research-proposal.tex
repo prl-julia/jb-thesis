@@ -1,5 +1,8 @@
 \documentclass[twocolumn]{article} 
 
+\usepackage{inconsolata}
+\usepackage[scaled=0.95]{PTSerif}
+
 \usepackage[margin=0.75in]{geometry}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage[colorlinks = true,
@@ -127,7 +130,7 @@ program transformations for type-unstable code.
 To reason about transformations, our model of JIT-compilation~\cite{stability}
 needs to be extended to account for new function definitions~\cite{worldage}.
 The analysis and
-transformations can both be incorporated into an interactive IDE tool.
+transformations will both be incorporated into an interactive IDE tool.
 To guide the design of the tool, we will interview Julia programmers
 with different levels of expertise in Julia and familiarity with
 compilers.
@@ -158,7 +161,7 @@ Thus, the new program will have one dynamically dispatched call to
 
 % \subsection{References}\label{references}
 
-\vspace*{-2em}
+\vspace*{-2.7em}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 

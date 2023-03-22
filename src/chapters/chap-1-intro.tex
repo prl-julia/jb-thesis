@@ -1,36 +1,88 @@
 \chapter{Introduction}
 
-Julia is a dynamic, high-level language for scientific computing
-which relies on \emph{multiple dynamic dispatch} as its core paradigm.
-Multiple dispatch enables high code reuse and extensibility
-by allowing functions to have multiple implementations specialized
-for different argument types, with the best implementation picked at run time
-for each function call.
+Julia is a dynamic, high-level, yet high-performance programming
+language~\cite{TODO},
+originally designed for scientific computing.
+Julia aims to solve the two-language problem, combining the convenience of
+productivity languages such as Python and R, and performance of languages such
+as Fortran and C~\cite{TODO}.
 
-Although Julia does not have a static type system,
-the dispatch mechanism is built around an expressive language of types
-and subtyping.
-For example, Julia provides impredicative, bounded existential types,
-which can be used to model wildcards in Java.
-Furthermore, drawing inspiration from semantic subtyping,
-union and existential types distribute over covariant tuple types.
-A more detailed account of dispatch and subtyping is provided in~\chapref{chap:2}.
+Notably, to allow for a high level of code reuse and extensibility,
+Julia is designed around \emph{symmetric multiple dynamic dispatch}.
+Multiple dispatch allows a function to have multiple implementations, called
+methods, tailored to different argument types; at run time, a function
+call is dispatched to the most specific method for the given arguments.
+To deliver performance, Julia relies on a type-specializing just-in-time (JIT)
+compiler: with few exceptions~\cite{TODO},
+every time a method is called with a new set of argument types,
+it is specialized for those types, creating a new method definition~\cite{TODO}.
+Therefore, even for functions with a single user-defined method,
+more methods may accrue during the program execution,
+adding work for the dispatch mechanism.
+
+% Thus, although Julia is dynamically typed and does not require
+% programmers to provide type annotations,
+% types have a profound role in the language semantics and performance.
+
+Multiple dispatch is resolved with the use of a subtype relation.
+In particular, for every function call, subtyping is checked between
+the argument types and method type signatures,
+as well as between method type signatures.
+While most run-time values are represented by nominal types,
+the language of type annotations is inspired by semantic subtyping
+and supports union types that distribute over covariant tuples.
+Furthermore, Julia uses existential types to represent
+parametric method definitions.
+With all the features combined, Julia's type language
+does not have a straightforward analogue in the literature.
+
+%to identify the most specific applicable method.
+
+Despite intentional simplifications, e.g. disallowing recursive bounds on type
+variables, subtyping in Julia is \emph{undecidable}.
+The key issue is the support for impredicative bounded existential types
+such as \cjl{Vector\{Vector\{T\} where T<:Number\}}, which
+describes a vector of vectors of numeric values where inner vectors
+can have different element types.
+A more detailed account of subtyping is provided in~\chapref{chap:2}.
+% Although Julia does not have a static type system, the language of type
+% annotations is surprisingly expressive.
+
+Although relying on undecidable subtyping is not unusual
+for a statically typed language
+with an expressive type system such as Scala~\ref{TODO},
+in the dynamic Julia language, undecidability manifests at run time and thus,
+has a much higher cost to the user.
+Namely, as every function call is resolved by multiple dispatch via subtyping,
+any function call may lead to a run-time crash.
+
+% Although Julia does not have a static type system,
+% the dispatch mechanism is built around an expressive language of types
+% and subtyping.
+% For example, Julia provides impredicative, bounded existential types,
+% which can be used to model wildcards in Java.
+% Furthermore, drawing inspiration from semantic subtyping,
+% union and existential types distribute over covariant tuple types.
+% A more detailed account of dispatch and subtyping is provided in~\chapref{chap:2}.
 % Additionally, Julia supports a special kind of existential
 % types to allow for a common use case of dispatched methods: so-called diagonal
 % rule, where an existential variable is allowed to be instantiated only with a
 % concrete type.
 
-As it turns out, Julia substyping is actually \emph{undecidable},
-which is a problem because it is used at run time to resolve function calls,
-process function definitions, and even during JIT compilation.
-Despite similarities of parts of the type language to other systems
-such as semantic subtyping and Java wildcards, the particular combination
-of features in Julia does not have a straightforward analogue in the literature.
+% As it turns out, Julia substyping is actually \emph{undecidable},
+% which is a problem because it is used at run time to resolve function calls,
+% process function definitions, and even during JIT compilation.
+% Despite similarities of parts of the type language to other systems
+% such as semantic subtyping and Java wildcards, the particular combination
+% of features in Julia does not have a straightforward analogue in the literature.
 
-In this work, I propose to develop a decidable subtyping specification for the
-Julia language, as outlined in~\chapref{chap:3}.
-\chapref{chap:4} reports preliminary results,
-and \chapref{chap:5} describes the related work.
+In this thesis, I propose to develop
+a \emph{decidable and practical} subtyping relation for the Julia language.
+%,as outlined in~\chapref{chap:3}.
+
+%
+%\chapref{chap:4} reports preliminary results,
+%and \chapref{chap:5} describes the related work.
 
 
 % both concrete user-defined

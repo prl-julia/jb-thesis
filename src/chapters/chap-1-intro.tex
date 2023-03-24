@@ -17,7 +17,7 @@ compiler: with few exceptions~\cite{TODO},
 every time a method is called with a new set of argument types,
 it is specialized for those types, creating a new method definition~\cite{TODO}.
 Therefore, even for functions with a single user-defined method,
-more methods may accrue during the program execution,
+more methods can accrue during the program execution,
 adding work for the dispatch mechanism.
 
 % Thus, although Julia is dynamically typed and does not require
@@ -25,36 +25,38 @@ adding work for the dispatch mechanism.
 % types have a profound role in the language semantics and performance.
 
 Multiple dispatch is resolved with the use of a subtype relation.
-In particular, for every function call, subtyping is checked between
+Namely, for every function call, subtyping is checked between
 the argument types and method type signatures,
 as well as between method type signatures.
-While most run-time values are represented by nominal types,
+While most run-time value types are nominal,
 the language of type annotations is inspired by semantic subtyping
-and supports union types that distribute over covariant tuples.
-Furthermore, Julia uses existential types to represent
-parametric method definitions.
-With all the features combined, Julia's type language
-does not have a straightforward analogue in the literature.
+and supports untagged unions that distribute over covariant tuples.
+In addition, Julia uses existential types
+to represent parametric method definitions,
+choosing an unusual combination of type language features.
 
 %to identify the most specific applicable method.
 
-Despite intentional simplifications, e.g. disallowing recursive bounds on type
-variables, subtyping in Julia is \emph{undecidable}.
-The key issue is the support for impredicative bounded existential types
-such as \cjl{Vector\{Vector\{T\} where T<:Number\}}, which
+Despite intentional simplifications in the type language,
+e.g. the lack of recursive bounds on type variables,
+subtyping in Julia is \emph{undecidable} due to %the support for
+impredicative bounded existential types.
+Simply disallowing such types would not be practical,
+as Julia users rely on them to describe heterogeneous data.
+For example, \cjl{Vector\{Vector\{T\} where T<:Number\}}
 describes a vector of vectors of numeric values where inner vectors
 can have different element types.
-A more detailed account of subtyping is provided in~\chapref{chap:2}.
+A~more detailed account of Julia types and subtyping
+is provided in~\chapref{chap:2}.
 % Although Julia does not have a static type system, the language of type
 % annotations is surprisingly expressive.
 
-Although relying on undecidable subtyping is not unusual
-for a statically typed language
-with an expressive type system such as Scala~\ref{TODO},
-in the dynamic Julia language, undecidability manifests at run time and thus,
-has a much higher cost to the user.
-Namely, as every function call is resolved by multiple dispatch via subtyping,
-any function call may lead to a run-time crash.
+Although relying on undecidable subtyping is not unprecedented
+for a statically typed language, e.g. Scala~\ref{TODO},
+%with an expressive type system such as
+the price of undecidability is higher in the dynamic Julia:
+here, any function call may lead to a run-time crash,
+as undecidable subtyping is used to resolve multiple dispatch.
 
 % Although Julia does not have a static type system,
 % the dispatch mechanism is built around an expressive language of types

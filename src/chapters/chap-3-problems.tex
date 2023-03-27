@@ -1,53 +1,69 @@
 \chapter{Research problem}\label{chap:3}
 
+The undecidability of subtyping in Julia
+can manifest itself at almost any point during the program execution,
+as subtyping over a complex language of run-time types and type annotations
+is an integral part of Julia's dynamic semantics.
+Namely, subtyping is used to resolve function calls,
+process new method definitions,
+manipulate data (e.g. when adding an element to a container),
+as well as during the JIT compilation.
 
+In practice, the undecidability of subtyping leads to 
+a run-time crash with a \cjl{StackOverflowError}.
+Such an error can be particularly hard to debug,
+because neither the problematic subtyping query nor its origins are available
+to the user.
 
-As discussed in \chapref{chap:2}, Julia relies on a complex language of types
-and subtyping for multiple dynamic dispatch, and subtyping turns out to be
-undecidable. In practice, this can manifest with a \cjl{StackOverflowError}
-during program execution, as subtyping is used at run time for several purposes:
-to resolve function calls, to process new method definitions, and even during
-JIT compilation. A number of issues related to subtyping have been reported
+A number of issues related to subtyping have been reported
 on the Julia bug tracker. For example,
 \href{https://github.com/JuliaLang/julia/issues/41948}{\code{\#41948}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/41948}
-} reports \cjl{StackOverflowError} caused by a function definition,
+} reports a \cjl{StackOverflowError} caused by a function definition,
 and
 \href{https://github.com/JuliaLang/julia/issues/33137}{\code{\#33137}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/33137}
-} points out an inconsistency related to the diagonal rule.
-Overall, there are 22 open and 114 closed issues labeled with both ``bug''
-and ``types and dispatch'' (as of December~2021). For context, ``bug'' and
-``codegen'' are assigned to 6 open and 76 closed issues, and overall, ``bug''
-is assigned to 213 open and 2477 closed issues.
-This demonstrates that type-related concerns, including undecidability of
-subtyping, are not purely theoretical: they manifest in the user code and
+} points out an inconsistency in subtyping. % related to the diagonal rule.
+Overall, there are 13 open and 138 closed issues labeled with both ``bug''
+and ``types and dispatch'' (as of March~2023). For context, ``bug'' and
+``codegen'' are assigned to 8 open and 86 closed issues, and in total, ``bug''
+is assigned to 226 open and 2644 closed issues.
+This statistics demonstrates that type-related concerns,
+including the undecidability of subtyping,
+are not purely theoretical and
 constitute a non-negligible portion of problems in the Julia implementation.
+%Overall, there are 22 open and 114 closed issues labeled with both ``bug''
+%and ``types and dispatch'' (as of December~2021). For context, ``bug'' and
+%``codegen'' are assigned to 6 open and 76 closed issues, and overall, ``bug''
+%is assigned to 213 open and 2477 closed issues.
+%This demonstrates that type-related concerns, including undecidability of
+%subtyping, are not purely theoretical: they manifest in the user code and
+%constitute a non-negligible portion of problems in the Julia implementation.
 
-The main research problem I am going to focus on is
-\tdef{decidable subtyping for the Julia language}.
-The goal is to find a decidable subtyping specification for a type language
-that is close enough to the one currently used in Julia
-and is not unreasonably restrictive.
-The latter means that the majority of types in the existing Julia packages
-are supported by the proposed specification.
-Furthermore, the type language should be suitable for the use in the rest of
-the Julia compiler.
-To tackle the problem, I will answer the following questions:
-\begin{enumerate}
-    \item \emph{How are types used in Julia and what operations on types
-      need to be supported?}
-      Clearly, types are used as type annotations in method definitions, with
-      subtyping being part of the dispatch resolution.
-      But beyond that, Julia is known to rely on type inference for optimizations
-      during JIT compilation. According to \citet{TODO}, which describes the
-      original Julia design, the type inference algorithm needs subtyping
-      but also meet, join, and widening operators.
-      As \cite{TODO} is generally outdated, the current state of Julia needs
-      to be reviewed to identify what operations on types the compiler relies on.
-    \item \emph{How complicated are types used in practice?}
-      To make subtyping decidable, I will likely need to restrict the type
-      language in some way. At the same time, the restriction should not be
-      prohibitively strong for the existing code base. Thus, an analysis of types
-      currently used in practice can provide guidance for possible restrictions.
-\end{enumerate}
+% The main research problem I am going to focus on is
+% \tdef{decidable subtyping for the Julia language}.
+% The goal is to find a decidable subtyping specification for a type language
+% that is close enough to the one currently used in Julia
+% and is not unreasonably restrictive.
+% The latter means that the majority of types in the existing Julia packages
+% are supported by the proposed specification.
+% Furthermore, the type language should be suitable for the use in the rest of
+% the Julia compiler.
+% To tackle the problem, I will answer the following questions:
+% \begin{enumerate}
+%     \item \emph{How are types used in Julia and what operations on types
+%       need to be supported?}
+%       Clearly, types are used as type annotations in method definitions, with
+%       subtyping being part of the dispatch resolution.
+%       But beyond that, Julia is known to rely on type inference for optimizations
+%       during JIT compilation. According to \citet{TODO}, which describes the
+%       original Julia design, the type inference algorithm needs subtyping
+%       but also meet, join, and widening operators.
+%       As \cite{TODO} is generally outdated, the current state of Julia needs
+%       to be reviewed to identify what operations on types the compiler relies on.
+%     \item \emph{How complicated are types used in practice?}
+%       To make subtyping decidable, I will likely need to restrict the type
+%       language in some way. At the same time, the restriction should not be
+%       prohibitively strong for the existing code base. Thus, an analysis of types
+%       currently used in practice can provide guidance for possible restrictions.
+% \end{enumerate}

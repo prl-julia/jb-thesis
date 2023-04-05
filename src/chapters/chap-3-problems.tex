@@ -1,4 +1,4 @@
-\chapter{Research problem}\label{chap:3}
+\chapter{Thesis Question}\label{chap:3}
 
 The undecidability of subtyping in Julia
 can manifest itself at almost any point during the program execution,
@@ -8,8 +8,8 @@ Namely, subtyping is used to resolve function calls,
 process new method definitions,
 manipulate data (e.g. when adding an element to a container),
 as well as during the JIT compilation.
-
-In practice, the undecidability of subtyping leads to 
+In practice, the undecidability %of subtyping
+leads to 
 a run-time crash with a \cjl{StackOverflowError}.
 Such an error can be particularly hard to debug,
 because neither the problematic subtyping query nor its origins are available
@@ -20,16 +20,26 @@ on the Julia bug tracker. For example,
 \href{https://github.com/JuliaLang/julia/issues/41948}{\code{\#41948}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/41948}
 } reports a \cjl{StackOverflowError} caused by a function definition,
-and
+which is likely linked to the undecidability;
 \href{https://github.com/JuliaLang/julia/issues/33137}{\code{\#33137}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/33137}
-} points out an inconsistency in subtyping. % related to the diagonal rule.
-Overall, there are 13 open and 138 closed issues labeled with both ``bug''
-and ``types and dispatch'' (as of March~2023). For context, ``bug'' and
-``codegen'' are assigned to 8 open and 86 closed issues, and in total, ``bug''
-is assigned to 226 open and 2644 closed issues.
-This statistics demonstrates that type-related concerns,
-including the undecidability of subtyping,
+} points out an inconsistency in subtyping; % related to the diagonal rule.
+\href{https://github.com/JuliaLang/julia/issues/24166}{\code{\#24166}}\footnote{
+    \url{https://github.com/JuliaLang/julia/issues/24166} 
+} (now fixed) reports a problem with reflexivity and transitivity.
+Overall, there are 105 open/704 closed issues labeled with ``types and
+dispatch'' as of March 2023,
+with 13 open/138 closed being also labeled with ``bug''
+(not every issue is properly labeled as a bug,
+e.g. the aforementioned
+\href{https://github.com/JuliaLang/julia/issues/24166}{\code{\#24166}}).
+\tabref{tab:julia-issues-stats} provides a few more data points for comparison:
+for example, there are 8 open/86 closed ``codegen'' bugs
+and 1 open/15 closed ``GC'' bugs.
+% For context, ``bug'' and ``codegen'' are assigned to 8 open/86 closed issues
+% out of 71 open/654 closed ``codegen'' issues.
+% In total, ``bug'' is assigned to 226 open/2644 closed issues.
+Thus, type-related concerns, including the undecidability of subtyping,
 are not purely theoretical and
 constitute a non-negligible portion of problems in the Julia implementation.
 %Overall, there are 22 open and 114 closed issues labeled with both ``bug''
@@ -39,6 +49,40 @@ constitute a non-negligible portion of problems in the Julia implementation.
 %This demonstrates that type-related concerns, including undecidability of
 %subtyping, are not purely theoretical: they manifest in the user code and
 %constitute a non-negligible portion of problems in the Julia implementation.
+
+\begin{table}[t]
+\caption{Statistics of issues on the Julia bug tracker: open/closed (March 2023)}\label{tab:julia-issues-stats}
+\vspace*{0.25em}
+\centering\footnotesize
+\begin{tabular}{c|ccccc}
+ & types and dispatch & codegen & GC & macros & <any label> \\
+\midrule
+<any label> &
+  92/414 & 56/246 & 24/51 & 27/36 & 3551/19238 \\
+bug &
+  13/138 & 8/86 & 1/15 & 5/11 & 226/2664
+\end{tabular}
+\end{table}
+
+The main question addressed by my thesis research is:
+\begin{quote}
+\emph{Can Julia's type language be altered in a practical way
+to allow for a decidable subtype relation?}
+\end{quote}
+Here, \emph{practical} means that most of the existing type annotations
+in Julia programs would conform to the proposed type language.
+The resulting relation is intended to be reflexive and transitive, as is
+typical for a subtype relation. 
+
+Furthermore, I suggest that Julia types are given a set-theoretic interpretation,
+with the subtype relation matching set inclusion on the interpretations.
+Although Julia was inspired by semantic subtyping, the existing subtype relation
+is not consistent with the semantic approach: for example, the type 
+\cjl{Tuple\{Int, Union\{\}\}} (a covariant tuple of an integer and the bottom type)
+is not considered a subtype of the bottom type despite the fact that there are
+no values of type \cjl{Tuple\{Int, Union\{\}\}}.
+
+
 
 % The main research problem I am going to focus on is
 % \tdef{decidable subtyping for the Julia language}.

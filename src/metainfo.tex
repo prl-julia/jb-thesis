@@ -9,4 +9,27 @@
 
 \begin{abstract}
   TODO: abstract.
+
+Julia is a dynamic, high-level, yet high-performance programming language
+for scientific computing.
+To encourage a high level of code reuse and extensibility, Julia is
+designed around symmetric multiple dynamic dispatch, which allows functions
+to have multiple implementations tailored to different argument types.
+To resolve multiple dispatch, Julia relies on a subtype relation over a complex
+language of run-time types and type annotations, which include parametric types,
+untagged unions that distribute over covariant tuples, and impredicative
+existential types.
+Notably, Julia's subtyping is undecidable.
+Unlike in statically typed languages
+with undecidable subtyping, e.g. Scala, where the undecidability manifests at
+compile time, in the dynamic Julia, it leads to a run-time
+StackOverflowError error. This can happen
+at almost any point during the program execution, as subtyping is used to
+resolve every function call.
+In this thesis, I propose to develop a decidable and practical subtype relation
+for the Julia language.
+In particular, to provide for decidability, I will restrict the language of type
+annotations. To evaluate practicality, I will check whether type annotations
+used in the registered Julia packages conform to the proposed restriction.
+
 \end{abstract}

@@ -1,14 +1,15 @@
-\chapter{Background: Julia}\label{chap:2}
+\chapter{Background: Dispatch and Subtyping in Julia}\label{chap:2}
 
 \section{Overview of the Julia Language}
 %% ======================================================================
 
-Julia is a high-level, dynamic programming language for scientific computing~\cite{TODO}.
-It was designed to provide good performance as well as productivity features and
-the ease of use~\cite{TODO}.
-For performance, Julia relies on an optimizing JIT compiler.
+Julia is a high-level, dynamic programming language, originally designed 
+for scientific computing~\cite{TODO}.
+It aims to solve a so-called ``two-language problem''
+by providing both good performance and productivity features~\cite{TODO}.
+For performance, Julia relies on an optimizing, type-specializing JIT compiler.
 For productivity, the language provides garbage collection, dynamic typing, and
-multiple dispatch. 
+multiple dynamic dispatch.
 
 \begin{figure}[t]
 %-(x::Date, y::Week) = Date(UTD(value(x) - 7*value(y)))    
@@ -27,13 +28,14 @@ in~Julia}\label{fig:code:subtraction}
 language. The dispatch mechanism allows a function, called \emph{generic
 function}, to have multiple implementations, called \emph{methods}, that are
 tailored to different argument types. For example, \figref{fig:code:subtraction}
-shows several method definitions of \cjl{(-)}, which is used as both unary
-negation (lines~1 and 5) and binary subtraction (lines 2--4).
+shows several method definitions of function \cjl{(-)},
+which is used as both unary negation (lines~1 and 5)
+and binary subtraction (lines 2--4).
 At \emph{run time}\footnote{Statically typed languages often support
 \emph{method overloading}. The difference between method overloading and method
 dispatch is that overloading is resolved at compile time, using static types of
-the arguments, whereas dispatch is resolved at run-time, using precise types
-of the arguments.},
+the arguments, whereas dispatch is resolved at run time, using the precise,
+run-time types of the arguments.},
 every function call in the program is dispatched to the
 \emph{most specific applicable} method, which is determined based on the
 types of the argument values. If such a single best method does not exist,

@@ -45,62 +45,65 @@ it suffices to know that dispatch resolution relies on \tdef{subtyping}.
 Notably, Julia does not allow the user to call a method of a generic function
 directly: the only way to reach a method is via the dispatch mechanism.
 Thus, whenever a method is called, its arguments are guaranteed to be
-subtypes of the declared type annotations.
+subtypes of the declared method signature types.
 %Thus, types impact the semantics of a program despite the language being dynamically typed.
 
-Julia has a non-trivial \tdef{language of types} \ty, some of which are
+Julia has a non-trivial \tdef{language of types}, as
 demonstrated in~\figref{fig:code:subtraction}. In addition to nominal types such
 as \cjl{BigInt} and \cjl{Number}, the language also supports set-theoretic union
 types (e.g. \cjl{Union\{Int16, ..., UInt128\}} in line~3),
-covariant tuple types written with \cjl{Tuple} (e.g. \cjl{Tuple\{String, Number\}}),
+covariant tuple types (e.g. \cjl{Tuple\{String, Number\}}),
 invariant parametric types (e.g. \cjl{Vector\{T\}}),
-and so-called union-all types, which are written with \cjl{where} (lines~3 and 5).
-A union-all type \cjl{t where T} represents a union of types \cjl{t} for all
-valid instantiations of the type variable \cjl{T}. \citet{TODO} provide a detailed
+and so-called union-all types, written with \cjl{where} (lines~3 and 5).
+Intuitively, a union-all type \cjl{t where T} represents a union of types
+\cjl{t[t'/T]} for all valid instantiations \cjl{t'} of the type variable \cjl{T}.
+\citet{TODO} provides a detailed
 account of Julia types and their subtyping relation, and we give a brief
 overview of subtyping in \secref{sec:2:subtyping}.
 
-One of the key notions related to types in Julia is the distinction between
-\emph{concrete} and \emph{abstract} types. A concrete type \gty is a type that
+One of the key properties related to Julia types is the distinction between
+\emph{concrete} and \emph{abstract} types. A concrete type is a type that
 describes the representation of a value; for any value, its concrete type can be
-obtained with the \cjl{typeof} operator. Concrete types include primitive types
-such as \cjl{Int128} and composite \cjl{struct} types (either mutable or
+obtained with the \cjl{typeof} operator. Concrete types include primitive types,
+such as \cjl{Int128}, and composite \cjl{struct} types (either mutable or
 immutable). Any concrete type definition in Julia is final: a concrete type does
-not have subtypes other than itself. However, every concrete type has a single
-declared supertype, which is an abstract nominal type. Such types can be used
-to create a nominal subtyping hierarchy, but they cannot be instantiated with
-values and have no fields. Other categories of abstract types are union types
+not have non-empty subtypes other than itself.
+On the other hand, every concrete type has a single
+declared supertype, which can only be an abstract nominal type.
+Abstract nominal types can be used
+to create a nominal subtype hierarchy, but they cannot be instantiated with
+values. Other categories of abstract types include union types
 such as \cjl{Union\{Int16,}$\ldots$\cjl{, UInt128\}}, and union-all types
-such as \cjl{Vector\{T\} where T} (in Julia, such a type can be written shorter
-as \cjl{Vector}). Note, however, that every particular instantiation of
+such as \cjl{Vector\{T\} where T} (a shorthand for this type 
+is simply \cjl{Vector}). Note, however, that every particular instantiation of
 \cjl{Vector}, e.g. \cjl{Vector\{Number\}}, is a concrete type.
 The bottom type represented with the empty union, \cjl{Union\{\}}, is neither
 concrete nor abstract: it has no values and is a subtype of all types.
 
 \figref{fig:code:user-def-types} provides several examples of user-defined
 concrete (on the left) and abstract (on the right) types. Parametric types (both
-abstract and concrete) can declare lower and upper bounds on type variables;
+abstract and concrete) can declare (non-recursive) lower and upper bounds on type variables;
 for example, type \cjl{Rational\{T\}} requires \cjl{T} to be a subtype of
 abstract \cjl{Integer}.
 Supertypes in type definitions are declared to the right of~\cjl{<:}.
 For example, \cjl{Int128} is a subtype of \cjl{Signed}, and \cjl{Signed} is a
 subtype of \cjl{Integer}. If the supertype declaration is omitted, like in
 \cjl{AbstractSet\{T\}}, the supertype defaults to \cjl{Any},
-which is the supertype of all types.
+which is a supertype of all types.
 
-It is worth noting that the language does not have a function type that would
-typically be written as \cjl{T} $\rightarrow$ \cjl{S}. As mentioned above,
+It is worth noting that the Julia language does not have a structural function type,
+which would typically be written as \cjl{T} $\rightarrow$ \cjl{S}. As mentioned above,
 all function calls are dynamically dispatched to a method of the generic
 function, and there is no way to directly call or
 pass a particular method as an argument.
-Generic functions, on the other hand, are first-class values and can be used as
-method arguments, for example, \cjl{(-)} is passed to a function call in line~5
+However, generic functions are first-class values and can be used as
+method arguments: for example, \cjl{(-)} is passed to a function call in line~5
 of~\figref{fig:code:subtraction}.
 Every generic function~\cjl{f} has the concrete type \cjl{typeof(f)},
 which is a subtype of the type of all functions \cjl{Function}.
 
 \begin{figure}[t] 
-\begin{minipage}{5.5cm}
+\begin{minipage}{6cm}
 \begin{julia}
 primitive type Int128 <: Signed 128
 end
@@ -120,7 +123,7 @@ end
 % offset::Int
 \end{minipage}
 \hspace{1.2cm}
-\begin{minipage}{4.8cm}
+\begin{minipage}{5.5cm}
 \begin{julia}
 abstract type Signed <: Integer
 end
@@ -141,45 +144,49 @@ end
 
 Method resolution for a dispatched function call \cjl{f(a1, a2, ...)}
 relies on subtyping between run-time argument types and method type signatures.
-Argument types are combined into a tuple of concrete types
-$\gty =$ \cjl{Tuple\{typeof(a1), typeof(a2), ...\}}.
-Method type signature is a tuple of the declared argument types
-if the method definition is not parametric, and a union-all of a tuple
+Namely, argument types are combined into a tuple of concrete types
+\begin{center}
+  $\gty =$ \cjl{Tuple\{typeof(a1), typeof(a2), ...\}}.
+\end{center}
+A method type signature is either a tuple of declared argument types
+if the method definition is not parametric, or a union-all of that tuple
 if the definition is parametric.
-For example, in \figref{fig:code:subtraction}, method in line~1
+For example, consider \figref{fig:code:subtraction}: method in line~1
 has the signature \cjl{Tuple\{BigInt\}}, line~4 has the signature
 \cjl{Tuple\{Missing,Number\}}, and line~3 has the signature
 \cjl{Tuple\{T, T\} where T <: Union\{...\}}.
 Thus, for the purpose of dispatch resolution, arguments of a function call
 are represented with a single concrete type \gty,
-and method type signature is represented as an arbitrary type \ty.
+and method type signatures are represented as arbitrary types \ty.
 
 Dispatch resolution, if successful, returns the \emph{most specific applicable
-method}. Namely, for a call to generic function~\cjl{f} with the argument
-type~\gty, the process can be specified as follows:
+method} for the given arguments.
+Namely, for a call to a generic function~\cjl{f} with a concrete argument
+type~\gty, the process can be described as follows:
 \begin{enumerate}
   \item Find all applicable methods, i.e., all method signatures \ty of the
-    function~\cjl{f} such that $\gty <: \ty$ (argument type is a subtype of the
-    method signature).
+    function~\cjl{f} that are supertypes of the argument type $\gty <: \ty$.
     If no methods are applicable, a method-not-found error is raised.
   \item Among the applicable methods $\{\ty_1, \ldots, \ty_n\}$,
     pick the method with the most specific type signature,
-    i.e., $\ty_k$ such that $\forall i\in1..n, \ty_k <: \ty_i$ 
-    (method type signature is a subtype of all other applicable method
-    signatures). If there is no such single best method, a method-is-ambiguous
-    error is raised.\footnote{Julia has extra specificity rules
-    to resolve ambiguities in some cases requested by users,
+    i.e., $\ty_k$ such that $\forall i\in1..n, \ty_k <: \ty_i$.
+    %(method type signature is a subtype of all other applicable method
+    %signatures).
+    If there is no such single best method, a method-is-ambiguous
+    error is raised.\footnote{Requested by language users over the years,
+    Julia has additional specificity rules to resolve ambiguities in some cases,
     but those are not relevant to this work.}
 \end{enumerate}
-Julia's dispatch mechanism is \emph{symmetric}: all arguments are given
-equivalent consideration as a part of subtyping of tuples.
+Notably, Julia's dispatch mechanism is \emph{symmetric}:
+during dispatch resolution, all arguments are given
+equal consideration as a part of subtyping on tuples.
 
 While there are ways to optimize dispatch resolution to limit the number of
-subtyping checks, the key takeaway from this section is that
-in Julia, \emph{subtyping happens at run time} as a part of dynamic dispatch.
-Furthermore, the following section will show that because of invariant
-constructors and union-all types, even subtyping with a concrete type on the left
-(i.e., $\gty <: \ty$) can require an arbitrary subtyping check $\ty_1 <: \ty_2$.
+subtyping checks, the key takeaway is that %from this section 
+in Julia, \emph{subtyping} is checked \emph{at run time} as a part of dynamic dispatch.
+%Furthermore, the following section will show that because of invariant
+%constructors and union-all types, even subtyping with a concrete type on the left
+%(i.e., $\gty <: \ty$) can require an arbitrary subtyping check $\ty_1 <: \ty_2$.
 
 \section{Julia subtyping}\label{sec:2:subtyping}
 %% ======================================================================

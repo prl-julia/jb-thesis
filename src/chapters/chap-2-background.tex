@@ -183,7 +183,8 @@ equal consideration as a part of subtyping on tuples.
 
 While there are ways to optimize dispatch resolution to limit the number of
 subtyping checks, the key takeaway is that %from this section 
-in Julia, \emph{subtyping} is checked \emph{at run time} as a part of dynamic dispatch.
+in Julia, \emph{subtyping} is checked \emph{at run time} as a part of
+resolving multiple dynamic dispatch.
 %Furthermore, the following section will show that because of invariant
 %constructors and union-all types, even subtyping with a concrete type on the left
 %(i.e., $\gty <: \ty$) can require an arbitrary subtyping check $\ty_1 <: \ty_2$.
@@ -192,14 +193,14 @@ in Julia, \emph{subtyping} is checked \emph{at run time} as a part of dynamic di
 %% ======================================================================
 
 Subtyping in Julia largely follows the combination of
-\tdef{nominal subtyping} between user-defined nominal types and
+\tdef{nominal subtyping} for user-defined nominal types and
 \tdef{semantic subtyping} for covariant tuple and union types.
-Thus, using types from \figref{fig:code:user-def-types} as an example,
+For example, using types from \figref{fig:code:user-def-types}, we note that
 \cjl{Int128} is a subtype of \cjl{Signed}, and, transitively, of \cjl{Integer};
-\cjl{BitSet} is a subtype of \cjl{AbstractSet\{Int\}} but not
-\cjl{AbstractSet\{String\}}.
+\cjl{BitSet} is a subtype of \cjl{AbstractSet\{Int\}}.
+%but not \cjl{AbstractSet\{String\}}.
 A~union type \cjl{Union\{t1, t2, ...\}} describes a set-theoretic union of
-types \cjl{t1}, \cjl{t2}, \cjl{...}, so, for example, \cjl{Int} is a subtype of
+types \cjl{t1}, \cjl{t2}, \cjl{...}; for example, \cjl{Int} is a subtype of
 \cjl{Union\{Signed, String\}}, and \cjl{Union\{t1, t2, ...\} <: t} if all
 components \cjl{t1 <: t, t2 <: t, ...}.
 Tuples in Julia are immutable, and tuple types are covariant:
@@ -209,13 +210,14 @@ Following semantic subtyping, tuple types distribute over unions,
 so types \cjl{Tuple\{Union\{Int,String\}\}} and
 \cjl{Union\{Tuple\{Int\},Tuple\{String\}\}} are equivalent.
 
-User-defined parametric types are invariant regardless of whether the type is
+User-defined parametric structs are invariant in the type parameter
+regardless of whether the struct is
 mutable or immutable, meaning that \cjl{Name\{t11, t12, ...\}} is a subtype of 
-\cjl{Name\{t21, t22, ...\}} only if corresponding type arguments are equivalent,
+\cjl{Name\{t21, t22, ...\}} only if the corresponding type arguments are equivalent,
 i.e., \cjl{t11 <:> t21, t21 <:> t22, ...}.
-Thus, while covariant \cjl{Tuple\{Int\} <: Tuple\{Signed\}},
-invariant \cjl{Rational\{Int\}} is \emph{not}
-a subtype of \cjl{Rational\{Signed\}}.
+Thus, the immutable invariant struct \cjl{Rational\{Int\}} is \emph{not}
+a subtype of \cjl{Rational\{Signed\}},
+while the covariant tuple \cjl{Tuple\{Int\} <: Tuple\{Signed\}}.
 
 Abstract union-all types \cjl{t where tl<:T<:tu} are better known
 in literature as \tdef{bounded existential types}, which also model
@@ -225,49 +227,54 @@ In what follows, we will call \cjl{t where tl<:T<:tu} an existential type;
 if lower (upper) bound on the type variable is omitted, it defaults to the
 bottom type \cjl{Union\{\}} (top type \cjl{Any}).
 Intuitively, an existential type denotes a union of \cjl{t[t'/T]} for all
-instantiations of \cjl{T} such that \cjl{tl <: t' <: tu}.
-Similarly to subtyping for union types,
+instantiations of the type variable \cjl{T} such that \cjl{tl <: t' <: tu}.
+Similarly to subtyping of finite union types, the intent is that:
 \begin{itemize}
   \item \cjl{(t where tl<:T<:tu) <: t2} if \emph{for all} valid instantiations
-    \cjl{t'} it holds that \cjl{t[t'/T] <: t2}, and
+    \cjl{t'}, it holds that\\ \cjl{t[t'/T] <: t2}, and
   \item \cjl{t1 <: (t where tl<:T<:tu)} if \emph{there exists} at least one 
     \cjl{t'} such that \cjl{t1 <: t[t'/T]}.
 \end{itemize}
 For example, \cjl{Vector\{Int\}} is a subtype of \cjl{Vector\{T\} where
 T<:Integer} because \cjl{T} can be instantiated with \cjl{Int},
 and \cjl{Vector\{T\} where T<:Integer} is a subtype of
-\cjl{Vector\{S\} where S} because for all valid instantiations of~\cjl{T},
-type variable \cjl{S} can be instantiated with the same type.
-Just like with unions, tuple types distribute over existential types:
+\cjl{Vector\{S\} where S} because for all valid instantiations \cjl{t'} of~\cjl{T},
+type variable \cjl{S} can be instantiated with the same type \cjl{t'}.
+Just like unions, existential types distribute over tuples:
 for example, types \cjl{Tuple\{Vector\{T\} where T\}}
 and \cjl{Tuple\{Vector\{T\}\} where T} are equivalent.
 
 Existential types in Julia are \emph{impredicative}:
-existential quantifiers can appear anywhere in a type.
+existential quantifiers can appear anywhere in a type,
+and type variables can be instantiated with arbitrary existential types.
 For example, type \cjl{Vector\{Matrix\{T\} where T\}} denotes a vector
 of matrices with arbitrary element types.
-In contrast, \cjl{Vector\{Matrix\{S\}\} where S} denotes a set vectors where
+In contrast, \cjl{Vector\{Matrix\{S\}\} where S} denotes a set of vectors where
 elements are matrices with the same element type.
 Thus, a vector of integer matrices \cjl{Vector\{Matrix\{Int\}\}} is a subtype
-of the latter, existential type, because \cjl{S} can be instantiated with
-\cjl{Int}. But it is not a subtype of the former, invariant parametric type
+of the latter---existential---type, because \cjl{S} can be instantiated with
+\cjl{Int}. But it is not a subtype of the former---invariant parametric---type
 \cjl{Vector\{Matrix\{T\} where T\}}, because type arguments \cjl{Matrix\{Int\}}
 and \cjl{Matrix\{T\} where T} are not equivalent.
 Note that because of the impredicativity, type arguments of invariant type
 constructors such as \cjl{Vector} are arbitrarily complex. Thus, even though any
-particular \cjl{Vector\{t\}} is a concrete type, its subtyping check may reduce
-to subtyping of a non-concrete \cjl{t}.
+particular \cjl{Vector\{t\}} is a concrete type, checking subtyping for this
+type requires a subtype check for an arbitrary \cjl{t}.
 
-Types that involve existentials, such as \cjl{Vector\{Matrix\{T\} where T\}},
-are useful for representing heterogeneous data, but existential types
-also represent type signatures of parametric method definitions.
+Existential types serve at least two purposes in the Julia language.
+First, parametric types with existential parameters,
+such as \cjl{Vector\{Matrix\{T\} where T\}},
+are useful for representing heterogeneous data.
+Second, top-level existential types, such as
+\cjl{Tuple\{T, Vector\{T\}\} where T}, represent
+type signatures of parametric method definitions.
 It may be surprising that Julia uses existential rather than universal types,
 but recall that the primary purpose of types is to serve multiple dispatch.
-It is impossible to directly invoke a parametric method definition and provide
-it with a type argument. Instead, the method is being dispatched to if
-subtyping for the corresponding existential type succeeded. Then, in the body of
-the method, the existential type is implicitly unpacked, and its witness type
-is set to the instantiation induced by subtyping.
+In Julia, it is impossible to directly invoke a parametric method definition
+and provide it with a type argument. Instead, the method is being dispatched to if
+subtyping for the corresponding existential type succeeds. Then, in the body of
+the method, the existential type is implicitly unpacked, with the witness type
+being some valid instantiation induced by subtyping.
 Consider the following code snippet as an example:
 \begin{codeenvd}
 \begin{julia}
@@ -277,15 +284,46 @@ f([5, 7, 5]) # Set{Int} with 2 elements: 5, 7
 \end{julia}
 \end{codeenvd}
 Because \cjl{[5, 7, 5]} is a \cjl{Vector\{Int\}} and
-\cjl{Tuple\{Vector\{Int\}\}} is a subtype of \cjl{Tuple\{Vector\{T\}\} where T}
+\cjl{Tuple\{Vector\{Int\}\}} is a subtype of the existential
+\cjl{Tuple\{Vector\{T\}\} where T},
 as witnessed by the instantiation of \cjl{T} with \cjl{Int},
 the call \cjl{f([5, 7, 5])} dispatches to the method in line~1,
 and \cjl{T} in the body of the method becomes \cjl{Int}.
+However, when multiple instantiations of the variable are possible,
+Julia sometimes gives up on assigning the witness type.
+In the example below, subtyping succeeds for the call \cjl{g(5.0)},
+because \cjl{Tuple\{Bool\} <: Tuple\{T\} where T>:Int}, as witnessed
+by multiple instantiations of \cjl{T}, e.g. \cjl{Any} or
+\cjl{Union\{Int, Bool\}}.
+But rather than pick one instantiation, Julia throws an error.
+\begin{codeenvd}
+\begin{julia}
+> g(x::T) where T>:Int = begin
+    println(x)
+    println(T)
+  end
 
-To support a generic programming pattern where method arguments are expected
-to be of the same concrete type, Julia provides a so-called \tdef{diagonal
-rule}. Consider the following method definition, which defines equality
-\cjl{(==)} in terms of the built-in equality of representations \cjl{(===)}:
+> g(true)
+true
+ERROR: UndefVarError: T not defined
+\end{julia}
+\end{codeenvd}
+On the other hand, for the call \cjl{g(5)}, \cjl{T} is assigned the smallest
+possible type, \cjl{Int}:
+\begin{codeenvd}
+\begin{julia}
+> g(5)
+5
+Int
+\end{julia}
+\end{codeenvd}
+
+Subtyping of existential types includes a special case, called 
+the \tdef{diagonal rule}, which provides the support for
+a generic programming pattern where method arguments are expected
+to be of the same concrete type.
+Consider the following method definition, which defines equality
+\cjl{(==)} in terms of the built-in equality of bit representations \cjl{(===)}:
 \begin{codeenvd}
 \begin{julia}
 ==(x::T, y::T) where T<:Number = x === y
@@ -296,13 +334,14 @@ If it were possible to instantiate \cjl{T} with an abstract type such as
 integer. This would be an incorrect implementation of equality, for the same bit
 representation corresponds to different numbers when interpreted with and
 without the sign.
-To prevent such behavior, the diagonal rule states that if a type variable
-appears in the type only covariantly and more than once, it can be instantiated
-only with concrete types.\footnote{A similar rule applies for static resolution
-of method overloading in \CSharp. An example can be found on
-\href{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}{this page}.}
+To prevent such behavior, the diagonal rule states: if a type variable
+appears in the type (1) only covariantly and (2) more than once,
+it can be instantiated
+only with concrete types.\footnote{A similar rule applies to static resolution
+of method overloading in \CSharp. An example can be found on this page:
+\href{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}}
 Thus, the type signature of \cjl{(==)} above,
-\cjl{Tuple\{T, T\} where T<:Number} represents a restricted existential type:
+\cjl{Tuple\{T, T\} where T<:Number}, represents a restricted existential type:
 it is a union of tuples \cjl{Tuple\{t, t\}} where \cjl{t} is a concrete subtype
 of \cjl{Number}. The same rule applies in line~3
 of~\figref{fig:code:subtraction}: built-in integer subtraction \cjl{sub_int} is
@@ -321,34 +360,40 @@ guaranteed to be called only with primitive integers of the same concrete type.
     \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
 \end{array}
 \]
-\caption{Encoding of \FSub types in Julia}\label{fig:FSub-encoding}
+\caption{Encoding of \FSubN types in Julia}\label{fig:FSub-encoding}
 \end{figure}
 
-It is not unusual for subtyping in a complex type language to be undecidable,
-as happened to Java and Scala~\cite{grigore:java-undec:2017,hu:dot-undec:2020}.
-In practice, for a statically-typed language, this means that the
+It is not unusual for a statically typed programming language 
+to have undecidable subtyping,
+as witnessed by Java and Scala~\cite{grigore:java-undec:2017,hu:dot-undec:2020}.
+In practice, the undecidability means that the
 compiler might not terminate on some programs. Although undesirable,
-such undecidability, if it manifests rarely, remains an acceptable trade-off
-for the sake of an expressive type system.
+such property can be acceptable if it manifests rarely and
+allows for an expressive type system.
 
-In a dynamically typed Julia subtyping is used at run time for dispatch
-resolution. Even on rare occasions, run-time effects of
-undecidability are of greater concern than the compile-time one.
-Therefore, decidability of subtyping was one of the explicit goals
-in the original Julia design~\cite{TODO}.
-To this end, Julia disallows several features that are known to cause
-undecidability: recursive constraints on type variables and
+In a dynamically typed Julia, however, subtyping is used at run time---for
+dispatch resolution. Even on rare occasions, consequences of
+undecidability at run time are of greater concern than at compile time.
+That is why the decidability of subtyping was one of the explicit goals
+of the original design of the Julia language~\cite{TODO}.
+To this end, Julia disallowed several features that were known to cause
+undecidability, such as recursive constraints on type variables and
 circularities in the inheritance hierarchy~\cite{TODO}.
 
-Despite the aim of decidability, Julia subtyping is \emph{undecidable}.
+Despite the intentional simplifications in the type language,
+Julia subtyping is in fact \emph{undecidable}.
 As discovered by Ben Chung and Ross Tate, Julia can encode system
 \FSubN, which is known to be undecidable~\cite{pierce:bound-sub-undec:1992}.
-\figref{fig:FSub-encoding} shows the encoding of \FSub types\footnote{Arrow
+\figref{fig:FSub-encoding} shows the encoding\footnote{Arrow %of \FSubN types
 type is dropped as irrelevant to the undecidabiltiy result.},
-with $\ty_1 \leq \ty_2$ of \FSub defined as
+with $\ty_1 \leq \ty_2$ in \FSubN defined as
 $\interp{\ty_2} <: \interp{\ty_1}$ in Julia.
-Internally, Julia keeps a dedicated stack for checking subtyping
+
+In practice, the undecidability of Julia subtyping manifests itself with
+a \cjl{StackOverflowError}.
+The reason is that internally, Julia relies on a dedicated stack
+to resolve subtyping
 and terminates the program when the stack reaches a certain limit.
-Thus, in practice, subtyping checks that showcase undecidability, such as
-the Ghelli example, often manifest with a \cjl{StackOverflowError}
-rather than non-termination.
+%Thus, in practice, subtyping checks that showcase undecidability, such as
+%the Ghelli example, often manifest with a \cjl{StackOverflowError}
+%rather than non-termination.

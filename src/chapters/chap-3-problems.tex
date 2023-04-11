@@ -10,15 +10,54 @@
 % The resulting relation is intended to be reflexive and transitive, as is
 % typical for a subtype relation. 
 
+Because of the undecidability of subtyping---an integral part of Julia's
+dynamic semantics, a Julia program can
+unexpectedly crash at almost any point during the execution.
+One way to address this problem would be to use a decidable subtype relation
+in place of the existing, undecidable one.
+However, as subtyping directly impacts program semantics,
+such a change can have profound effects on the language expressiveness, 
+usability, and performance.
+Thus, not any decidable subtype relation would be beneficial.
+
+
+Subtyping is an integral part of Julia's dynamic semantics
+Julia programs can unexpectedly crash at run time due to the undecidability
+of subtyping used by the language.
+
+While it would be desirable for the language to rely on a decidable
+
+The subtype relation currently used by the Julia language is undecidable.
+This is particularly problematic, as the relation is checked at run time, 
+
+
+Because of the undecidability of subtyping used to resolve
+multiple dynamic dispatch, a Julia program can
+unexpectedly crash at almost any point during the execution.
+
+While it would clearly be desirable to rely on a decidable subtype relation
+instead, 
+is clearly a desired property of subtyping in the Julia language.
+in the context of language evolution,
+not any decidable subtype relation would be acceptable.
+For example, removing existential types would allow for decidability but
+rule out all parametric method definitions, thus likely incurring high
+usability and performance penalties.
+
 \begin{quotation}\emph{
   The Julia language can be evolved to provide for decidable subtyping while
   requiring minimal effort for migrating existing code.
 }\end{quotation}
 
-In the thesis, I will show that
+
+
+In the thesis, I will show that it is possible to 
 the decidability of subtyping can be achieved
-for a type language reminiscent of Julia's type annotations language,
-with a restriction on existential types used to instantiate parametric types.
+for a type language reminiscent of the one currently used by Julia,
+with a restriction on existential types that are used
+to instantiate parametric types.
+To estimate the effort required for migrating existing user code,
+
 The resulting subtype relation is intended to be reflexive and transitive,
 as is typical for a subtype relation. 
 Furthermore, I will define a set-theoretic interpretation of types

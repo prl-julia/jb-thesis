@@ -1,14 +1,82 @@
-\chapter{Plan of work}\label{chap:6}
+\chapter{Proposed work}\label{chap:6}
 
-I am currently working on designing a subtype relation
-and proving its decidability, reflexivity, and transitivity.
-I have also extended the interpretation of types to account for type variables.
-To evaluate the practicality of the subtype relation,
-I will perform a static analysis of type annotations in registered Julia
-packages (about 9000 as of March 2023).
+\paragraph*{Decidable subtyping.}
+I will show that
+the decidability of subtyping can be achieved
+for a type language similar to the one currently used by Julia,
+with additional restrictions on existential types.
+The restricted grammar of types is shown
+in~\figref{fig:restricted-type-grammar}:
+\begin{itemize}
+  \item meant to represent method type signatures, \tysig is allowed to have
+  a more expressive, Julia-style form of existential types where bound type
+  variables can have multiple occurrences anywhere in the signature;
+  \item meant to represent data, type \ty is allowed to have only a limited,
+  Java wildcards-style form of existential types where type variables
+  occur exactly once in an invariant position and are bound immediately outside
+  the invariant costructor; namely, \tyinv{\iname}{\ty_l<:<\ty_u} represents
+  an existential type \tyexist{X}{\ty_l}{\ty_u}{\tyinv{\iname}{\tyvar{X}}}.
+\end{itemize}
+In addition to being decidable, the proposed subtype relation
+is intended to be reflexive and transitive,
+as is typical for such a relation.
+Building on the indexed, tag-based interpretation of types, I will extend
+it to account for type variables, and explore the relationship between
+the extended model and the decidable, syntactic subtype relation.
+%with the subtype relation matching set inclusion on the interpretations.
+% Although Julia was inspired by semantic subtyping, the existing subtype relation
+% is not consistent with the semantic approach: for example, the type 
+% \cjl{Tuple\{Int, Union\{\}\}} (a covariant tuple of an integer and the bottom type)
+% is not considered a subtype of the bottom type despite the fact that there are
+% no values of type \cjl{Tuple\{Int, Union\{\}\}}.
+% This inconsistency will be addressed in the subtype relation proposed
+% in the thesis.
 
-In July 2023, I intend to submit a POPL 2024 paper on decidable subtyping
-and complete my thesis, defending in August 2023.
+\begin{figure}
+\small
+\[
+\begin{array}{rcll}
+  \tysig & ::= &
+    \tybot \Alt \tyany \Alt
+    \typair{\tysig}{\tysig} \Alt \tyunion{\tysig}{\tysig} \Alt
+    \tyinv{\iname}{v,\ldots} \Alt
+    \tyexist{X}{\ty}{\ty}{\tysig} \Alt \tyvar{X}
+    & \text{type signature} \\
+  \ty & ::= & 
+    \tybot \Alt \tyany \Alt
+    \typair{\ty}{\ty} \Alt \tyunion{\ty}{\ty} \Alt
+    \tyinv{\iname}{v,\ldots} \Alt \tyvar{X}
+    & \text{type} \\
+  v & ::= &
+    \ty<:<\ty
+    & \text{restricted existential variable} \\
+\end{array}
+\]
+\caption{Restricted grammar of Julia types}\label{fig:restricted-type-grammar}
+\end{figure}
+
+\paragraph*{Evaluation of migration effort.}
+To evaluate the effort required for migrating existing code to a language
+with the new subtype relation, I will conduct a static analysis of type
+annotations in the official registry of Julia packages
+(about 9000 packages as of March 2023).
+In addition, I will manually inspect a random sample of packages containing
+type annotations that do not conform to the new type language
+and propose possible migration strategies.
+
+\paragraph*{Paper submission.}
+I intend to submit a POPL 2024 paper on the formalization and evaluation of
+the decidable subtype relation.
+
+\paragraph*{Schedule.}
+I am currently working on proving the decidability, reflexivity,
+and transitivity of the new subtype relation,
+and intend to complete proofs in May 2023.
+After that, I will perform the evaluation
+and study an extension of the tag-based semantic interpretation
+for types with type variables.
+I will concurrently work on writing the thesis and the POPL 2024 paper
+throughout May and June, and will finish the thesis in July.
 
 \begin{table}[h]
   \caption{Schedule}
@@ -24,6 +92,35 @@ and complete my thesis, defending in August 2023.
   defense & & & & X \\
 \end{tabular}
 \end{table}
+
+
+
+
+
+% I am currently working on designing a subtype relation
+% and proving its decidability, reflexivity, and transitivity.
+% I have also extended the interpretation of types to account for type variables.
+% To evaluate the practicality of the subtype relation,
+% I will perform a static analysis of type annotations in registered Julia
+% packages (about 9000 as of March 2023).
+
+% In July 2023, I intend to submit a POPL 2024 paper on decidable subtyping
+% and complete my thesis, defending in August 2023.
+
+% \begin{table}[h]
+%   \caption{Schedule}
+%   \vspace*{0.25em}
+%   \centering\footnotesize
+%   \begin{tabular}{c|ccccc}
+%   \toprule
+%   & May & June & July & August \\
+%   \midrule
+%   proofs \& evaluation & X & X & & \\
+%   paper & X & X & & \\
+%   thesis & X & X & X & \\
+%   defense & & & & X \\
+% \end{tabular}
+% \end{table}
 
 % I plan to work on developing a decidable subtyping specification for the Julia
 % language and write a research paper on that.
@@ -179,13 +276,5 @@ and complete my thesis, defending in August 2023.
 % \end{figure}
 
 
-\begin{figure}
-\small
 
-\begin{array}{rcll}
-  \ty & ::= & & 
-\end{array}
-
-\caption{TODO}
-\end{figure}
 

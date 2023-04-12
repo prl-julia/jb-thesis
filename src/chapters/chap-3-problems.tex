@@ -10,82 +10,39 @@
 % The resulting relation is intended to be reflexive and transitive, as is
 % typical for a subtype relation. 
 
-Because of the undecidability of subtyping---an integral part of Julia's
+Because of the undecidability of subtyping, which is an integral part of Julia's
 dynamic semantics, a Julia program can
-unexpectedly crash at almost any point during the execution.
+unexpectedly crash during the execution.
 One way to address this problem would be to use a decidable subtype relation
 in place of the existing, undecidable one.
-However, as subtyping directly impacts program semantics,
-such a change can have profound effects on the language expressiveness, 
+However, as subtyping impacts the set of valid programs and their semantics,
+this can have profound effects on the language expressiveness, 
 usability, and performance.
-Thus, not any decidable subtype relation would be beneficial.
+%Thus, not any decidable subtype relation would be worthwhile a major change in
+%the language.
 
-
-Subtyping is an integral part of Julia's dynamic semantics
-Julia programs can unexpectedly crash at run time due to the undecidability
-of subtyping used by the language.
-
-While it would be desirable for the language to rely on a decidable
-
-The subtype relation currently used by the Julia language is undecidable.
-This is particularly problematic, as the relation is checked at run time, 
-
-
-Because of the undecidability of subtyping used to resolve
-multiple dynamic dispatch, a Julia program can
-unexpectedly crash at almost any point during the execution.
-
-While it would clearly be desirable to rely on a decidable subtype relation
-instead, 
-is clearly a desired property of subtyping in the Julia language.
-in the context of language evolution,
-not any decidable subtype relation would be acceptable.
-For example, removing existential types would allow for decidability but
-rule out all parametric method definitions, thus likely incurring high
-usability and performance penalties.
-
+My thesis is:
 \begin{quotation}\emph{
   The Julia language can be evolved to provide for decidable subtyping while
   requiring minimal effort for migrating existing code.
 }\end{quotation}
 
+To validate the thesis, I will:
+\begin{enumerate}
+  \item design a new subtype relation based on the one currently used by Julia
+    and prove it decidable;
+  \item estimate the migration effort by conducting a static analysis of
+    registered Julia packages and suggesting code migration strategies.
+\end{enumerate}
 
+I conjecture that the migration effort can be used to assess the impact of the
+new subtype relation on expressiveness and usability:
+if most of the existing code remains valid in the new language, 
+then the impact on the expressiveness and usability is limited.
 
-In the thesis, I will show that it is possible to 
-the decidability of subtyping can be achieved
-for a type language reminiscent of the one currently used by Julia,
-with a restriction on existential types that are used
-to instantiate parametric types.
-To estimate the effort required for migrating existing user code,
-
-The resulting subtype relation is intended to be reflexive and transitive,
-as is typical for a subtype relation. 
-Furthermore, I will define a set-theoretic interpretation of types
-in terms of run-time type tags and explore the relationship between
-the set-theoretic model
-and the decidable, syntactic subtype relation.
-%with the subtype relation matching set inclusion on the interpretations.
-Although Julia was inspired by semantic subtyping, the existing subtype relation
-is not consistent with the semantic approach: for example, the type 
-\cjl{Tuple\{Int, Union\{\}\}} (a covariant tuple of an integer and the bottom type)
-is not considered a subtype of the bottom type despite the fact that there are
-no values of type \cjl{Tuple\{Int, Union\{\}\}}.
-This inconsistency will be addressed in the subtype relation proposed
-in the thesis.
-
-To evaluate the effort required to migrate existing code to a language
-with the new subtype relation, I will conduct a static analysis of type
-annotations in the official registry of Julia packages
-(about 9000 packages as of March 2023).
-In addition, I will manually inspect a random sample of packages containing
-type annotations that do not conform to the new type language
-and propose possible migration strategies.
-
-I intend to submit a POPL 2024 paper on the formalization and evaluation of
-the decidable subtype relation and defend my thesis in August 2023.
-
-An implementation of the subtype relation is beyond the scope of this thesis and
-is left for future work.
+An implementation of the subtype relation and understanding its impact on
+Julia's performance are beyond the scope of this thesis and
+remain future work.
 
 % Furthermore, I suggest that Julia types are given a set-theoretic interpretation,
 % with the subtype relation matching set inclusion on the interpretations.
@@ -109,31 +66,6 @@ I have also collaborated on modeling Julia's dynamic semantics, including
 and the JIT compiler~\cite{TODO},
 which illuminated the role of types and subtyping
 in the language.
-
-\paragraph*{Plan of work.}
-I am currently working on proving the decidability, reflexivity,
-and transitivity of the new subtype relation,
-and intend to complete proofs in May 2023.
-After that, I will perform the evaluation
-and study an extension of the set-theoretic interpretation
-for types with type variables.
-I will concurrently work on writing the thesis and the POPL 2024 paper
-throughout May and June, and will finish the thesis in July.
-
-\begin{table}[h]
-  \caption{Schedule}
-  \vspace*{0.25em}
-  \centering\footnotesize
-  \begin{tabular}{c|ccccc}
-  \toprule
-  & May & June & July & August \\
-  \midrule
-  proofs \& evaluation & X & X & & \\
-  paper & X & X & & \\
-  thesis & X & X & X & \\
-  defense & & & & X \\
-\end{tabular}
-\end{table}
 
 % The main research problem I am going to focus on is
 % \tdef{decidable subtyping for the Julia language}.

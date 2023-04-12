@@ -73,6 +73,8 @@
 %% Metavariables
 %% *********************************************************
 
+\newcommand{\tysig}{\EM{\psi}}              %% type signature
+
 \newcommand{\ty}{\EM{\tau}}                 %% type annotation τ
 \newcommand{\gty}{\EM{\sigma}}              %% type tag σ
 
@@ -87,7 +89,8 @@
 
 \newcommand{\cname}{\EM{\mathit{cname}}}
 \newcommand{\aname}{\EM{\mathit{aname}}}
-\newcommand{\iname}{\EM{\mathit{name}}}
+%\newcommand{\iname}{\EM{\mathit{name}}}
+\newcommand{\iname}{\EM{\mathit{N}}}
 
 \newcommand{\VEnv}{\EM{\mathrm{V}}}     %% simple variable environment V
 \newcommand{\AEnv}{\EM{\Gamma}}         %% forall-variable environment Γ
@@ -131,8 +134,11 @@
 %% Type Constructors
 %% *********************************************************
 
-\newcommand{\tyany}{\tyname{Any}}               %% Any
-\newcommand{\tybot}{\tyname{Bot}}               %% Bot
+%\newcommand{\tyany}{\tyname{Any}}               %% Any
+%\newcommand{\tybot}{\tyname{Bot}}               %% Bot
+\newcommand{\tyany}{\EM{\top}}                    %% Any
+\newcommand{\tybot}{\EM{\bot}}               %% Bot
+
 
 \newcommand{\typair}[2]{\EM{#1 \times #2}}      %% t1 × t2
 \newcommand{\tyunion}[2]{\EM{#1 \cup #2}}       %% t1 ∪ t2
@@ -173,7 +179,8 @@
 \newcommand{\cgty}{\closed{\gty}}
 \newcommand{\cnuty}{\closed{\nuty}}
 
-\newcommand{\tyvar}[1]{\var{\prescript{\circ}{}{#1}}}     %% type variable
+%\newcommand{\tyvar}[1]{\var{\prescript{\circ}{}{#1}}}     %% type variable
+\newcommand{\tyvar}[1]{\var{#1}}     %% type variable
 \newcommand{\gtyvar}[1]{\var{\prescript{\bullet}{}{#1}}}   %% concrete type variable
 \newcommand{\avar}[1]{\var{\prescript{?}{}{#1}}}        %% any type variable
 

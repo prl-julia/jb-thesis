@@ -161,6 +161,49 @@
 %% Semantic Subtyping
 %% ======================================================================
 
+@inproceedings{ancona:sem-sub-imp:2016,
+    author = {Ancona, Davide and Corradi, Andrea},
+    title = {Semantic Subtyping for Imperative Object-Oriented Languages},
+    year = {2016},
+    isbn = {9781450344449},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/2983990.2983992},
+    doi = {10.1145/2983990.2983992},
+    abstract = {Semantic subtyping is an approach for defining sound and complete procedures to decide subtyping for expressive types, including union and intersection types; although it has been exploited especially in functional languages for XML based programming, recently it has been partially investigated in the context of object-oriented languages, and a sound and complete subtyping algorithm has been proposed for record types, but restricted to immutable fields, with union and recursive types interpreted coinductively to support cyclic objects. In this work we address the problem of studying semantic subtyping for imperative object-oriented languages, where fields can be mutable; in particular, we add read/write field annotations to record types, and, besides union, we consider intersection types as well, while maintaining coinductive interpretation of recursive types. In this way, we get a richer notion of type with a flexible subtyping relation, able to express a variety of type invariants useful for enforcing static guarantees for mutable objects. The addition of these features radically changes the defi- nition of subtyping, and, hence, the corresponding decision procedure, and surprisingly invalidates some subtyping laws that hold in the functional setting. We propose an intuitive model where mutable record val- ues contain type information to specify the values that can be correctly stored in fields. Such a model, and the correspond- ing subtyping rules, require particular care to avoid circularity between coinductive judgments and their negations which, by duality, have to be interpreted inductively. A sound and complete subtyping algorithm is provided, together with a prototype implementation.},
+    booktitle = {Proceedings of the 2016 ACM SIGPLAN International Conference on Object-Oriented Programming, Systems, Languages, and Applications},
+    pages = {568–587},
+    numpages = {20},
+    keywords = {Structural Types for Objects, Semantic Subtyp- ing, Read/Write Field Annotations},
+    location = {Amsterdam, Netherlands},
+    series = {OOPSLA 2016}
+}
+
+@article{dardha:sem-sub-obj:2016,
+    author = {Dardha, Ornela and Gorla, Daniele and Varacca, Daniele},
+    title = "{Semantic Subtyping for Objects and Classes}",
+    journal = {The Computer Journal},
+    volume = {60},
+    number = {5},
+    pages = {636-656},
+    year = {2016},
+    month = {12},
+    abstract = "{In this paper, we propose an integration of structural subtyping with boolean connectives and semantic subtyping to define a Java-like programming language that exploits the benefits of both techniques. Semantic subtyping is an approach for defining subtyping relation based on set-theoretic models, rather than syntactic rules. On the one hand, this approach involves some non-trivial mathematical machinery in the background. On the other hand, final users of the language need not know this machinery and the resulting subtyping relation is very powerful and intuitive. While semantic subtyping is naturally linked to the structural one, we show how our framework can also accommodate the nominal subtyping. Several examples show the expressivity and the practical advantages of our proposal.}",
+    issn = {0010-4620},
+    doi = {10.1093/comjnl/bxw080},
+    url = {https://doi.org/10.1093/comjnl/bxw080},
+    eprint = {https://academic.oup.com/comjnl/article-pdf/60/5/636/14011337/bxw080.pdf},
+}
+
+@inproceedings{castagna:sem-poly:2011,
+	author = {G. Castagna and Z. Xu},
+	title = {Set-theoretic Foundation of Parametric Polymorphism and Subtyping},
+	booktitle = {ICFP\,'11: 16th {ACM-SIGPLAN} International Conference on Functional Programming},
+	year = {2011},
+	pages = {94-106},
+	month = {sep},
+}
+
 @article{frih:sem-sub:2008,
     author = {Frisch, Alain and Castagna, Giuseppe and Benzaken, V\'{e}ronique},
     title = {Semantic Subtyping: Dealing Set-Theoretically with Function, Union, Intersection, and Negation Types},
@@ -219,6 +262,29 @@
     series = {ICFP '03}
 }
 
+@article{frisch:sem-sub:2002,
+  title={Semantic subtyping},
+  author={Alain Frisch and Giuseppe Castagna and V{\'e}ronique Benzaken},
+  journal={Proceedings 17th Annual IEEE Symposium on Logic in Computer Science},
+  year={2002},
+  pages={137-146}
+}
+
+@inproceedings{hosoya:reg-types-XML:2000,
+    author = {Hosoya, Haruo and Vouillon, J\'{e}r\^{o}me and Pierce, Benjamin C.},
+    title = {Regular Expression Types for XML},
+    year = {2000},
+    isbn = {1581132026},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/351240.351242},
+    doi = {10.1145/351240.351242},
+    abstract = {We propose regular expression types as a foundation for XML processing languages. Regular expression types are a natural generalization of Document Type Definitions (DTDs), describing structures in XML documents using regular expression operators (i.e., *, ?, |, etc.) and supporting a simple but powerful notion of subtyping.The decision problem for the subtype relation is EXPTIME-hard, but it can be checked quite efficiently in many cases of practical interest. The subtyping algorithm developed here is a variant of Aiken and Murphy's set-inclusion constraint solver, to which are added several optimizations and two new properties: (1) our algorithm is provably complete, and (2) it allows a useful "subtagging" relation between nodes with different labels in XML trees.},
+    booktitle = {Proceedings of the Fifth ACM SIGPLAN International Conference on Functional Programming},
+    pages = {11–22},
+    numpages = {12},
+    series = {ICFP '00}
+}
 
 %% Subtyping Misc
 %% ======================================================================
@@ -270,6 +336,25 @@
 
 %% Julia
 %% ======================================================================
+
+@InProceedings{chung:julia-sub-algo:2019,
+  author =	{Benjamin Chung and Francesco Zappa Nardelli and Jan Vitek},
+  title =	{{Julia's Efficient Algorithm for Subtyping Unions and Covariant Tuples (Pearl)}},
+  booktitle =	{33rd European Conference on Object-Oriented Programming (ECOOP 2019)},
+  pages =	{24:1--24:15},
+  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
+  ISBN =	{978-3-95977-111-5},
+  ISSN =	{1868-8969},
+  year =	{2019},
+  volume =	{134},
+  editor =	{Alastair F. Donaldson},
+  publisher =	{Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik},
+  address =	{Dagstuhl, Germany},
+  URL =		{http://drops.dagstuhl.de/opus/volltexte/2019/10816},
+  URN =		{urn:nbn:de:0030-drops-108165},
+  doi =		{10.4230/LIPIcs.ECOOP.2019.24},
+  annote =	{Keywords: Type systems, Subtyping, Union types}
+}
 
 @phdthesis{bezanson:julia:2015,
   author    = {Jeff Bezanson},
@@ -343,3 +428,25 @@
     pages = {471–523},
     numpages = {53}
 }
+
+%% Multiple dispatch
+%% ======================================================================
+
+@inproceedings{leavens:tuple-dispatch:1998,
+    author = {Leavens, Gary T. and Millstein, Todd D.},
+    title = {Multiple Dispatch as Dispatch on Tuples},
+    year = {1998},
+    isbn = {1581130058},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/286936.286977},
+    doi = {10.1145/286936.286977},
+    abstract = {Many popular object-oriented programming languages, such as C++, Smalltalk-80, Java, and Eiffel, do not support multiple dispatch. Yet without multiple dispatch, programmers find it difficult to express binary methods and design patterns such as the "visitor" pattern. We describe a new, simple, and orthogonal way to add multimethods to single-dispatch object-oriented languages, without affecting existing code. The new mechanism also clarifies many differences between single and multiple dispatch.},
+    booktitle = {Proceedings of the 13th ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications},
+    pages = {374–387},
+    numpages = {14},
+    keywords = {typing, single dispatch, semantics, language design, generic functions, multiple dispatch, binary methods, tuple, multimethods},
+    location = {Vancouver, British Columbia, Canada},
+    series = {OOPSLA '98}
+}
+

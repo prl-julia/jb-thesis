@@ -143,21 +143,22 @@ end
 %% ======================================================================
 
 Method resolution for a dispatched function call \cjl{f(a1, a2, ...)}
-relies on subtyping between run-time argument types and method type signatures.
+relies on tuple subtyping~\cite{leavens:tuple-dispatch:1998}
+between run-time argument types and method type signatures.
 Namely, argument types are combined into a tuple of concrete types
 \begin{center}
-  $\gty =$ \cjl{Tuple\{typeof(a1), typeof(a2), ...\}}.
+  $\gty =$ \cjl{Tuple\{typeof(a1), typeof(a2), ...\}},
 \end{center}
-A method type signature is either a tuple of declared argument types
+whereas every method type signature is either a tuple of declared argument types
 if the method definition is not parametric, or a union-all of that tuple
 if the definition is parametric.
 For example, consider \figref{fig:code:subtraction}: method in line~1
-has the signature \cjl{Tuple\{BigInt\}}, line~4 has the signature
-\cjl{Tuple\{Missing,Number\}}, and line~3 has the signature
+is represented by the signature \cjl{Tuple\{BigInt\}}, line~4 by
+\cjl{Tuple\{Missing,Number\}}, and line~3 by
 \cjl{Tuple\{T, T\} where T <: Union\{...\}}.
-Thus, for the purpose of dispatch resolution, arguments of a function call
-are represented with a single concrete type \gty,
-and method type signatures are represented as arbitrary types \ty.
+%Thus, for the purpose of dispatch resolution, arguments of a function call
+%are represented with a single concrete type \gty,
+%and every method type signature is represented as a type \ty.
 
 Dispatch resolution, if successful, returns the \emph{most specific applicable
 method} for the given arguments.
@@ -259,9 +260,9 @@ and \cjl{Matrix\{T\} where T} are not equivalent.
 Note that because of the impredicativity, type arguments of invariant type
 constructors such as \cjl{Vector} are arbitrarily complex. Thus, even though any
 particular \cjl{Vector\{t\}} is a concrete type, checking subtyping for this
-type requires a subtype check for an arbitrary \cjl{t}.
+type requires a subtyping check for an arbitrary \cjl{t}.
 
-Existential types serve at least two purposes in the Julia language.
+Existential types serve at least two distinct purposes in the Julia language.
 First, parametric types with existential parameters,
 such as \cjl{Vector\{Matrix\{T\} where T\}},
 are useful for representing heterogeneous data.

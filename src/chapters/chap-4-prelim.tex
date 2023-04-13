@@ -52,15 +52,30 @@ which I plan to address in the thesis.
 %This makes it hard, if not impossible, to reason about properties of subtyping
 %such as reflexivity and transitivity.
 
-\paragraph{Tag-based semantic subtyping for nominal types, tuples, and
-unions~\cite{TODO}.}
-Although subtyping in Julia is intended to follow the semantic subtyping
-intuition, there is no formal set-theoretic model of Julia types.
+\paragraph{Tag-based semantic subtyping for non-existential types.}
+Julia's subtype relation was inspired by semantic subtyping.
+The description of the original Julia design~\cite{bezanson:julia:2015}
+suggested an intuitive interpretation of types as sets of values,
+but the interpretation is not formally well defined.
+Furthermore, the treatment of invariant parametric types
+in the interpretation does not match
+the subtype relation. In particular, for concrete nominal \cjl{Name},
+\[
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}} =
+  \{ x\ |\ \text{\cjl{typeof}}(x) = \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}   
+\]
+does not account for the fact that there are multiple syntactic
+representations $\ty'$ corresponding to the same interpretation as \ty.
+Thus, for example, types \cjl{Vector\{Union\{Int,Any\}\}} and \cjl{Vector\{Any\}}
+are not equivalent according to the interpretation,
+but they are equivalent in Julia.
+
 In \cite{TODO}, I proposed and mechanized in Coq~\cite{TODO}
 a semantic interpretation of (a subset of) Julia
-types \ty as sets of type tags \gty, which correspond to concrete types.
-Then, for a language of non-parametric nominal types, tuples, and unions,
-subtyping can be defined as the set inclusion of interpretations
+types \ty as sets of type tags \gty (i.e. concrete types) rather than values.
+For the type language of non-parametric nominal types, tuples, and unions,
+a decidable syntactic subtyping based on disjunctive normal form
+coincides with the set inclusion of interpretations
 $\interp{\ty} \subseteq \interp{\ty'}$.
 % While the treatment of tuples and unions is completely standard, nominal types
 % are not as straightforward: interpreting an abstract type as a set of
@@ -77,33 +92,37 @@ $\interp{\ty} \subseteq \interp{\ty'}$.
 %\cjl{Tuple\{Union\{\}\}} is not a subtype of \cjl{Union\{\}}.
 
 Following up on this work, I extended the interpretation to support
-the bottom and top types, as well as
 invariant type constructors such as \cjl{Vector\{...\}}.
-In the new system, types are given an indexed interpretation $\interp{\cdot}_n$.
+To account for the issue of multiple syntactic representations of types,
+in the new system, types are given an indexed interpretation $\interp{\cdot}_n$.
 %However, in the presence of invariant type constructors such as \cjl{Vector\{...\}},
 %types are given an indexed interpretation $\interp{\cdot}_n$.
 In particular, a concrete type constructor \cjl{Name\{...\}} is interpreted as
 \[
-\interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}}_{n+1} =
-\{ \text{\cjl{Name\{}}\ty'\text{\cjl{\}}}
-\ |\ \interp{\ty'}_n = \interp{\ty}_n \},
+\begin{array}{lcl}
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}}_{n+1} & = &
+  \{ \text{\cjl{Name\{}}\ty'\text{\cjl{\}}}
+  \ |\ \interp{\ty'}_n = \interp{\ty}_n \}    \\
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}}_{0} & = &
+  \{ \text{\cjl{Name\{}}\ty'\text{\cjl{\}}} \},
+\end{array}
 \]
 and subtyping is defined as
 \[
   \ty <: \ty' \quad \equiv \quad
   \forall n.\ \interp{\ty}_n \subseteq \interp{\ty'}_n.
 \]
-The reason $\text{\cjl{Name\{}}\ty\text{\cjl{\}}}$ is not interpreted simply as
-a singleton set $\{ \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}$
-is that because of the union and bottom types,
-there are multiple syntactic representations of the same type.
-Therefore, any type tag %$\text{\cjl{Name\{}}\ty\text{\cjl{\}}}$ and
-$\text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$ %can have syntactically different
-%but semantically equivalent type parameters \ty and $\ty'$.
-such that $\ty'$ is equivalent to $\ty$ should be included in the interpretation
-of $\{ \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}$.
+% The reason $\text{\cjl{Name\{}}\ty\text{\cjl{\}}}$ is not interpreted simply as
+% a singleton set $\{ \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}$
+% is that because of the union and bottom types,
+% there are multiple syntactic representations of the same type.
+% Therefore, any type tag %$\text{\cjl{Name\{}}\ty\text{\cjl{\}}}$ and
+% $\text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$ %can have syntactically different
+% %but semantically equivalent type parameters \ty and $\ty'$.
+% such that $\ty'$ is equivalent to $\ty$ should be included in the interpretation
+% of $\{ \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}$.
 Despite the more complex indexed interpretation, the subtype relation has
-an equivalent, standard syntactic definition $\ty \leq \ty'$ where
+an equivalent, decidable syntactic definition $\ty \leq \ty'$ where
 $\text{\cjl{Name\{}}\ty\text{\cjl{\}}} \leq
 \text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$
 holds if $\ty \leq \ty'$ and $\ty' \leq \ty$.

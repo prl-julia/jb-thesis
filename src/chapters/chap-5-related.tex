@@ -9,14 +9,25 @@ Subtyping can also be used at run time
 in both statically and dynamically typed languages to perform
 type tests, casts, and dynamic dispatch.
 
-\section{Decidability}
+There is a wide variety of research related to subtyping, but this chapter
+focuses primarily on work that concerns decidability of subtyping,
+semantic subtyping, and subtyping of Java generics with wildcards,
+as Julia's subtype relation was inspired by the latter
+two~\cite{bezanson:julia:2015}.
+In particular, the treatment of tuple and union types aligns with the semantic
+subtyping approach, and existential types are often used to model Java
+wildcards. 
+
+
+\section{Decidability of subtyping}
 %% ======================================================================
 
-Although decidability is desirable for a static type system and its
-subtyping relation, establishing decidability can be challenging.
+Even in the context of statically typed languages,
+decidability is a desirable property of static type systems and
+subtype relations, but establishing decidability can be challenging.
 For example, the \emph{un}decidability of checking subtyping for Java generics
 was established only fairly recently by~\citet{grigore:java-undec:2017},
-and the previously suspected undecidability of subtyping and type checking 
+and the previously suspected undecidability of subtyping and type checking for
 the core calculus of Scala 3,
 DOT (Dependent Object Calculus)~\cite{amin:dot:2016},
 was proven by~\citet{hu:dot-undec:2020}.
@@ -45,33 +56,33 @@ as discussed in~\secref{sec:2:undecidable}.
 %\citet{kennedy:nom-sub-var-dec:2007} showed the undecidability of subtyping
 %by a reduction from the Post correspondence problem.
 
-Practically, undecidability of a static type system manifests itself with
-the compiler not terminating or crashing. In some cases,
-benefits of having a more expressive type system might outweigh the cost of
-undecidability: if the undecidability arises only in rare, contrived cases,
+In practice, benefits of having a more expressive type system might outweigh
+the cost of undecidability, which amounts to the compiler crashing or
+not terminating on some input programs.
+If the undecidability arises only in rare, contrived cases,
 being able to successfully type check more benign programs
 %at the cost of rare compiler crashes
 might be preferable to reliably rejecting those
 programs with a decidable but less expressive type system.
 
-When subtyping is used at run time, the cost of undecidability is higher
-because a crash or non-termination could happen during program execution
+However, when subtyping is used at run time, the cost of undecidability is
+higher because a crash or non-termination occurs during program execution
 rather than compilation.
 In mainstream programming languages that require run-time subtyping checks,
 run-time types are often more restrictive than static ones,
 which simplifies the corresponding subtyping problem.
 For example, in the .NET intermediate language,
-the decidability of subtyping was shown for ground types
+the decidability of subtyping was shown for ground types,
 which are used at run time~\cite{kennedy:nom-sub-var-dec:2007}\footnote{Due
 to the lack of documentation, it is not clear whether subtyping between ground
-types is still decidable in \CSharp as of 2022.}.
+types is still decidable in \CSharp as of 2023.}.
 In the case of Java generics, where static subtyping is undecidable,
 the type erasure mechanism allows for decidable run-time subtyping.
 In Julia, however, it is the \emph{run-time} subtyping that is undecidable,
-yet subtyping is heavily used by the dynamic semantics for resolving dispatch.
+yet subtyping is heavily used by the dynamic semantics.
 
-Identifying decidable fragments of undecidable type systems
-remains an important challenge.
+Identifying decidable fragments of undecidable type systems and subtype
+relations remains an important challenge.
 In some cases, it might be possible to recover
 decidability by restricting the system in a way that does not affect most
 practical programs. For example, the material-shape separation for Java
@@ -89,8 +100,8 @@ and variance without F-bounded polymorphism: the fragments can be obtained by
 restricting either contravariance, or expansive class tables,
 or multiple instantiation inheritance.
 Aiming for decidable subtyping, Julia designers deliberately restricted
-the language from F-bounded polymorphism, contravariant constructors,
-and multiple inheritance.
+the language to \emph{not} support F-bounded polymorphism, 
+contravariant constructors, and multiple inheritance.
 Based on those restrictions, \citet{bezanson:julia:2015} conjectured
 the decidability of subtyping but pointed out that
 the combination of invariant constructors
@@ -99,59 +110,93 @@ and contravariance in lower bounds of existential types
 is akin to the source of undecidability in~\FSub;
 the conjecture relied on the fact that left- and right-hand side variables
 are treated assymetrically in Julia.
-Still, Julia subtyping turned out to be powerful enough to encode
-undecidable \FSub.
+Still, Julia subtyping is powerful enough to encode
+the undecidable \FSub.
 
-A number of decidable subtyping relations,
+A number of decidable subtype relations,
 e.g. \WyvSelf~\cite{mackay:path-dep-dec:2020}
 and Kernel \DSub~\cite{hu:dot-undec:2020},
 adopt subtyping rules inspired by a decidable, restricted variant of \FSub
 called Kernel~\FSub~\cite{cardelli:types-poly:1985}.
 The downside of such relations is their rejecting more subtyping judgments
 than is desirable in practice.
-Strong Kernel \DSub~\cite{hu:dot-undec:2020} is also decidable
-but strictly more powerful than Kernel \DSub.
+A strictly more powerful than Kernel \DSub system
+Strong Kernel \DSub~\cite{hu:dot-undec:2020} is also decidable.
 This relation splits the type variable context into two parts, for the left-
 and right-hand sides of the subtyping judgment, thus avoiding the problematic
 rebounding of type variables in a single context;
-the same idea applies to \FSub to obtain decidable, Strong Kernel \FSub.
+the same idea applies to \FSub to obtain the decidable, Strong Kernel \FSub.
 A similar approach with context splitting was used
 by~\citet{mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
 In both \WyvFix and Strong Kernel systems,
 an undesired consequence of maintaining two separate contexts
-is that the resulting subtyping relations lack transitivity.
-In Julia, subtyping also relies on two contexts, but the right-hand side
-variables can refer to the left-hand side ones, thus preventing
-complete separation of the contexts.
+is that the resulting subtype relations lack transitivity.
+%In Julia, subtyping also relies on two contexts, but the right-hand side
+%variables can refer to the left-hand side ones, thus preventing
+%complete separation of the contexts.
 Another decidable variant of \FSub, called \FSubR, was proposed
-by~\citet{mackay:bound-poly-sub-dec:2020}. There, contravariance is allowed
+by~\citet{mackay:bound-poly-sub-dec:2020}. There, %contravariance is allowed
+rebounding of type variables is allowed
 only for type bounds that do not themselves contain bounded quantification,
-with more complex types resorting to the Kernel subtyping.
+with unrestricted types resorting to the Kernel subtyping rule.
 With this syntactic restriction, \FSubR admits some useful judgments
 rejected by Kernel \FSub, yet does not lose transitivity.
-
-
-\TODO{Semantic subtyping and Java wildcards (several paragraphs).}
-
-Subtyping and decidability of subtyping are clearly a problem in various languages,
-but we will focus on several related subsets.
-
-Decidable and undecidable systems. Subtyping in PL..
 
 \section{Semantic subtyping}
 %% ======================================================================
 
-In Julia, subtyping of union and tuple types (maybe also invariant ones?) build
-on top of \TODO{Voulon} and has similarities to XDuce/CDuce.
-There is a large body of work on semantic subtyping, which extends it to
-function and polymorphic types. However, such systems do not deal with
-impredicative types.
-For example, \citet{frih:sem-sub:2008} describe a framework for defining semantic
-subtyping without building a model of the entire language, and then define
-decidable subtyping and type checking for a language with dynamic dispatch,
-unions, functions, and negation types.\TODO{clean up the description}
+In semantic subtyping~\cite{frih:sem-sub:2008}, types are given a set-theoretic
+interpretation, and subtyping is defined as the set inclusion on
+interpretations.
+For example, \citet{hosoya:reg-types-XML:2000} define a static type system for
+an XML processing language and interpret types as sets of valid XML documents.
+In addition to providing a mental model of types for the users,
+defined as the set inclusion, semantic subtyping automatically satisfies
+useful properties such as reflexivity and transitivity.
+However, the subtype relation still needs a decision procedure,
+which is where the complexity often lies, especially if the procedure
+has to be efficient.
+For example, in the Julia language itself, subtyping union and tuple types
+relies on a space-efficient algorithm that lazily explores the disjunctive
+normal form~\cite{chung:julia-sub-algo:2019}.
+In~\cite{frisch:sem-sub:2002}, which supports not only union, but also
+intersection and negation types, subtyping $t \leq s$ is checked via
+the emptiness test $t \land \lnot s \approx \bot$ and also involves
+rewriting into the disjunctive normal form.
 
-In the semantic subtyping approach, types are interpreted as subsets of the
-model of the programming
+While types such as unions and tuples have a straightforward
+semantic interpretation, other types that are common for statically typed
+languages can be challenging to interpret.
+To this end, \citet{frisch:sem-sub:2002} provide an interpretation for
+function types, and \citet{castagna:sem-poly:2011} interpret predicative
+parametric polymorphism. For the latter, the interpretation is parameterized
+by semantic assignments of type variables.
+\citet{dardha:sem-sub-obj:2016, ancona:sem-sub-imp:2016} study semantic
+subtyping for object-oriented languages.
+In the case of the Julia language, which does not have function types and is not
+concerned with static type checking, the challenge instead comes from the
+combination of impredicative bounded existential types and invariant type
+constructors.
 
-\TODO{\cite{hosoya:xduce:2003, bezanken:cduce:2003}}
+
+% Julia's approach to subtyping of tuple and union types that distribute over
+% tuples, was inspired by work on static types systems for XML processing
+% languages~\cite{hosoya:xduce:2003, bezanken:cduce:2003}.
+
+% In Julia, subtyping of union and tuple types (maybe also invariant ones?) build
+% on top of \TODO{Vouilon} and has similarities to XDuce/CDuce.
+% There is a large body of work on semantic subtyping, which extends it to
+% function and polymorphic types. However, such systems do not deal with
+% impredicative types.
+% For example, \citet{frih:sem-sub:2008} describe a framework for defining semantic
+% subtyping without building a model of the entire language, and then define
+% decidable subtyping and type checking for a language with dynamic dispatch,
+% unions, functions, and negation types.\TODO{clean up the description}
+
+% In the semantic subtyping approach, types are interpreted as subsets of the
+% model of the programming
+
+\section{Java wildcards}
+%% ======================================================================
+
+\TODO{}

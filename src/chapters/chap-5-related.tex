@@ -150,33 +150,45 @@ interpretation, and subtyping is defined as the set inclusion on
 interpretations.
 For example, \citet{hosoya:reg-types-XML:2000} define a static type system for
 an XML processing language and interpret types as sets of valid XML documents.
-In addition to providing a mental model of types for the users,
-defined as the set inclusion, semantic subtyping automatically satisfies
+Thus, semantic subtyping provides an intuitive mental
+model of types to the users. In addition, it automatically satisfies
 useful properties such as reflexivity and transitivity.
-However, the subtype relation still needs a decision procedure,
-which is where the complexity often lies, especially if the procedure
-has to be efficient.
-For example, in the Julia language itself, subtyping union and tuple types
+
+However, semantic subtyping still needs a decision procedure,
+and that is where the complexity often lies, especially if efficiency matters.
+For example, in the Julia language itself, inspired by the semantic approach
+subtyping of union and tuple types
 relies on a space-efficient algorithm that lazily explores the disjunctive
 normal form~\cite{chung:julia-sub-algo:2019}.
 In~\cite{frisch:sem-sub:2002}, which supports not only union, but also
 intersection and negation types, subtyping $t \leq s$ is checked via
-the emptiness test $t \land \lnot s \approx \bot$ and also involves
-rewriting into the disjunctive normal form.
+the emptiness test $t \land \lnot s \approx \bot$ and also relies on
+the disjunctive normal form.
+Related to Julia's treatment of right-hand side existential variables as 
+unification variables, \citet{castagna:sem-poly-inf:2015} build and solve
+subtype constraints as a part of type inference process in their set-theoretic
+framework with union, intersection, and negation types.
+\citet{schimpf:set-types-erlang:2023} successfully apply the
+same framework to typing Erlang.
+However, the approach to solving constraints does not translate to Julia
+due to the presence of invariant type constructors, which prevents the
+possibility of rewriting constraints into a simple enough normal form.
 
 While types such as unions and tuples have a straightforward
 semantic interpretation, other types that are common for statically typed
 languages can be challenging to interpret.
 To this end, \citet{frisch:sem-sub:2002} provide an interpretation for
 function types, and \citet{castagna:sem-poly:2011} interpret predicative
-parametric polymorphism. For the latter, the interpretation is parameterized
-by semantic assignments of type variables.
-\citet{dardha:sem-sub-obj:2016, ancona:sem-sub-imp:2016} study semantic
-subtyping for object-oriented languages.
-In the case of the Julia language, which does not have function types and is not
-concerned with static type checking, the challenge instead comes from the
-combination of impredicative bounded existential types and invariant type
-constructors.
+parametric polymorphism. In the latter, the interpretation needs to be
+parameterized by semantic assignments of type variables.
+In the context of object-oriented languages,
+\citet{dardha:sem-sub-obj:2016} propose an integration of structural types and
+semantic subtyping, and \citet{ancona:sem-sub-imp:2016} study semantic
+subtyping for imperative languages with mutable fields.
+In the case of the Julia language, %which does not have function types and is not
+%concerned with static type checking,
+the main challenge comes from interpreting the combination of
+impredicative bounded existential types and invariant type constructors.
 
 
 % Julia's approach to subtyping of tuple and union types that distribute over

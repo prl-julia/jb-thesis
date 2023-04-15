@@ -15,8 +15,8 @@ semantic subtyping, and subtyping of Java generics with wildcards,
 as Julia's subtype relation was inspired by the latter
 two~\cite{bezanson:julia:2015}.
 In particular, the treatment of tuple and union types aligns with the semantic
-subtyping approach, and existential types are often used to model Java
-wildcards. 
+subtyping approach, and bounded existential types are commonly used
+as a model of wildcards.
 
 
 \section{Decidability of subtyping}
@@ -33,7 +33,7 @@ DOT (Dependent Object Calculus)~\cite{amin:dot:2016},
 was proven by~\citet{hu:dot-undec:2020}.
 
 Typically, undecidability is shown by a reduction from a known undecidable
-problem. For example, the halting problem for Turing machines was used
+problem. For example, the halting problem for Turing machines is used
 to prove the undecidability of Java generics~\cite{grigore:java-undec:2017}
 % the culprit is recursive inheritance in Java generics
 as well as System \FSub~\cite{pierce:bound-sub-undec:1992}.
@@ -44,9 +44,9 @@ contravariance and rebounding of type variables in the context.
 %leads to the growth of type variable context.
 Proofs by reduction from \FSub are commonly used to establish
 undecidability in languages with some form of bounded quantification.
-For instance, the undecidability of DOT~\cite{hu:dot-undec:2020} was shown
+For instance, the undecidability of DOT~\cite{hu:dot-undec:2020} is shown
 by reducing a variant of \FSub to \DSub, a restriction of DOT featuring type
-members and path-dependent types. A similar approach was used
+members and path-dependent types. A similar approach is used
 by~\citet{mackay:path-dep-dec:2020} for \WyvCore, another simplification of
 DOT featuring path-dependent and recursive types.
 In the case of Julia, the undecidability of subtyping also follows from its
@@ -91,7 +91,7 @@ enables decidability of subtyping by limiting F-bounded polymorphism %~\cite{can
 (i.e., recursive constraints on type variables)
 to the subset of types, called shapes, that are used exclusively as constraints;
 this separation appears to be in agreement with an industry-wide practice.
-\citet{mackay:path-dep-dec:2020} extended the material-shape separation
+\citet{mackay:path-dep-dec:2020} extend the material-shape separation
 to the context of path-dependent and recursive types. %, with additional
 %restrictions to ensure decidability.
 Earlier, \citet{kennedy:nom-sub-var-dec:2007} identified three decidable
@@ -126,7 +126,7 @@ This relation splits the type variable context into two parts, for the left-
 and right-hand sides of the subtyping judgment, thus avoiding the problematic
 rebounding of type variables in a single context;
 the same idea applies to \FSub to obtain the decidable, Strong Kernel \FSub.
-A similar approach with context splitting was used
+A similar approach with context splitting is used
 by~\citet{mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
 In both \WyvFix and Strong Kernel systems,
 an undesired consequence of maintaining two separate contexts
@@ -154,10 +154,10 @@ Thus, semantic subtyping provides an intuitive mental
 model of types to the users. In addition, it automatically satisfies
 useful properties such as reflexivity and transitivity.
 
-However, semantic subtyping still needs a decision procedure,
-and that is where the complexity often lies, especially if efficiency matters.
-For example, in the Julia language itself, inspired by the semantic approach
-subtyping of union and tuple types
+However, semantic subtyping still needs a decision procedure, and that is where
+the complexity typically comes from, especially if efficiency matters.
+For example, in the Julia language, semantic subtyping of union and tuple types
+%inspired by the semantic approach
 relies on a space-efficient algorithm that lazily explores the disjunctive
 normal form~\cite{chung:julia-sub-algo:2019}.
 In~\cite{frisch:sem-sub:2002}, which supports not only union, but also
@@ -165,14 +165,14 @@ intersection and negation types, subtyping $t \leq s$ is checked via
 the emptiness test $t \land \lnot s \approx \bot$ and also relies on
 the disjunctive normal form.
 Related to Julia's treatment of right-hand side existential variables as 
-unification variables, \citet{castagna:sem-poly-inf:2015} build and solve
+unification variables, \citet{castagna:sem-poly-inf:2015} generate and solve
 subtype constraints as a part of type inference process in their set-theoretic
 framework with union, intersection, and negation types.
 \citet{schimpf:set-types-erlang:2023} successfully apply the
 same framework to typing Erlang.
-However, the approach to solving constraints does not translate to Julia
-due to the presence of invariant type constructors, which prevents the
-possibility of rewriting constraints into a simple enough normal form.
+However, the approach to constraint solving does not translate to Julia
+due to the presence of invariant type constructors.%, which prevents the
+%possibility of rewriting constraints into the right form.
 
 While types such as unions and tuples have a straightforward
 semantic interpretation, other types that are common for statically typed
@@ -190,25 +190,35 @@ In the case of the Julia language, %which does not have function types and is no
 the main challenge comes from interpreting the combination of
 impredicative bounded existential types and invariant type constructors.
 
-
-% Julia's approach to subtyping of tuple and union types that distribute over
-% tuples, was inspired by work on static types systems for XML processing
-% languages~\cite{hosoya:xduce:2003, bezanken:cduce:2003}.
-
-% In Julia, subtyping of union and tuple types (maybe also invariant ones?) build
-% on top of \TODO{Vouilon} and has similarities to XDuce/CDuce.
-% There is a large body of work on semantic subtyping, which extends it to
-% function and polymorphic types. However, such systems do not deal with
-% impredicative types.
-% For example, \citet{frih:sem-sub:2008} describe a framework for defining semantic
-% subtyping without building a model of the entire language, and then define
-% decidable subtyping and type checking for a language with dynamic dispatch,
-% unions, functions, and negation types.\TODO{clean up the description}
-
-% In the semantic subtyping approach, types are interpreted as subsets of the
-% model of the programming
-
 \section{Java wildcards}
 %% ======================================================================
 
-\TODO{}
+The wildcards mechanism of Java generics~\cite{torgersen:wildcards:2004}
+provides use-site variance of parametric types~\cite{thorup:unif-genericity:1999},
+which has been recognized as a restricted form of bounded existential
+types~\cite{igarashi:variance:2002}.
+For example, a variable of type \code{List<? \textbf{extends} Number>},
+which represents an existential type \code{$\exists$X<:Number.List<X>},
+can be assigned any list with the element type that is a subtype of \code{Number};
+furthermore, elements of this wildcard-typed list can be safely read at
+type \code{Number}.
+There have been multiple formalizations of Java wildcards,
+such as WildFJ~\cite{torgersen:wildfj:2005} and
+TameFJ~\cite{cameron:java-wildcards:2008}, but they
+were focused on type soundness rather than a decidable subtyping algorithm.
+\citet{smith:java-type-inf:2008} found inconsistencies in Java's type inference
+and subtyping algorithm and proposed a solution using a limited form of union
+types, with a conjecture on decidability of subtyping.
+
+Subtyping Java wildcards is challenging.
+For example, there are multiple sources of non-termination due to wildcards
+being allowed in the inheritance hierarchy,
+as well as the presence of recursive constraints on type
+variables~\cite{tate:taming-wildcards:2011}.
+By making practical restrictions on the Java language,
+\citet{tate:taming-wildcards:2011} provide a terminating subtyping algorithm.
+\citet{wehr:dec-bounded-exist:2009} identify multiple undecidable subtype
+relations for bounded existential types in formal models inspired by Java.
+Julia lacks all the Java features that were linked to non-termination of
+subtyping, but supports union and existential types that are not present
+in Java's surface language.

@@ -25,16 +25,11 @@
     title = {Syntactically Restricting Bounded Polymorphism for Decidable Subtyping},
     year = {2020},
     isbn = {978-3-030-64436-9},
-    publisher = {Springer-Verlag},
-    address = {Berlin, Heidelberg},
     url = {https://doi.org/10.1007/978-3-030-64437-6_7},
     doi = {10.1007/978-3-030-64437-6_7},
     abstract = {Subtyping of Bounded Polymorphism has long been known to be undecidable when coupled with contra-variance. While decidable forms of bounded polymorphism exist, they all sacrifice either useful properties such as contra-variance (Kernel F<:), or useful metatheoretic properties (F<:⊤). In this paper we show how, by syntactically separating contra-variance from the recursive aspects of subtyping in System F<:, decidable subtyping can be ensured while also allowing for both contra-variant subtyping of certain instances of bounded polymorphism, and many of System F<:’s desirable metatheoretic properties. We then show that this approach can be applied to the related polymorphism present in D<:, a minimal calculus that models core features of the Scala type system.},
-    booktitle = {Programming Languages and Systems: 18th Asian Symposium, APLAS 2020, Fukuoka, Japan, November 30 – December 2, 2020, Proceedings},
-    pages = {125–144},
-    numpages = {20},
+    journal = {APLAS 2020},
     keywords = {Object oriented languages, Functional languages, Language design, Polymorphism},
-    location = {Fukuoka, Japan}
 }
 
 @article{mackay:path-dep-dec:2020,
@@ -42,17 +37,14 @@
     title = {Decidable Subtyping for Path Dependent Types},
     year = {2019},
     issue_date = {January 2020},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     volume = {4},
-    number = {POPL},
+    number = {POPL 2020},
     url = {https://doi.org/10.1145/3371134},
     doi = {10.1145/3371134},
     abstract = {Path dependent types have long served as an expressive component of the Scala programming language. They allow for the modelling of both bounded polymorphism and a degree of nominal subtyping. Nominality in turn provides the ability to capture first class modules. Thus a single language feature gives rise to a rich array of expressiveness. Recent work has proven path dependent types sound in the presence of both intersection and recursive types, but unfortunately typing remains undecidable, posing problems for programmers who rely on the results of type checkers. The Wyvern programming language is an object oriented language with path dependent types, recursive types and first class modules. In this paper we define two variants of Wyvern that feature decidable typing, along with machine checked proofs of decidability. Despite the restrictions, our approaches retain the ability to encode the parameteric polymorphism of Java generics along with many idioms of the Scala module system.},
     journal = {Proc. ACM Program. Lang.},
     month = {dec},
     articleno = {66},
-    numpages = {27},
     keywords = {Scala, Path Dependent Types, Structural Subtyping, Nominal Subtyping, Functional Languages, Language Design, Decidability, Subtyping, Object Oriented Languages, Wyvern}
 }
 
@@ -61,23 +53,17 @@
     title = {Java Generics Are Turing Complete},
     year = {2017},
     isbn = {9781450346603},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/3009837.3009871},
     doi = {10.1145/3009837.3009871},
     abstract = { This paper describes a reduction from the halting problem of Turing machines to subtype checking in Java. It follows that subtype checking in Java is undecidable, which answers a question posed by Kennedy and Pierce in 2007. It also follows that Java's type checker can recognize any recursive language, which improves a result of Gill and Levy from 2016. The latter point is illustrated by a parser generator for fluent interfaces. },
-    booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
-    pages = {73–85},
-    numpages = {13},
     keywords = {subtype checking, Java, fluent interface, parser generator, Turing machine, decidability},
-    location = {Paris, France},
-    series = {POPL 2017}
+    journal = {POPL 2017}
 }
 
 @inproceedings{kennedy:nom-sub-var-dec:2007,
     author = {Kennedy, Andrew and Pierce, Benjamin C.},
     title = {On Decidability of Nominal Subtyping with Variance},
-    booktitle = {International Workshop on Foundations and Developments of Object-Oriented Languages (FOOL/WOOD)},
+    journal = {FOOL/WOOD 2007},
     year = {2007},
     month = {January},
     abstract = {We investigate the algorithmics of subtyping in the presence of nominal inheritance and variance for generic types, as found in Java 5, Scala 2.0, and the .NET 2.0 Intermediate Language. We prove that the general problem is undecidable and characterize three different decidable fragments. From the latter, we conjecture that undecidability critically depends on the combination of three features that are not found together in any of these languages: contravariant type constructors, class hierarchies in which the set of types reachable from a given type by inheritance and decomposition is not always finite, and class hierarchies in which a type may have multiple supertypes with the same head constructor. These results settle one case of practical interest: subtyping between ground types in the .NET intermediate language is decidable; we conjecture that our proof can also be extended to show full decidability of subtyping in .NET. For Java and Scala, the decidability questions remain open; however, the proofs of our preliminary results introduce a number of novel techniques that we hope may be useful in further attacks on these questions.},
@@ -90,16 +76,10 @@
     title = {Bounded Quantification is Undecidable},
     year = {1992},
     isbn = {0897914538},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/143165.143228},
     doi = {10.1145/143165.143228},
     abstract = {F≤ is a typed λ-calculus with subtyping and bounded second-order polymorphism. First proposed by Cardelli and Wegner, it has been widely studied as a core calculus for type systems with subtyping.Curien and Ghelli proved the partial correctness of a recursive procedure for computing minimal types of F≤ terms and showed that the termination of this procedure is equivalent to the termination of this procedure is equivalent to the termination of its major component, a procedure for checking the subtype relation between F≤ types. This procedure was thought to terminate on all inputs, but the discovery of a subtle bug in a purported proof of this claim recently reopened the question of the decidability of  subtyping, and hence of typechecking.This question is settled here in the negative, using a reduction from the halting problem for two-counter Turing machines to show that the subtype relation of F≤ is undecidable.},
-    booktitle = {Proceedings of the 19th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
-    pages = {305–315},
-    numpages = {11},
-    location = {Albuquerque, New Mexico, USA},
-    series = {POPL '92}
+    journal = {POPL 1992}
 }
 
 
@@ -121,16 +101,11 @@
     year = {2016},
     isbn = {9781450344449},
     publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/2983990.2983992},
     doi = {10.1145/2983990.2983992},
     abstract = {Semantic subtyping is an approach for defining sound and complete procedures to decide subtyping for expressive types, including union and intersection types; although it has been exploited especially in functional languages for XML based programming, recently it has been partially investigated in the context of object-oriented languages, and a sound and complete subtyping algorithm has been proposed for record types, but restricted to immutable fields, with union and recursive types interpreted coinductively to support cyclic objects. In this work we address the problem of studying semantic subtyping for imperative object-oriented languages, where fields can be mutable; in particular, we add read/write field annotations to record types, and, besides union, we consider intersection types as well, while maintaining coinductive interpretation of recursive types. In this way, we get a richer notion of type with a flexible subtyping relation, able to express a variety of type invariants useful for enforcing static guarantees for mutable objects. The addition of these features radically changes the defi- nition of subtyping, and, hence, the corresponding decision procedure, and surprisingly invalidates some subtyping laws that hold in the functional setting. We propose an intuitive model where mutable record val- ues contain type information to specify the values that can be correctly stored in fields. Such a model, and the correspond- ing subtyping rules, require particular care to avoid circularity between coinductive judgments and their negations which, by duality, have to be interpreted inductively. A sound and complete subtyping algorithm is provided, together with a prototype implementation.},
-    booktitle = {Proceedings of the 2016 ACM SIGPLAN International Conference on Object-Oriented Programming, Systems, Languages, and Applications},
-    pages = {568–587},
-    numpages = {20},
     keywords = {Structural Types for Objects, Semantic Subtyp- ing, Read/Write Field Annotations},
-    location = {Amsterdam, Netherlands},
-    series = {OOPSLA 2016}
+    journal = {OOPSLA 2016}
 }
 
 @article{dardha:sem-sub-obj:2016,
@@ -139,7 +114,6 @@
     journal = {The Computer Journal},
     volume = {60},
     number = {5},
-    pages = {636-656},
     year = {2016},
     month = {12},
     abstract = "{In this paper, we propose an integration of structural subtyping with boolean connectives and semantic subtyping to define a Java-like programming language that exploits the benefits of both techniques. Semantic subtyping is an approach for defining subtyping relation based on set-theoretic models, rather than syntactic rules. On the one hand, this approach involves some non-trivial mathematical machinery in the background. On the other hand, final users of the language need not know this machinery and the resulting subtyping relation is very powerful and intuitive. While semantic subtyping is naturally linked to the structural one, we show how our framework can also accommodate the nominal subtyping. Several examples show the expressivity and the practical advantages of our proposal.}",
@@ -154,26 +128,20 @@
     title = {Polymorphic Functions with Set-Theoretic Types: Part 2: Local Type Inference and Type Reconstruction},
     year = {2015},
     isbn = {9781450333009},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/2676726.2676991},
     doi = {10.1145/2676726.2676991},
     abstract = {This article is the second part of a two articles series about the definition of higher order polymorphic functions in a type system with recursive types and set-theoretic type connectives (unions, intersections, and negations).In the first part, presented in a companion paper, we defined and studied the syntax, semantics, and evaluation of the explicitly-typed version of a calculus, in which type instantiation is driven by explicit instantiation annotations. In this second part we present a local type inference system that allows the programmer to omit explicit instantiation annotations for function applications, and a type reconstruction system that allows the programmer to omit explicit type annotations for function definitions.The work presented in the two articles provides the theoretical foundations and technical machinery needed to design and implement higher-order polymorphic functional languages with union and intersection types and/or for semi-structured data processing.},
-    booktitle = {Proceedings of the 42nd Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
-    pages = {289–302},
-    numpages = {14},
     keywords = {xml, semantic subtyping, types, polymorphism, type constraints, intersection types},
     location = {Mumbai, India},
-    series = {POPL '15}
+    journal = {POPL 2015}
 }
 
 @inproceedings{castagna:sem-poly:2011,
 	author = {G. Castagna and Z. Xu},
 	title = {Set-theoretic Foundation of Parametric Polymorphism and Subtyping},
-	booktitle = {ICFP\,'11: 16th {ACM-SIGPLAN} International Conference on Functional Programming},
 	year = {2011},
-	pages = {94-106},
 	month = {sep},
+    journal = {ICFP 2011},
 }
 
 @article{frih:sem-sub:2008,
@@ -181,10 +149,6 @@
     title = {Semantic Subtyping: Dealing Set-Theoretically with Function, Union, Intersection, and Negation Types},
     year = {2008},
     issue_date = {September 2008},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    volume = {55},
-    number = {4},
     issn = {0004-5411},
     url = {https://doi.org/10.1145/1391289.1391293},
     doi = {10.1145/1391289.1391293},
@@ -192,7 +156,6 @@
     journal = {J. ACM},
     month = {sep},
     articleno = {19},
-    numpages = {64},
     keywords = {union types, intersection types, negation types, higher-order functions, Subtyping}
 }
 
@@ -201,8 +164,6 @@
     title = {XDuce: A Statically Typed XML Processing Language},
     year = {2003},
     issue_date = {May 2003},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     volume = {3},
     number = {2},
     issn = {1533-5399},
@@ -211,8 +172,6 @@
     abstract = {XDuce is a statically typed programming language for XML processing. Its basic data values are XML documents, and its types (so-called regular expression types) directly correspond to document schemas. XDuce also provides a flexible form of regular expression pattern matching, integrating conditional branching, tag checking, and subtree extraction, as well as dynamic typechecking. We survey the principles of XDuce's design, develop examples illustrating its key features, describe its foundations in the theory of regular tree automata, and present a complete formal definition of its core, along with a proof of type safety.},
     journal = {ACM Trans. Internet Technol.},
     month = {may},
-    pages = {117–148},
-    numpages = {32},
     keywords = {XML, subtyping, Type systems, tree automata}
 }
 
@@ -221,17 +180,12 @@
     title = {CDuce: An XML-Centric General-Purpose Language},
     year = {2003},
     isbn = {1581137567},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/944705.944711},
     doi = {10.1145/944705.944711},
     abstract = {We present the functional language CDuce, discuss some design issues, and show its adequacy for working with XML documents. Distinctive features of CDuce are a powerful pattern matching, first class functions, overloaded functions, a very rich type system (arrows, sequences, pairs, records, intersections, unions, differences), precise type inference for patterns and error localization, and a natural interpretation of types as sets of values. We also outline some important implementation issues; in particular, a dispatch algorithm that demonstrates how static type information can be used to obtain very efficient compilation schemas..},
-    booktitle = {Proceedings of the Eighth ACM SIGPLAN International Conference on Functional Programming},
-    pages = {51–63},
-    numpages = {13},
+    journal = {ICFP 2003},
     keywords = {type systems, XML, CDuce, XML-processing},
     location = {Uppsala, Sweden},
-    series = {ICFP '03}
 }
 
 @article{frisch:sem-sub:2002,
@@ -239,7 +193,6 @@
   author={Alain Frisch and Giuseppe Castagna and V{\'e}ronique Benzaken},
   journal={Proceedings 17th Annual IEEE Symposium on Logic in Computer Science},
   year={2002},
-  pages={137-146}
 }
 
 @inproceedings{hosoya:reg-types-XML:2000,
@@ -247,15 +200,10 @@
     title = {Regular Expression Types for XML},
     year = {2000},
     isbn = {1581132026},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/351240.351242},
     doi = {10.1145/351240.351242},
     abstract = {We propose regular expression types as a foundation for XML processing languages. Regular expression types are a natural generalization of Document Type Definitions (DTDs), describing structures in XML documents using regular expression operators (i.e., *, ?, |, etc.) and supporting a simple but powerful notion of subtyping.The decision problem for the subtype relation is EXPTIME-hard, but it can be checked quite efficiently in many cases of practical interest. The subtyping algorithm developed here is a variant of Aiken and Murphy's set-inclusion constraint solver, to which are added several optimizations and two new properties: (1) our algorithm is provably complete, and (2) it allows a useful "subtagging" relation between nodes with different labels in XML trees.},
-    booktitle = {Proceedings of the Fifth ACM SIGPLAN International Conference on Functional Programming},
-    pages = {11–22},
-    numpages = {12},
-    series = {ICFP '00}
+    journal = {ICFP 2000}
 }
 
 %% Subtyping Misc
@@ -264,13 +212,9 @@
 @InProceedings{igarashi:variance:2002,
     author="Igarashi, Atsushi
     and Viroli, Mirko",
-    editor="Magnusson, Boris",
     title="On Variance-Based Subtyping for Parametric Types",
-    booktitle="ECOOP 2002 --- Object-Oriented Programming",
+    journal="ECOOP 2002",
     year="2002",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="441--469",
     abstract="We develop the mechanism of variant parametric types, inspired by structural virtual types by Thorup and Torgersen, as a means to enhance synergy between parametric and inclusive polymorphism in object-oriented languages. Variant parametric types are used to control both subtyping between different instantiations of one generic class and the visibility of their fields and methods. On one hand, one parametric class can be used as either covariant, contravariant, or bivariant by attaching a variance annotation---which can be either +, -, or *, respectively---to a type argument. On the other hand, the type system prohibits certain method/field accesses through variant parametric types, when those accesses can otherwise make the program unsafe. By exploiting variant parametric types, a programmer can write generic code abstractions working on a wide range of parametric types in a safe way. For instance, a method that only reads the elements of a container of strings can be easily modified so that it can accept containers of any subtype of string.",
     isbn="978-3-540-47993-2"
 }
@@ -280,14 +224,9 @@
     and Martini, Simone
     and Mitchell, John C.
     and Scedrov, Andre",
-    editor="Ito, Takayasu
-    and Meyer, Albert R.",
     title="An extension of system F with subtyping",
     booktitle="Theoretical Aspects of Computer Software",
     year="1991",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="750--770",
     abstract="System F is a well-known typed $\lambda$-calculus with polymorphic types, which provides a basis for polymorphic programming languages. We study an extension of F, called F<:, that combines parametric polymorphism with subtyping.",
     isbn="978-3-540-47617-7"
 }
@@ -326,13 +265,9 @@
 @InProceedings{thorup:unif-genericity:1999,
     author="Krab Thorup, Kresten
     and Torgersen, Mads",
-    editor="Guerraoui, Rachid",
     title="Unifying Genericity",
-    booktitle="ECOOP' 99 --- Object-Oriented Programming",
+    journal="ECOOP 1999",
     year="1999",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="186--204",
     abstract="Generic types in programming languages are most often supported with various forms of parametric polymorphism, i.e. functions on types. Within the framework of object-oriented languages, virtual types present an alternative where specific types are derived from generic ones using inheritance rather than function application. While both mechanisms are statically safe and support basic genericity, they have very different typing properties, each of them providing for the description of useful relationships, which are not expressible with the other. In this paper we present, through the use of examples, a mechanism for describing generic classes: structural virtual types. This mechanism is essentially a merger of parameterized classes and virtual types and includes the benefits of both, in particular retaining mutual recursion and covariance of virtual types as well as the function-like nature of parameterized classes.",
     isbn="978-3-540-48743-2"
 }
@@ -342,15 +277,9 @@
     title = {F-Bounded Polymorphism for Object-Oriented Programming},
     year = {1989},
     isbn = {0897913280},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/99370.99392},
     doi = {10.1145/99370.99392},
-    booktitle = {Proceedings of the Fourth International Conference on Functional Programming Languages and Computer Architecture},
-    pages = {273–280},
-    numpages = {8},
-    location = {Imperial College, London, United Kingdom},
-    series = {FPCA '89}
+    journal = {FPCA 1989}
 }
 
 @article{cardelli:types-poly:1985,
@@ -381,28 +310,18 @@
     title = {Multiple Dispatch as Dispatch on Tuples},
     year = {1998},
     isbn = {1581130058},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/286936.286977},
     doi = {10.1145/286936.286977},
     abstract = {Many popular object-oriented programming languages, such as C++, Smalltalk-80, Java, and Eiffel, do not support multiple dispatch. Yet without multiple dispatch, programmers find it difficult to express binary methods and design patterns such as the "visitor" pattern. We describe a new, simple, and orthogonal way to add multimethods to single-dispatch object-oriented languages, without affecting existing code. The new mechanism also clarifies many differences between single and multiple dispatch.},
-    booktitle = {Proceedings of the 13th ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications},
-    pages = {374–387},
-    numpages = {14},
     keywords = {typing, single dispatch, semantics, language design, generic functions, multiple dispatch, binary methods, tuple, multimethods},
-    location = {Vancouver, British Columbia, Canada},
-    series = {OOPSLA '98}
+    journal = {OOPSLA 1998}
 }
 
 @InProceedings{chambers:multi-cecil:1992,
     author="Chambers, Craig",
-    editor="Madsen, Ole Lehrmann",
     title="Object-oriented multi-methods in Cecil",
-    booktitle="ECOOP '92 European Conference on Object-Oriented Programming",
+    journal="ECOOP 1992",
     year="1992",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="33--56",
     abstract="Multiple dispatching provides increased expressive power over single dispatching by guiding method lookup using the values of all arguments instead of only the receiver. However, existing languages with multiple dispatching do not encourage the data-abstraction-oriented programming style that is encouraged by traditional single-dispatching languages; instead existing multiple-dispatching languages tend to foster a function-oriented programming style organized around generic functions. We propose an alternative view of multiple dispatching that is intended to promote a data-abstraction-oriented programming style. Instead of viewing a multi-method as ``outside'' of all objects, we view a multi-method as ``inside'' the objects for which the multi-method applies (on which it dispatches). Because objects are closely connected to the multi-methods implementing their operations, the internals of an object can be encapsulated by being accessible only to the closely-connected multi-methods. We are exploring this object-oriented view of multi-methods in the context of a new programming language named Cecil.",
     isbn="978-3-540-47268-1"
 }
@@ -410,7 +329,7 @@
 @inproceedings{bobrow:common-loops:1986,
   title={CommonLoops: merging Lisp and object-oriented programming},
   author={Daniel G. Bobrow and Kenneth M. Kahn and Gregor Kiczales and Larry Masinter and Mark Stefik and Frank Zdybel},
-  booktitle={OOPLSA '86},
+  journal={OOPLSA 1986},
   year={1986}
 }
 
@@ -431,9 +350,6 @@
     title="The Essence of Dependent Object Types",
     bookTitle="A List of Successes That Can Change the World: Essays Dedicated to Philip Wadler on the Occasion of His 60th Birthday",
     year="2016",
-    publisher="Springer International Publishing",
-    address="Cham",
-    pages="249--272",
     abstract="Focusing on path-dependent types, the paper develops foundations for Scala from first principles. Starting from a simple calculus D{\$}{\$}{\_}{\{}<:{\}}{\$}{\$}<:of dependent functions, it adds records, intersections and recursion to arrive at DOT, a calculus for dependent object types. The paper shows an encoding of System F with subtyping in D{\$}{\$}{\_}{\{}<:{\}}{\$}{\$}<:and demonstrates the expressiveness of DOT by modeling a range of Scala constructs in it.",
     isbn="978-3-319-30936-1",
     doi="10.1007/978-3-319-30936-1_14",
@@ -449,17 +365,12 @@
     title = {Getting F-Bounded Polymorphism into Shape},
     year = {2014},
     isbn = {9781450327848},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/2594291.2594308},
     doi = {10.1145/2594291.2594308},
     abstract = {We present a way to restrict recursive inheritance without sacrificing the benefits of F-bounded polymorphism. In particular, we distinguish two new concepts, materials and shapes, and demonstrate through a survey of 13.5 million lines of open-source generic-Java code that these two concepts never actually overlap in practice. With this Material-Shape Separation, we prove that even na\"{\i}ve type-checking algorithms are sound and complete, some of which address problems that were unsolvable even under the existing proposals for restricting inheritance. We illustrate how the simplicity of our design reflects the design intuitions employed by programmers and potentially enables new features coming into demand for upcoming programming languages.},
-    booktitle = {Proceedings of the 35th ACM SIGPLAN Conference on Programming Language Design and Implementation},
-    pages = {89–99},
-    numpages = {11},
     keywords = {F-bounded polymorphism, variance, higher-kinded types, separation, joins, decidability, materials, subtyping, shapes},
     location = {Edinburgh, United Kingdom},
-    series = {PLDI '14}
+    journal = {PLDI 2014}
 }
 
 @inproceedings{tate:taming-wildcards:2011,
@@ -467,29 +378,19 @@
     title = {Taming Wildcards in Java's Type System},
     year = {2011},
     isbn = {9781450306638},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/1993498.1993570},
     doi = {10.1145/1993498.1993570},
     abstract = {Wildcards have become an important part of Java's type system since their introduction 7 years ago. Yet there are still many open problems with Java's wildcards. For example, there are no known sound and complete algorithms for subtyping (and consequently type checking) Java wildcards, and in fact subtyping is suspected to be undecidable because wildcards are a form of bounded existential types. Furthermore, some Java types with wildcards have no joins, making inference of type arguments for generic methods particularly difficult. Although there has been progress on these fronts, we have identified significant shortcomings of the current state of the art, along with new problems that have not been addressed.In this paper, we illustrate how these shortcomings reflect the subtle complexity of the problem domain, and then present major improvements to the current algorithms for wildcards by making slight restrictions on the usage of wildcards. Our survey of existing Java programs suggests that realistic code should already satisfy our restrictions without any modifications. We present a simple algorithm for subtyping which is both sound and complete with our restrictions, an algorithm for lazily joining types with wildcards which addresses some of the shortcomings of prior work, and techniques for improving the Java type system as a whole. Lastly, we describe various extensions to wildcards that would be compatible with our algorithms.},
-    booktitle = {Proceedings of the 32nd ACM SIGPLAN Conference on Programming Language Design and Implementation},
-    pages = {614–627},
-    numpages = {14},
     keywords = {parametric types, single-instantiation inheritance, joins, existential types, type inference, subtyping, wildcards},
-    location = {San Jose, California, USA},
-    series = {PLDI '11}
+    journal = {PLDI 2011}
 }
 
 @InProceedings{wehr:dec-bounded-exist:2009,
     author="Wehr, Stefan
     and Thiemann, Peter",
-    editor="Hu, Zhenjiang",
     title="On the Decidability of Subtyping with Bounded Existential Types",
     booktitle="Programming Languages and Systems",
     year="2009",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="111--127",
     abstract="Bounded existential types are a powerful language feature for modeling partial data abstraction and information hiding. However, existentials do not mingle well with subtyping as found in current object-oriented languages: the subtyping relation is already undecidable for very restrictive settings.",
     isbn="978-3-642-10672-9"
 }
@@ -499,30 +400,20 @@
     title = {Java Type Inference is Broken: Can We Fix It?},
     year = {2008},
     isbn = {9781605582153},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/1449764.1449804},
     doi = {10.1145/1449764.1449804},
     abstract = {Java 5, the most recent major update to the Java Programming Language, introduced a number of sophisticated features, including a major extension to the type system. While the technical details of these new features are complex, much of this complexity is hidden from the typical Java developer by an ambitious type inference mechanism. Unfortunately, the extensions to the Java 5 type system were so novel that their technical details had not yet been thoroughly investigated in the research literature. As a result, the Java 5 compiler includes a pragmatic but flawed type inference algorithm that is, by design, neither sound nor locally complete. The language specification points out that neither of these failures is catastrophic: the correctness of potentially-unsound results must be verified during type checking; and incompleteness can usually be worked around by manually providing the method type parameter bindings for a given call site.This paper dissects the type inference algorithm of Java 5 and proposes a signficant revision that is sound and able to calculate correct results where the Java 5 algorithm fails. The new algorithm is locally complete with the exception of a difficult corner case. Moreover, the new algorithm demonstrates that several arbitrary restrictions in the Java type system---most notably the ban on lower-bounded type parameter declarations and the limited expressibility of intersection types---are unnecessary. We hope that this work will spur the evolution of a more coherent, more comprehensive generic type system for Java.},
-    booktitle = {Proceedings of the 23rd ACM SIGPLAN Conference on Object-Oriented Programming Systems Languages and Applications},
-    pages = {505–524},
-    numpages = {20},
     keywords = {intersection types, union types, type inference, type argument inference, parameterized types, wildcards, subtyping, polymorphic methods, bounded quantification, generics},
-    location = {Nashville, TN, USA},
-    series = {OOPSLA '08}
+    journal = {OOPSLA 2008}
 }
 
 @InProceedings{cameron:java-wildcards:2008,
     author="Cameron, Nicholas
     and Drossopoulou, Sophia
     and Ernst, Erik",
-    editor="Vitek, Jan",
     title="A Model for Java with Wildcards",
-    booktitle="ECOOP 2008 -- Object-Oriented Programming",
+    journal="ECOOP 2008",
     year="2008",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="2--26",
     abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
     isbn="978-3-540-70592-5"
 }
@@ -533,8 +424,7 @@
     author = "Mads Torgersen and Erik Ernst and Hansen, {Christian Plesner}",
     year = "2005",
     language = "English",
-    booktitle = "Proceedings of FOOL 12",
-    note = "The Twelth International Workshop on Foundations of Object-Oriented Languages ; Conference date: 15-01-2005",
+    journal = "FOOL 2005",
 }
 
 @inproceedings{torgersen:wildcards:2004,
@@ -542,16 +432,10 @@
     title = {Adding Wildcards to the Java Programming Language},
     year = {2004},
     isbn = {1581138121},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
     url = {https://doi.org/10.1145/967900.968162},
     doi = {10.1145/967900.968162},
     abstract = {This paper describes wildcards, a new language construct designed to increase the flexibility of object-oriented type systems with parameterized classes. Based on the notion of use-site variance, wildcards provide a type safe abstraction over different instantiations of parameterized classes, by using '?' to denote unspecified type arguments. Thus they essentially unify the distinct families of classes often introduced by parametric polymorphism. Wildcards are implemented as part of the upcoming addition of generics to the Java™ programming language, and will thus be deployed world-wide as part of the reference implementation of the Java compiler javac available from Sun Microsystems, Inc. By providing a richer type system, wildcards allow for an improved type inference scheme for polymorphic method calls. Moreover, by means of a novel notion of wildcard capture, polymorphic methods can be used to give symbolic names to unspecified types, in a manner similar to the "open" construct known from existential types. Wildcards show up in numerous places in the Java Platform APIs of the upcoming release, and some of the examples in this paper are taken from these APIs.},
-    booktitle = {Proceedings of the 2004 ACM Symposium on Applied Computing},
-    pages = {1289–1296},
-    numpages = {8},
     keywords = {parameterized types, genericity, wildcards},
-    location = {Nicosia, Cyprus},
-    series = {SAC '04}
+    journal = {SAC 2004}
 }
 

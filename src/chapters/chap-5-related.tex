@@ -187,38 +187,41 @@ semantic subtyping, and \citet{ancona:sem-sub-imp:2016} study semantic
 subtyping for imperative languages with mutable fields.
 In the case of the Julia language, %which does not have function types and is not
 %concerned with static type checking,
-the main challenge comes from interpreting the combination of
+the key challenge is the combination of
 impredicative bounded existential types and invariant type constructors.
 
 \section{Java wildcards}
 %% ======================================================================
 
 The wildcards mechanism of Java generics~\cite{torgersen:wildcards:2004}
-provides use-site variance of parametric types~\cite{thorup:unif-genericity:1999},
-which has been recognized as a restricted form of bounded existential
-types~\cite{igarashi:variance:2002}.
-For example, a variable of type \code{List<? \textbf{extends} Number>},
-which represents an existential type \code{$\exists$X<:Number.List<X>},
+provides use-site variance of parametric
+types~\cite{thorup:unif-genericity:1999}.
+For example, a variable of type \code{List<? \textbf{extends} Number>}
 can be assigned any list with the element type that is a subtype of \code{Number};
-furthermore, elements of this wildcard-typed list can be safely read at
-type \code{Number}.
+using the variable, elements of the list can be safely read at type \code{Number}.
+Use-site variance has been recognized as a restricted form of bounded existential
+types~\cite{igarashi:variance:2002}.
+Thus, the wildcard-typed list above represents an existential
+type \code{$\exists$X<:Number.List<X>}.
 There have been multiple formalizations of Java wildcards,
 such as WildFJ~\cite{torgersen:wildfj:2005} and
 TameFJ~\cite{cameron:java-wildcards:2008}, but they
 were focused on type soundness rather than a decidable subtyping algorithm.
 \citet{smith:java-type-inf:2008} found inconsistencies in Java's type inference
-and subtyping algorithm and proposed a solution using a limited form of union
-types, with a conjecture on decidability of subtyping.
+and subtyping algorithms and proposed a solution using a limited form of union
+types, with a conjecture on the decidability of subtyping.
 
-Subtyping Java wildcards is challenging.
-For example, there are multiple sources of non-termination due to wildcards
-being allowed in the inheritance hierarchy,
-as well as the presence of recursive constraints on type
-variables~\cite{tate:taming-wildcards:2011}.
-By making practical restrictions on the Java language,
-\citet{tate:taming-wildcards:2011} provide a terminating subtyping algorithm.
+Subtyping Java wildcards is challenging and, as shown
+by~\citet{grigore:java-undec:2017},
+undecidable.
 \citet{wehr:dec-bounded-exist:2009} identify multiple undecidable subtype
 relations for bounded existential types in formal models inspired by Java.
+\citet{tate:taming-wildcards:2011} highlight multiple sources of 
+non-termination in Java subtyping,
+e.g. the presence of recursive constraints on type variables
+and wildcards being allowed in the inheritance hierarchy;
+by making practical restrictions on the Java language,
+they provide a terminating subtyping algorithm.
 Julia lacks all the Java features that were linked to non-termination of
-subtyping, but supports union and existential types that are not present
+subtyping but supports union and existential types that are not present
 in Java's surface language.

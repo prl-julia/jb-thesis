@@ -4,9 +4,9 @@
 %% ======================================================================
 
 Julia is a high-level, dynamic programming language, originally designed 
-for scientific computing~\cite{TODO}.
+for scientific computing~\cite{bezanson:julia-fresh:2017}.
 It aims to solve a so-called ``two-language problem''
-by providing both good performance and productivity features~\cite{TODO}.
+by providing both good performance and productivity features~\cite{oopsla18a}.
 For performance, Julia relies on an optimizing, type-specializing JIT compiler.
 For productivity, the language provides garbage collection, dynamic typing, and
 multiple dynamic dispatch.
@@ -24,8 +24,9 @@ multiple dynamic dispatch.
 in~Julia}\label{fig:code:subtraction}
 \end{figure}
 
-\tdef{Multiple dynamic dispatch}~\cite{TODO} is the core paradigm of the Julia
-language. The dispatch mechanism allows a function, called \emph{generic
+\tdef{Multiple dynamic dispatch}~\cite{bobrow:common-loops:1986,%
+chambers:multi-cecil:1992} is at the core of the Julia language.
+The dispatch mechanism allows a function, called \emph{generic
 function}, to have multiple implementations, called \emph{methods}, that are
 tailored to different argument types. For example, \figref{fig:code:subtraction}
 shows several method definitions of function \cjl{(-)},
@@ -57,8 +58,8 @@ invariant parametric types (e.g. \cjl{Vector\{T\}}),
 and so-called union-all types, written with \cjl{where} (lines~3 and 5).
 Intuitively, a union-all type \cjl{t where T} represents a union of types
 \cjl{t[t'/T]} for all valid instantiations \cjl{t'} of the type variable \cjl{T}.
-\citet{TODO} provides a detailed
-account of Julia types and their subtyping relation, and we give a brief
+\citet{oopsla18b} provide a detailed
+account of Julia types and their subtype relation, and we give a brief
 overview of subtyping in \secref{sec:2:subtyping}.
 
 One of the key properties related to Julia types is the distinction between
@@ -222,7 +223,8 @@ while the covariant tuple \cjl{Tuple\{Int\} <: Tuple\{Signed\}}.
 
 Abstract union-all types \cjl{t where tl<:T<:tu} are better known
 in literature as \tdef{bounded existential types}, which also model
-Java wildcards~\cite{TODO}\footnote{In Julia syntax, a Java wildcard type
+Java wildcards~\cite{torgersen:wildcards:2004}\footnote{In Julia syntax, 
+a Java wildcard type
 \cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}.}.
 In what follows, we will call \cjl{t where tl<:T<:tu} an existential type;
 if lower (upper) bound on the type variable is omitted, it defaults to the
@@ -376,10 +378,10 @@ In a dynamically typed Julia, however, subtyping is used at run time---for
 dispatch resolution. Even on rare occasions, consequences of
 undecidability at run time are of greater concern than at compile time.
 That is why the decidability of subtyping was one of the explicit goals
-of the original design of the Julia language~\cite{TODO}.
+of the original design of the Julia language~\cite{bezanson:julia:2015}.
 To this end, Julia disallowed several features that were known to cause
 undecidability, such as recursive constraints on type variables and
-circularities in the inheritance hierarchy~\cite{TODO}.
+circularities in the inheritance hierarchy~\cite{tate:taming-wildcards:2011}.
 
 Despite the intentional simplifications in the type language,
 Julia subtyping is in fact \emph{undecidable}.

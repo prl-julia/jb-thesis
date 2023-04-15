@@ -103,61 +103,6 @@
 }
 
 
-%% Java subtyping
-%% ======================================================================
-
-@inproceedings{greenman:f-bound-material-shape:2014,
-    author = {Greenman, Ben and Muehlboeck, Fabian and Tate, Ross},
-    title = {Getting F-Bounded Polymorphism into Shape},
-    year = {2014},
-    isbn = {9781450327848},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    url = {https://doi.org/10.1145/2594291.2594308},
-    doi = {10.1145/2594291.2594308},
-    abstract = {We present a way to restrict recursive inheritance without sacrificing the benefits of F-bounded polymorphism. In particular, we distinguish two new concepts, materials and shapes, and demonstrate through a survey of 13.5 million lines of open-source generic-Java code that these two concepts never actually overlap in practice. With this Material-Shape Separation, we prove that even na\"{\i}ve type-checking algorithms are sound and complete, some of which address problems that were unsolvable even under the existing proposals for restricting inheritance. We illustrate how the simplicity of our design reflects the design intuitions employed by programmers and potentially enables new features coming into demand for upcoming programming languages.},
-    booktitle = {Proceedings of the 35th ACM SIGPLAN Conference on Programming Language Design and Implementation},
-    pages = {89–99},
-    numpages = {11},
-    keywords = {F-bounded polymorphism, variance, higher-kinded types, separation, joins, decidability, materials, subtyping, shapes},
-    location = {Edinburgh, United Kingdom},
-    series = {PLDI '14}
-}
-
-@InProceedings{cameron:wildcards:2008,
-    author="Cameron, Nicholas
-    and Drossopoulou, Sophia
-    and Ernst, Erik",
-    editor="Vitek, Jan",
-    title="A Model for Java with Wildcards",
-    booktitle="ECOOP 2008 -- Object-Oriented Programming",
-    year="2008",
-    publisher="Springer Berlin Heidelberg",
-    address="Berlin, Heidelberg",
-    pages="2--26",
-    abstract="Wildcards are a complex and subtle part of the Java type system, present since version 5.0. Although there have been various formalisations and partial type soundness results concerning wildcards, to the best of our knowledge, no system that includes all the key aspects of Java wildcards has been proven type sound. This paper establishes that Java wildcards are type sound. We describe a new formal model based on explicit existential types whose pack and unpack operations are handled implicitly, and prove it type sound. Moreover, we specify a translation from a subset of Java to our formal model, and discuss how several interesting aspects of the Java type system are handled.",
-    isbn="978-3-540-70592-5"
-}
-
-@inproceedings{torgesen:wildcards:2004,
-    author = {Torgersen, Mads and Hansen, Christian Plesner and Ernst, Erik and von der Ah\'{e}, Peter and Bracha, Gilad and Gafter, Neal},
-    title = {Adding Wildcards to the Java Programming Language},
-    year = {2004},
-    isbn = {1581138121},
-    publisher = {Association for Computing Machinery},
-    address = {New York, NY, USA},
-    url = {https://doi.org/10.1145/967900.968162},
-    doi = {10.1145/967900.968162},
-    abstract = {This paper describes wildcards, a new language construct designed to increase the flexibility of object-oriented type systems with parameterized classes. Based on the notion of use-site variance, wildcards provide a type safe abstraction over different instantiations of parameterized classes, by using '?' to denote unspecified type arguments. Thus they essentially unify the distinct families of classes often introduced by parametric polymorphism. Wildcards are implemented as part of the upcoming addition of generics to the Java™ programming language, and will thus be deployed world-wide as part of the reference implementation of the Java compiler javac available from Sun Microsystems, Inc. By providing a richer type system, wildcards allow for an improved type inference scheme for polymorphic method calls. Moreover, by means of a novel notion of wildcard capture, polymorphic methods can be used to give symbolic names to unspecified types, in a manner similar to the "open" construct known from existential types. Wildcards show up in numerous places in the Java Platform APIs of the upcoming release, and some of the examples in this paper are taken from these APIs.},
-    booktitle = {Proceedings of the 2004 ACM Symposium on Applied Computing},
-    pages = {1289–1296},
-    numpages = {8},
-    keywords = {wildcards, genericity, parameterized types},
-    location = {Nicosia, Cyprus},
-    series = {SAC '04}
-}
-
-
 %% Semantic Subtyping
 %% ======================================================================
 
@@ -449,35 +394,24 @@
     series = {OOPSLA '98}
 }
 
-
-%% Julia
-%% ======================================================================
-
-@InProceedings{chung:julia-sub-algo:2019,
-  author =	{Benjamin Chung and Francesco Zappa Nardelli and Jan Vitek},
-  title =	{{Julia's Efficient Algorithm for Subtyping Unions and Covariant Tuples (Pearl)}},
-  booktitle =	{33rd European Conference on Object-Oriented Programming (ECOOP 2019)},
-  pages =	{24:1--24:15},
-  series =	{Leibniz International Proceedings in Informatics (LIPIcs)},
-  ISBN =	{978-3-95977-111-5},
-  ISSN =	{1868-8969},
-  year =	{2019},
-  volume =	{134},
-  editor =	{Alastair F. Donaldson},
-  publisher =	{Schloss Dagstuhl--Leibniz-Zentrum fuer Informatik},
-  address =	{Dagstuhl, Germany},
-  URL =		{http://drops.dagstuhl.de/opus/volltexte/2019/10816},
-  URN =		{urn:nbn:de:0030-drops-108165},
-  doi =		{10.4230/LIPIcs.ECOOP.2019.24},
-  annote =	{Keywords: Type systems, Subtyping, Union types}
+@InProceedings{chambers:multi-cecil:1992,
+    author="Chambers, Craig",
+    editor="Madsen, Ole Lehrmann",
+    title="Object-oriented multi-methods in Cecil",
+    booktitle="ECOOP '92 European Conference on Object-Oriented Programming",
+    year="1992",
+    publisher="Springer Berlin Heidelberg",
+    address="Berlin, Heidelberg",
+    pages="33--56",
+    abstract="Multiple dispatching provides increased expressive power over single dispatching by guiding method lookup using the values of all arguments instead of only the receiver. However, existing languages with multiple dispatching do not encourage the data-abstraction-oriented programming style that is encouraged by traditional single-dispatching languages; instead existing multiple-dispatching languages tend to foster a function-oriented programming style organized around generic functions. We propose an alternative view of multiple dispatching that is intended to promote a data-abstraction-oriented programming style. Instead of viewing a multi-method as ``outside'' of all objects, we view a multi-method as ``inside'' the objects for which the multi-method applies (on which it dispatches). Because objects are closely connected to the multi-methods implementing their operations, the internals of an object can be encapsulated by being accessible only to the closely-connected multi-methods. We are exploring this object-oriented view of multi-methods in the context of a new programming language named Cecil.",
+    isbn="978-3-540-47268-1"
 }
 
-@phdthesis{bezanson:julia:2015,
-  author    = {Jeff Bezanson},
-  title     = {Abstraction in technical computing},
-  school    = {Massachusetts Institute of Technology},
-  year      = {2015},
-  url       = {http://hdl.handle.net/1721.1/99811}
+@inproceedings{bobrow:common-loops:1986,
+  title={CommonLoops: merging Lisp and object-oriented programming},
+  author={Daniel G. Bobrow and Kenneth M. Kahn and Gregor Kiczales and Larry Masinter and Mark Stefik and Frank Zdybel},
+  booktitle={OOPLSA '86},
+  year={1986}
 }
 
 
@@ -509,6 +443,24 @@
 
 %% Java
 %% ======================================================================
+
+@inproceedings{greenman:f-bound-material-shape:2014,
+    author = {Greenman, Ben and Muehlboeck, Fabian and Tate, Ross},
+    title = {Getting F-Bounded Polymorphism into Shape},
+    year = {2014},
+    isbn = {9781450327848},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/2594291.2594308},
+    doi = {10.1145/2594291.2594308},
+    abstract = {We present a way to restrict recursive inheritance without sacrificing the benefits of F-bounded polymorphism. In particular, we distinguish two new concepts, materials and shapes, and demonstrate through a survey of 13.5 million lines of open-source generic-Java code that these two concepts never actually overlap in practice. With this Material-Shape Separation, we prove that even na\"{\i}ve type-checking algorithms are sound and complete, some of which address problems that were unsolvable even under the existing proposals for restricting inheritance. We illustrate how the simplicity of our design reflects the design intuitions employed by programmers and potentially enables new features coming into demand for upcoming programming languages.},
+    booktitle = {Proceedings of the 35th ACM SIGPLAN Conference on Programming Language Design and Implementation},
+    pages = {89–99},
+    numpages = {11},
+    keywords = {F-bounded polymorphism, variance, higher-kinded types, separation, joins, decidability, materials, subtyping, shapes},
+    location = {Edinburgh, United Kingdom},
+    series = {PLDI '14}
+}
 
 @inproceedings{tate:taming-wildcards:2011,
     author = {Tate, Ross and Leung, Alan and Lerner, Sorin},

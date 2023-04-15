@@ -3,14 +3,14 @@
 %In this chapter, I briefly describe preliminary work
 %related to subtyping and the role of types in Julia. %run-time semantics of Julia.
 
-\paragraph{A reconstruction of Julia subtyping~\cite{TODO}.} 
+\paragraph{A reconstruction of Julia subtyping.} 
 This work is the result of a collaborative effort to provide a
 readable specification of Julia subtyping.
 Initially, an incomplete (and soon outdated) definition of subtyping existed only
-in~\cite{TODO}, with the actual implementation of subtyping ($\sim$3000 lines of
+in~\cite{bezanson:julia:2015}, with the actual implementation of subtyping ($\sim$3000 lines of
 heavily optimized C~code) being the only reference point.
 
-In~\cite{TODO}, we define subtyping in the form of a judgment
+In~\cite{oopsla18b}, we define subtyping in the form of a judgment
 \[
   \ljsub{E}{t}{t'}{E'}.
 \]
@@ -70,7 +70,7 @@ Thus, for example, types \cjl{Vector\{Union\{Int,Any\}\}} and \cjl{Vector\{Any\}
 are not equivalent according to the interpretation,
 but they are equivalent in Julia.
 
-In \cite{TODO}, I proposed and mechanized in Coq~\cite{TODO}
+In \cite{Belyakova:2019:minijl-sub}, I proposed and mechanized in Coq
 a semantic interpretation of (a subset of) Julia
 types \ty as sets of type tags \gty (i.e. concrete types) rather than values.
 For the type language of non-parametric nominal types, tuples, and unions,

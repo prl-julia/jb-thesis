@@ -36,8 +36,6 @@ In addition, Julia uses existential types
 to represent parametric method definitions,
 choosing an unusual combination of type language features.
 
-%to identify the most specific applicable method.
-
 Despite intentional simplifications in the type language,
 e.g. the lack of recursive bounds on type variables,
 subtyping in Julia is \emph{undecidable} due to %the support for
@@ -49,17 +47,12 @@ describes a vector of vectors of numeric values where inner vectors
 can have different element types.
 A~more detailed account of Julia types and subtyping
 is provided in~\chapref{chap:2}.
-% Although Julia does not have a static type system, the language of type
-% annotations is surprisingly expressive.
 
 Although relying on undecidable subtyping is not unprecedented
 for a statically typed language, e.g. Scala~\cite{hu:dot-undec:2020},
 %with an expressive type system such as
 the price of undecidability
 is higher in Julia, where it
-%here, any function call may lead to a run-time crash,
-%as undecidable subtyping is used to resolve multiple dispatch.
-%here, it %of subtyping in Julia
 can manifest at almost any point during the program execution.
 %as subtyping over a complex language of run-time types and type annotations
 %is an integral part of Julia's dynamic semantics.
@@ -95,19 +88,9 @@ e.g. the aforementioned
 \tabref{tab:julia-issues-stats} provides a few more data points for comparison:
 for example, there are 8 open/86 closed ``codegen'' bugs
 and 1 open/15 closed ``GC'' bugs.
-% For context, ``bug'' and ``codegen'' are assigned to 8 open/86 closed issues
-% out of 71 open/654 closed ``codegen'' issues.
-% In total, ``bug'' is assigned to 226 open/2644 closed issues.
 Thus, type-related concerns, including the undecidability of subtyping,
 are not purely theoretical and
 constitute a non-negligible portion of problems in the Julia implementation.
-%Overall, there are 22 open and 114 closed issues labeled with both ``bug''
-%and ``types and dispatch'' (as of December~2021). For context, ``bug'' and
-%``codegen'' are assigned to 6 open and 76 closed issues, and overall, ``bug''
-%is assigned to 213 open and 2477 closed issues.
-%This demonstrates that type-related concerns, including undecidability of
-%subtyping, are not purely theoretical: they manifest in the user code and
-%constitute a non-negligible portion of problems in the Julia implementation.
 
 \begin{table}[t]
 \caption{Statistics of issues on the Julia bug tracker: open/closed (March 2023)}\label{tab:julia-issues-stats}
@@ -122,97 +105,3 @@ bug &
   13/138 & 8/86 & 1/15 & 5/11 & 226/2664
 \end{tabular}
 \end{table}
-
-% Although Julia does not have a static type system,
-% the dispatch mechanism is built around an expressive language of types
-% and subtyping.
-% For example, Julia provides impredicative, bounded existential types,
-% which can be used to model wildcards in Java.
-% Furthermore, drawing inspiration from semantic subtyping,
-% union and existential types distribute over covariant tuple types.
-% A more detailed account of dispatch and subtyping is provided in~\chapref{chap:2}.
-% Additionally, Julia supports a special kind of existential
-% types to allow for a common use case of dispatched methods: so-called diagonal
-% rule, where an existential variable is allowed to be instantiated only with a
-% concrete type.
-
-% As it turns out, Julia substyping is actually \emph{undecidable},
-% which is a problem because it is used at run time to resolve function calls,
-% process function definitions, and even during JIT compilation.
-% Despite similarities of parts of the type language to other systems
-% such as semantic subtyping and Java wildcards, the particular combination
-% of features in Julia does not have a straightforward analogue in the literature.
-
-%In this thesis, I propose to develop
-%a \emph{decidable and practical} subtype relation for the Julia language.
-%,as outlined in~\chapref{chap:3}.
-
-%
-%\chapref{chap:4} reports preliminary results,
-%and \chapref{chap:5} describes the related work.
-
-
-% both concrete user-defined
-% types that describe values, and abstract types that can be used in method type
-% annotations to specify multiple dispatch. Dispatch is implemented using
-% subtyping in this language of types.
-% The language of types is surprisingly complex, and there is no clean
-% specification of subtyping available to Julia users. The only reference is
-% effectively the implementation of subtyping, which is written in obscure C (or
-% C++?) code and meant to be efficient. The implementation is not very readable,
-% and the reason it needs to be fast is that subtyping is used at run-time.
-% As any function call in Julia is a dynamically dispatched call, and dispatch
-% relies on subtyping, it needs to be fast.
-
-% However, even the most efficient implementation of subtyping is not enough to
-% make the language fast. Dispatched calls can hinder optimizations. Therefore,
-% Julia's JIT compiler tries to remove dispatched calls and perform further
-% optimizations. In doing so, Julia heavily relies on type inference at run-time.
-% When inferred types are precise enough to ``statically'' dispatch calls, the JIT
-% will do so. Again, this means that subtyping is used. But furthermore, the types
-% are used by the type inference algorithm to guide optimizations.
-
-% As the primary purpose of types in Julia at the surface level is to describe
-% behaviors, the language of types is an unusual one. For example, it provides
-% impredicative exsitential types with bounded quantification. Furthermore,
-% covariant tuples and unions are distributive in Julia, which is similar to
-% semantic subtyping. Additionally, Julia supports a special kind of existential
-% types to allow for a common use case of dispatched methods: so-called diagonal
-% rule, where an existential variable is allowed to be instantiated only with a
-% concrete type. Given all this, there are concerns of understandability and
-% properties of the type language and subtyping in Julia.
-
-% As the first step in understanding the language of types, we tried to reverse
-% engineer the implementation of subtyping and provide a more readable
-% specification. This work is reported in \TODO{OOPSLA 18}.
-% While we did come up with subtyping rules that describe subtyping, we found
-% several issues: for example, subtyping was not transitive. There were also
-% several bugs in the implementation of subtyping. Furthermore, we found that the
-% diagonal rule works in such a way that the meaning of a type changes depending
-% on a subtyping relation it is checked against.
-% Most importantly, subtyping turns out to be undecidable in Julia. This means
-% that in practice, the user may face with a stack overflow at run-time because
-% subtyping is used for dispatching.
-% Another problem is that the rules we provided are hard to reason about to prove
-% transitivity, for example.
-% Thus, our first goal is to develop a specification of subtyping that is
-% decidable and can be reasoned about.
-
-% The way existential types are used in Julia are reminiscent of models of Java
-% wildcards. The key difference is that Julia's existential types are
-% impredicative. Interestingly, in the hope to avoid undecidability, Julia
-% developers intentionally restricted bounded quantification to, for example,
-% forbid recursive constraints on type variables.
-% Thus, some approaches to making subtyping decidable are not applicable, e.g.
-% material-shape separation \TODO{understand and explain}.
-
-% Ideally, subtyping should also be intuitive for the users. So we explore the
-% applicability of a semantic subtyping approach to the type language. We will
-% identify a property that we call tag-based semantic subtyping, and we will
-% strive to support this property.
-
-% Because efficiency is important for Julia, and the way it is achieved is by JIT
-% compilation, we explore the role of types in the JIT compiler. It turns out that
-% the JIT heavily relies on type inference \TODO{OOPSLA 21}. Therefore, we need to
-% understand what happens with types and which operations needs to be supported on
-% types. This will be our final guiding principle.

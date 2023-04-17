@@ -1,15 +1,5 @@
 \chapter{Thesis Statement}\label{chap:3}
 
-% The main question addressed by my thesis research is:
-% \begin{quote}
-% \emph{Can Julia's type language be altered in a practical way
-% to allow for a decidable subtype relation?}
-% \end{quote}
-% Here, \emph{practical} means that most of the existing type annotations
-% in Julia programs would conform to the proposed type language.
-% The resulting relation is intended to be reflexive and transitive, as is
-% typical for a subtype relation. 
-
 Because of the undecidability of subtyping, which is an integral part of Julia's
 dynamic semantics, a Julia program can
 unexpectedly crash during the execution.
@@ -58,8 +48,6 @@ I have collaborated on reconstructing a specification of Julia subtyping
 (OOPSLA 2018~\cite{oopsla18b}),
 and defined and mechanized a set-theoretic model of a subset of Julia types
 (FTfJP 2019~\cite{Belyakova:2019:minijl-sub});
-%and collaborated on modeling Julia's type-specializing JIT compiler
-%(OOPSLA 2021~\cite{TODO}).
 more details about these efforts can be found in \chapref{chap:4}.
 I have also collaborated on modeling Julia's dynamic semantics, including
 \cjl{eval}~\cite{oopsla20a}
@@ -67,30 +55,8 @@ and the JIT compiler~\cite{oopsla21jules},
 which illuminated the role of types and subtyping
 in the language.
 
-% The main research problem I am going to focus on is
-% \tdef{decidable subtyping for the Julia language}.
-% The goal is to find a decidable subtyping specification for a type language
-% that is close enough to the one currently used in Julia
-% and is not unreasonably restrictive.
-% The latter means that the majority of types in the existing Julia packages
-% are supported by the proposed specification.
-% Furthermore, the type language should be suitable for the use in the rest of
-% the Julia compiler.
-% To tackle the problem, I will answer the following questions:
-% \begin{enumerate}
-%     \item \emph{How are types used in Julia and what operations on types
-%       need to be supported?}
-%       Clearly, types are used as type annotations in method definitions, with
-%       subtyping being part of the dispatch resolution.
-%       But beyond that, Julia is known to rely on type inference for optimizations
-%       during JIT compilation. According to \citet{TODO}, which describes the
-%       original Julia design, the type inference algorithm needs subtyping
-%       but also meet, join, and widening operators.
-%       As \cite{TODO} is generally outdated, the current state of Julia needs
-%       to be reviewed to identify what operations on types the compiler relies on.
-%     \item \emph{How complicated are types used in practice?}
-%       To make subtyping decidable, I will likely need to restrict the type
-%       language in some way. At the same time, the restriction should not be
-%       prohibitively strong for the existing code base. Thus, an analysis of types
-%       currently used in practice can provide guidance for possible restrictions.
-% \end{enumerate}
+% Because efficiency is important for Julia, and the way it is achieved is by JIT
+% compilation, we explore the role of types in the JIT compiler. It turns out that
+% the JIT heavily relies on type inference \TODO{OOPSLA 21}. Therefore, we need to
+% understand what happens with types and which operations need to be supported on
+% types. This will be our final guiding principle.

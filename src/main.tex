@@ -29,32 +29,17 @@
 % Typically, the thesis proposal should not exceed 15 pages, excluding appendices
 % and bibliography.
 
-% \section{Outline}
-
-% \begin{enumerate}
-%   \item Introduction: overview of the problem and the proposal?
-%   \item Background: brief intro to Julia and an overview of types.
-%   \item Research problems: what ids the role of types and subtyping in Julia?,
-%     can we define a reasonable restriction on types to achieve decidable but
-%     still useful subtyping relation? (With a plan to attach the problems)
-%   \item Related work: wildcards and existential types, decidability of bounded
-%     quantification, union and intersection types.
-%   \item Preliminary work: undesired properties of subtyping, confusion with
-%     diagonal types, tag-based semantic subtyping, model of Julia's JIT.
-%   \item Schedule of milestones.
-% \end{enumerate}
-
-
 \cleardoublepage
 \pagenumbering{arabic}
 
 \input{chapters/chap-1-intro.tex}
-\input{chapters/chap-3-problems.tex}
-\input{chapters/chap-2-background.tex}
+\input{chapters/chap-2-thesis.tex}
+\input{chapters/chap-3-background.tex}
 \input{chapters/chap-4-prelim.tex}
 \input{chapters/chap-5-related.tex}
 \input{chapters/chap-6-plan.tex}
 
+\addcontentsline{toc}{section}{Bibliography}
 \bibliography{bib/jv,bib/jl-lang,bib/all}
 
 \end{document}

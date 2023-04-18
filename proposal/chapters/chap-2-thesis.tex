@@ -1,0 +1,62 @@
+\chapter{Thesis Statement}\label{chap:3}
+
+Because of the undecidability of subtyping, which is an integral part of Julia's
+dynamic semantics, a Julia program can
+unexpectedly crash during the execution.
+One way to address this problem would be to use a decidable subtype relation
+in place of the existing, undecidable one.
+However, as subtyping impacts the set of valid programs and their semantics,
+this can have profound effects on user experience with the language.
+%the language expressiveness, usability, and performance.
+%Thus, not any decidable subtype relation would be worthwhile a major change in
+%the language.
+
+My thesis is:
+\begin{quotation}\emph{
+  The Julia language can be evolved to provide for decidable subtyping while
+  requiring minimal effort for migrating existing code.
+}\end{quotation}
+
+To validate the thesis, I will:
+\begin{enumerate}
+  \item design a new subtype relation based on the one currently used by Julia
+    and prove it decidable;
+  \item estimate the migration effort by conducting a static analysis of
+    registered Julia packages and suggesting code migration strategies.
+\end{enumerate}
+
+% I conjecture that the migration effort can be used to assess the impact of the
+% new subtype relation on expressiveness and usability:
+% if most of the existing code remains valid in the new language, 
+% then the impact on the expressiveness and usability is limited.
+
+An implementation of the subtype relation and understanding its impact on
+Julia's performance are beyond the scope of this thesis and
+remain future work.
+
+% Furthermore, I suggest that Julia types are given a set-theoretic interpretation,
+% with the subtype relation matching set inclusion on the interpretations.
+% Although Julia was inspired by semantic subtyping, the existing subtype relation
+% is not consistent with the semantic approach: for example, the type 
+% \cjl{Tuple\{Int, Union\{\}\}} (a covariant tuple of an integer and the bottom type)
+% is not considered a subtype of the bottom type despite the fact that there are
+% no values of type \cjl{Tuple\{Int, Union\{\}\}}.
+
+\paragraph*{Preliminary work.}
+In my thesis research so far,
+I have collaborated on reconstructing a specification of Julia subtyping
+(OOPSLA 2018~\cite{zappa-nardelli:julia-sub:oopsla:2018}),
+and defined and mechanized a set-theoretic model of a subset of Julia types
+(FTfJP 2019~\cite{belyakova:minijl-sub:ftfjp:2019});
+more details about these efforts can be found in \chapref{chap:4}.
+I have also collaborated on modeling Julia's dynamic semantics, including
+\cjl{eval}~\cite{belyakova:world-age:oopsla:2020}
+and the JIT compiler~\cite{pelenitsyn:type-stability:oopsla:2021},
+which illuminated the role of types and subtyping
+in the language.
+
+% Because efficiency is important for Julia, and the way it is achieved is by JIT
+% compilation, we explore the role of types in the JIT compiler. It turns out that
+% the JIT heavily relies on type inference \TODO{OOPSLA 21}. Therefore, we need to
+% understand what happens with types and which operations need to be supported on
+% types. This will be our final guiding principle.

@@ -1,0 +1,68 @@
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ************************************************************
+%% ==================================================
+
+%% General
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[T1]{fontenc}
+\usepackage[linedheaders=true]{classicthesis} % ,manychapters
+%\usepackage[osf]{libertine}
+\usepackage[english]{babel}
+\usepackage[margin=1.5in]{geometry} % TODO: this is temporary, for proposal
+
+%% Bibliography
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{natbib}
+%% Settings copied from the ACM style
+\bibliographystyle{style/ACM-Reference-Format}{}
+\setcitestyle{%
+    authoryear,%
+    open={[},close={]},citesep={;},%
+    aysep={},yysep={,},%
+    notesep={, },%
+}
+\let\citeN\cite
+\let\cite\citep
+%% removing extra fields for clarity
+
+%% back references in bibliography with a custom format
+%% (modified from https://tex.stackexchange.com/a/226415/54443)
+\usepackage[hyperpageref]{backref}
+\renewcommand*{\backrefalt}[4]{%
+\ifcase #1 %
+(No citations)%
+\or
+(cited on p. #2)%
+\else
+(cited on pp. #2)
+\fi
+}
+
+
+%% Style
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{style/julia}
+\usepackage{xspace}
+\usepackage{xcolor}
+
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+\usepackage{calc}
+
+%% Math
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{stmaryrd}
+\usepackage{amsmath}
+
+\usepackage{mathtools}
+
+%% CS
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{mathpartir} %% inference rules
+\usepackage[]{algorithm2e} %% algorithms

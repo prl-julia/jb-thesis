@@ -1,0 +1,116 @@
+\chapter{Proposed work}\label{chap:6}
+
+\paragraph*{Decidable subtyping.}
+I will show that
+the decidability of subtyping can be achieved
+for a type language similar to the one currently used by Julia,
+with additional restrictions on existential types.
+The restricted grammar of types is shown
+in~\figref{fig:restricted-type-grammar}.
+The key idea is to distinguish between more expressive \tysig and
+less expressive \ty, with invariant parametric types $\iname\{\ldots\}$
+being allowed to have only \ty as type arguments. In particular:
+\begin{itemize}
+  \item type signature \tysig, meant to represent method type signatures, is
+  allowed to have a more expressive, Julia-style form of existential types where
+  bound type variables can have multiple occurrences anywhere in the signature;
+  to encode the diagonal rule, existential variables can be declared concrete
+  (when kind $k$ is $c$), meaning that they can be instantiated only with
+  concrete types;
+  \item type \ty, meant to represent data, is allowed to have only a limited,
+  Java wildcards-style form of existential types where type variables
+  occur exactly once in an invariant position and are bound immediately outside
+  the invariant costructor; namely, \tyinv{\iname}{\ty_l<:<\ty_u} represents
+  an existential type \tyexist{X}{\ty_l}{\ty_u}{\tyinv{\iname}{\tyvar{X}}}.
+\end{itemize}
+In addition to being decidable, the proposed subtype relation
+is intended to be reflexive and transitive,
+as is typical for such a relation. Furthermore,
+building on the indexed, tag-based interpretation of types, I will extend
+it to account for type variables, and explore the relationship between
+the extended model and the decidable, syntactic subtype relation.
+
+%with the subtype relation matching set inclusion on the interpretations.
+% Although Julia was inspired by semantic subtyping, the existing subtype relation
+% is not consistent with the semantic approach: for example, the type 
+% \cjl{Tuple\{Int, Union\{\}\}} (a covariant tuple of an integer and the bottom type)
+% is not considered a subtype of the bottom type despite the fact that there are
+% no values of type \cjl{Tuple\{Int, Union\{\}\}}.
+% This inconsistency will be addressed in the subtype relation proposed
+% in the thesis.
+
+\begin{figure}[t]
+\small
+\[
+\begin{array}{rcll}
+  \tysig & ::= &
+    \tybot \Alt \tyany \Alt
+    \typair{\tysig}{\tysig} \Alt \tyunion{\tysig}{\tysig} \Alt
+    \tyinv{\iname}{v,\ldots} \Alt
+    \tyexist{\overset{k}{X}}{\ty}{\ty}{\tysig} \Alt \tyvar{X}
+    & \text{type signature} \\
+  \ty & ::= & 
+    \tybot \Alt \tyany \Alt
+    \typair{\ty}{\ty} \Alt \tyunion{\ty}{\ty} \Alt
+    \tyinv{\iname}{v,\ldots} \Alt \tyvar{X}
+    & \text{type} \\
+  v & ::= &
+    \ty<:<\ty
+    & \text{restricted existential variable} \\
+  k & ::= & a \Alt c & \text{variable kind (any | concrete)}
+\end{array}
+\]
+\caption{Restricted grammar of Julia types}\label{fig:restricted-type-grammar}
+\end{figure}
+
+\paragraph*{Evaluation of migration effort.}
+To evaluate the effort required for migrating existing code to a language
+with the new subtype relation, I will conduct a static analysis of type
+annotations in the official registry of Julia packages
+(about 9000 packages as of March 2023).
+In addition, I will manually inspect a random sample of packages containing
+type annotations that do not conform to the new type language
+and propose possible migration strategies.
+Thus, for example, \cjl{Vector\{Dict\{T,T\} where T\}} (a vector
+of dictionaries where keys and values are of the same type) is not expressible
+under the restriction due to multiple occurrences of \cjl{T}.
+Such a type can be replaced with a more permissive
+\cjl{Vector\{Dict\{<:Any,<:Any\}\}}, which is a shorthand for
+\cjl{Vector\{Dict\{K,V\} where K where V\}}. Then, the equality between
+the types of keys and values can be checked at run time for each dictionary
+in the vector.
+As a second example, consider \cjl{Vector\{Vector\{Union\{T, Int\}\} where T\}},
+which is not expressible due to \cjl{T} not being an immediate argument of
+the inner \cjl{Vector}. Under Julia's subtyping, this type is equivalent
+to \cjl{Vector\{Vector\{>:Int\}\}} (a shorthand for
+\cjl{Vector\{Vector\{T\} where T>:Int\}}),
+which is expressible in the new system.
+
+\paragraph*{Paper submission.}
+I intend to submit a POPL 2024 paper on the formalization and evaluation of
+the decidable subtype relation.
+
+\paragraph*{Schedule.}
+I am currently working on proving the decidability, reflexivity,
+and transitivity of the new subtype relation,
+and intend to complete proofs in May 2023.
+After that, I will perform the evaluation
+and study an extension of the tag-based semantic interpretation
+for types with type variables.
+I will concurrently work on writing the thesis and the POPL 2024 paper
+throughout May and June, and will finish the thesis in July.
+
+\begin{table}[h]
+  \caption{Schedule}
+  \vspace*{0.25em}
+  \centering\footnotesize
+  \begin{tabular}{c|ccccc}
+  \toprule
+  & May & June & July & August \\
+  \midrule
+  proofs \& evaluation & X & X & & \\
+  paper & X & X & & \\
+  thesis & X & X & X & \\
+  defense & & & & X \\
+\end{tabular}
+\end{table}

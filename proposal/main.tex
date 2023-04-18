@@ -1,0 +1,45 @@
+\RequirePackage{silence} % :-\
+  \WarningFilter{scrreprt}{Usage of package `titlesec'}
+  \WarningFilter{titlesec}{Non standard sectioning command}
+\documentclass[11pt,
+  footinclude,headinclude,
+  abstract=on
+]{scrreprt}
+%paper=b5
+
+\input{preamble.tex}
+\input{macros.tex}
+
+\pagenumbering{roman}
+
+\begin{document}
+
+\input{metainfo.tex}
+
+\tableofcontents
+
+%% ======================================================================
+%% *********************************************************
+
+% \section*{Proposal requirements}
+
+% The thesis proposal should include the relevant background materials from
+% literature and clearly specify the research problems to be attacked, the
+% techniques to be used, and a schedule of milestones towards completion.
+% Typically, the thesis proposal should not exceed 15 pages, excluding appendices
+% and bibliography.
+
+\cleardoublepage
+\pagenumbering{arabic}
+
+\input{chapters/chap-1-intro.tex}
+\input{chapters/chap-2-thesis.tex}
+\input{chapters/chap-3-background.tex}
+\input{chapters/chap-4-prelim.tex}
+\input{chapters/chap-5-related.tex}
+\input{chapters/chap-6-plan.tex}
+
+\addcontentsline{toc}{section}{Bibliography}
+\bibliography{bib/non-jb,bib/jb}
+
+\end{document}

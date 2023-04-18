@@ -1,0 +1,269 @@
+%% General
+%% ======================================================================
+
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+
+\newcommand{\figref}[1]{Fig.~\ref{#1}\xspace}
+\newcommand{\tabref}[1]{Tab.~\ref{#1}\xspace}
+\newcommand{\lemref}[1]{Lem.~\ref{#1}\xspace}
+\newcommand{\thmref}[1]{Thm.~\ref{#1}\xspace}
+\newcommand{\ruleref}[1]{Rule~{\small #1}\xspace}
+\newcommand{\defref}[1]{Def.~\ref{#1}\xspace}
+\newcommand{\secref}[1]{Section~\ref{#1}\xspace}
+\newcommand{\chapref}[1]{Chapter~\ref{#1}\xspace}
+\newcommand{\appref}[1]{Appendix~\ref{#1}\xspace}
+
+\newcommand{\tdef}[1]{\textbf{#1}}
+
+\newcommand{\CSharp}{C\texttt{\small\#}\xspace}
+\newcommand{\FSub}{$F_{<:}$\xspace}
+\newcommand{\FSubN}{$F^N_{\leq}$\xspace}
+\newcommand{\DSub}{$D_{<:}$\xspace}
+\newcommand{\WyvCore}{$Wyv_{core}$\xspace}
+\newcommand{\WyvSelf}{$Wyv_{self}$\xspace}
+\newcommand{\WyvFix}{$Wyv_{fix}$\xspace}
+\newcommand{\FSubR}{$F^R_{<:}$\xspace}
+
+%% for wide figures:
+%% http://16marzo.blogspot.com/2009/09/figure-e-margini-in-classicthesis.html
+\newlength\largefigure
+\setlength{\largefigure}{\columnwidth+\marginparsep+\marginparwidth}
+
+\definecolor{light-gray}{gray}{0.85}
+
+\newcommand{\cfbox}[2]{%
+    \colorlet{currentcolor}{.}%
+    {\color{#1}%
+    \fbox{\color{currentcolor}#2}}%
+}
+
+%% Code
+%% *********************************************************
+
+\newcommand{\code}[1]{\texttt{\small#1}\xspace}
+\newcommand{\cjl}[1]{\lstinline[language=Julia]!#1!\xspace}
+
+\lstnewenvironment{julia}
+    {\lstset{language=Julia,numbers=left,}}
+    {}
+\newenvironment{codeenvd}
+    {
+    \begin{center}
+    \begin{minipage}{8cm}
+    }
+    {
+    \end{minipage}
+    \end{center}
+    }
+
+%% Math
+%% *********************************************************
+
+%% make sure we are in math mode
+\newcommand{\EM}[1]{\ensuremath{#1}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\newcommand{\interp}[1]{\EM{\llbracket #1 \rrbracket}}
+
+%% Formalization
+%% ======================================================================
+
+%% Metavariables
+%% *********************************************************
+
+\newcommand{\tysig}{\EM{\psi}}              %% type signature
+
+\newcommand{\ty}{\EM{\tau}}                 %% type annotation τ
+\newcommand{\gty}{\EM{\sigma}}              %% type tag σ
+
+\newcommand{\nsty}{\EM{\phi}}               %% normalized simple type φ
+%% normalized existential type
+\newcommand{\nety}{\EM{\xi}}
+%\newcommand{\nety}{\EM{\prescript{\exists}{}{\phi}}}        %% ∃φ
+%% normalized union-existential type
+\newcommand{\nuty}{\EM{\omega}}
+%\newcommand{\nuty}{\EM{\prescript{}{\cup\exists}{\phi}}}    %% ∪∃φ       
+
+
+\newcommand{\cname}{\EM{\mathit{cname}}}
+\newcommand{\aname}{\EM{\mathit{aname}}}
+%\newcommand{\iname}{\EM{\mathit{name}}}
+\newcommand{\iname}{\EM{\mathit{N}}}
+
+\newcommand{\VEnv}{\EM{\mathrm{V}}}     %% simple variable environment V
+\newcommand{\AEnv}{\EM{\Gamma}}         %% forall-variable environment Γ
+\newcommand{\EEnv}{\EM{\mathbf\Delta}}         %% exist-variable environment Δ
+                                        %% (unification variables)
+\newcommand{\EmptyEnv}{\EM{\cdot}}
+
+\newcommand{\CSet}{\EM{\mathcal{C}}}    %% set of subtype constraints
+\newcommand{\EmptySet}{\EM{\varnothing}}    %% empty set of constraints
+
+%% Style
+%% *********************************************************
+
+\newcommand{\tyname}[1]{\EM{\mathsf{#1}}}       %% type name (like Int)
+\newcommand{\var}[1]{\EM{\mathrm{#1}}}          %% type variable
+\newcommand{\unvar}[1]{\EM{\mathbf{#1}}}        %% unification variable
+
+%% overline for list
+\newcommand{\ol}[1]{\EM{\overline{#1}}}
+
+%% set
+\newcommand{\cset}[1]{\EM{\{#1\}}}
+
+%% side condition
+\newcommand{\sidecond}[1]{\EM{\scriptstyle #1}}
+
+%% inference rule names
+\newcommand{\SR}[1]{\textsc{S-#1}}
+\newcommand{\ER}[1]{\textsc{E-#1}}
+
+%% Symbols
+%% *********************************************************
+
+\newcommand{\Alt}{~\vert~}                      %% |
+
+\newcommand{\symsub}{\EM{<:}}                   %% <:
+\newcommand{\symeq}{\EM{\approx}}               %% ==
+%\newcommand{\vdashfr}{\EM{\vdash\!\!{\circ}}}   %% |-o
+\newcommand{\vdashfr}{\EM{\Vdash}}   %% ||-
+
+%% Type Constructors
+%% *********************************************************
+
+%\newcommand{\tyany}{\tyname{Any}}               %% Any
+%\newcommand{\tybot}{\tyname{Bot}}               %% Bot
+\newcommand{\tyany}{\EM{\top}}                    %% Any
+\newcommand{\tybot}{\EM{\bot}}               %% Bot
+
+
+\newcommand{\typair}[2]{\EM{#1 \times #2}}      %% t1 × t2
+\newcommand{\tyunion}[2]{\EM{#1 \cup #2}}       %% t1 ∪ t2
+
+\newcommand{\tyinv}[2]{\EM{#1\{#2\}}}           %% t1{...}
+
+%\newcommand{\tybound}[3]{\EM{\tyvar{#1}\!\in\!({#2},{#3})}} %% X \in (tl,tu)
+\newcommand{\varbound}[3]{\EM{#2\!\symsub\!#1\!\symsub\!#3}} %% tl<:X<:tu
+\newcommand{\tybound}[3]{\varbound{\tyvar{#1}}{#2}{#3}} %% tl<:X<:tu
+\newcommand{\tyboundu}[2]{\EM{\tyvar{#1}\!\symsub\!#2}}     %% X<:tu
+\newcommand{\gtybound}[2]{\EM{\gtyvar{#1}\!\symsub\!#2}}    %% X<:tu
+%\newcommand{\untybound}[3]{\EM{\tyvar{\unvar{#1}}\!\in\!({#2},{#3})}} %% Q \in
+%(tl,tu)
+\newcommand{\untybound}[3]{\EM{#2\!\symsub\!\tyvar{\unvar{#1}}\!\symsub\!#3}} %% tl<:Q<:tu
+\newcommand{\ungtybound}[2]{\EM{\gtyvar{\unvar{#1}}\!\symsub\!#2}}    %% Q<:tu
+
+%% regular existential type with all bounds ∃tX_lb^ub.t
+\newcommand{\tyexist}[4]{\EM{\exists\tybound{#1}{#2}{#3}.#4}}
+%% concrete existential type withh all bounds ∃gX^ub.t
+\newcommand{\gtyexist}[3]{\EM{\exists\gtybound{#1}{#2}.#3}}
+%% regular existential type with only upper bound ∃tX^ub.t
+\newcommand{\tyexistu}[3]{\EM{\exists\tyboundu{#1}{#2}.#3}}
+%% regular existential type with no bounds ∃tX.t
+\newcommand{\tyexistnb}[2]{\EM{\exists\tyvar{#1}.#2}}
+%% concrete existential type with no bounds ∃gX.t
+\newcommand{\gtyexistnb}[2]{\EM{\exists\gtyvar{#1}.#2}}
+%% simple existential type with no bounds ∃X.t (variable kind is not specified)
+\newcommand{\styexist}[2]{\EM{\exists\var{#1}.#2}}
+
+%% lists of types
+\newcommand{\tys}{\EM{\ol{\ty}}}
+\newcommand{\gtys}{\EM{\ol{\gty}}}
+\newcommand{\nutys}{\EM{\ol{\nuty}}}
+
+%% closed types
+\newcommand{\closed}[1]{\EM{\dot{#1}}}
+\newcommand{\cty}{\closed{\ty}}
+\newcommand{\cgty}{\closed{\gty}}
+\newcommand{\cnuty}{\closed{\nuty}}
+
+%\newcommand{\tyvar}[1]{\var{\prescript{\circ}{}{#1}}}     %% type variable
+\newcommand{\tyvar}[1]{\var{#1}}     %% type variable
+\newcommand{\gtyvar}[1]{\var{\prescript{\bullet}{}{#1}}}   %% concrete type variable
+\newcommand{\avar}[1]{\var{\prescript{?}{}{#1}}}        %% any type variable
+
+%% constraints
+\newcommand{\subctr}[2]{\EM{#1 \leq #2}}
+\newcommand{\eqctr}[2]{\EM{#1 = #2}}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Type Examples
+
+\newcommand{\tyint}{\tyname{Int}}
+\newcommand{\tyflt}{\tyname{Flt}}
+\newcommand{\tystr}{\tyname{Str}}
+
+\newcommand{\nref}{\tyname{Ref}}
+\newcommand{\ninvpair}{\tyname{Pair}}
+
+\newcommand{\vx}{\var{X}}
+\newcommand{\vy}{\var{Y}}
+
+\newcommand{\tvx}{\tyvar{X}}
+\newcommand{\tvy}{\tyvar{Y}}
+
+\newcommand{\gvx}{\gtyvar{X}}
+\newcommand{\gvy}{\gtyvar{Y}}
+
+\newcommand{\avx}{\avar{X}}
+\newcommand{\avy}{\avar{Y}}
+
+\newcommand{\uavq}{\avar{\unvar{Q}}}
+\newcommand{\utvq}{\tyvar{\unvar{Q}}}
+\newcommand{\ugvq}{\gtyvar{\unvar{Q}}}
+
+%% Meta functions
+%% *********************************************************
+
+\DeclareMathOperator{\fvop}{\mathit{FV}}
+\DeclareMathOperator{\domop}{\mathit{dom}}
+
+\DeclareMathOperator{\ubop}{\mathit{ub}}    %% upper bound
+\DeclareMathOperator{\lbop}{\mathit{lb}}    %% lower bound
+
+\DeclareMathOperator{\normop}{\mathsf{Norm}}
+\DeclareMathOperator{\solvecop}{\mathbf{Solve}}
+
+\newcommand{\fv}[1]{\EM{\fvop(#1)}}
+\newcommand{\dom}[1]{\EM{\domop(#1)}}
+
+\newcommand{\ub}[2]{\EM{\ubop(#1, #2)}}
+\newcommand{\ubd}[1]{\ub{\AEnv}{#1}}
+\newcommand{\lb}[2]{\EM{\lbop(#1, #2)}}
+\newcommand{\lbd}[1]{\lb{\AEnv}{#1}}
+
+\newcommand{\norm}[1]{\EM{\normop(#1)}}
+
+\newcommand{\solvec}[4]{\EM{\solvecop(#1,#2,#3,#4)}}
+\newcommand{\solvecd}[1]{\solvec{\AEnv}{\EEnv}{\CSet}{#1}}
+
+%% Relations
+%% *********************************************************
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Well scopedness
+
+\newcommand{\wlscp}[2]{\EM{#1 \vdash #2}}                %% well scoped
+\newcommand{\wlscpd}[1]{\wlscp{\VEnv}{#1}}
+\newcommand{\wlfrscp}[2]{\EM{#1~\vdashfr~#2}}   %% well scoped with fresh scope
+\newcommand{\wlfrscpd}[1]{\wlfrscp{\VEnv}{#1}}
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Subtyping
+
+%% Constrained subtyping Γ;Δ |- t1 <: t2 -| C
+\newcommand{\subtyc}[5]{\EM{#1 ; #2 \vdash\ #3\ \symsub\ #4\ \dashv #5}}
+\newcommand{\subtycd}[3]{\subtyc{\AEnv}{\EEnv}{#1}{#2}{#3}}
+%% Subtyping Γ |- t1 <: t2
+\newcommand{\subty}[3]{\EM{#1 \vdash #2 \symsub #3}}
+\newcommand{\subtyd}[2]{\subty{\AEnv}{#1}{#2}}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equality
+
+\newcommand{\equalc}[5]{\EM{#1 ; #2 \,\vdashfr\ #3\ \symeq\ #4\ \dashv #5}}
+\newcommand{\equalcd}[3]{\equalc{\AEnv}{\EEnv}{#1}{#2}{#3}}
+
+%% Lambda-Julia
+%% *********************************************************
+
+\newcommand{\ljsub}[4]{\EM{#1 \vdash #2 <: #3 \vdash #4}}

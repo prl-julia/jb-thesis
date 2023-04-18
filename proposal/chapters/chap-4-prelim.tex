@@ -1,0 +1,131 @@
+\chapter{Preliminary work}\label{chap:4}
+
+%In this chapter, I briefly describe preliminary work
+%related to subtyping and the role of types in Julia. %run-time semantics of Julia.
+
+\paragraph{A reconstruction of Julia subtyping.} 
+This work is the result of a collaborative effort to provide a
+readable specification of Julia subtyping.
+Initially, an incomplete (and soon outdated) definition of subtyping existed only
+in~\cite{bezanson:julia:2015}, with the actual implementation of subtyping ($\sim$3000 lines of
+heavily optimized C~code) being the only reference point.
+
+In~\cite{zappa-nardelli:julia-sub:oopsla:2018}, we define subtyping in the form of a judgment
+\[
+  \ljsub{E}{t}{t'}{E'}.
+\]
+Here, $E$ is a type variable environment that contains two kinds of variables,
+forall (also called left) and exist (also called right).
+A forall variable is added to the environment
+when an existential type appears on the left of the subtyping judgment,
+as in \cjl{(Vector\{X\} where X) <: t'}. Such variables never change in the
+environment, which corresponds to the intuition that for a left-hand side
+existential type,
+subtyping should hold for all possible instantiations of the type variable.
+However, when an existential type appears on the right,
+as in \cjl{t <: Vector\{Q\} where Q}, the variable is
+added as an exist variable. During subtype checking, such variables may accrue
+subtype constraints in addition to their declared bounds; if all the constraints
+are consistent, subtyping succeeds, which corresponds to the intuition that
+for a right-hand side existential type, subtyping holds
+if there exists a valid instantiation of the type variable. 
+%Constraints on possible instantiations take the form of updated
+%variable bounds, and these updates produce the environment~$E'$.
+Exist-variables with updated bounds are recorded in the output environment~$E'$.
+For example, if \cjl{Q} is an exist variable with bounds
+\cjl{Union\{\}<:Q<:Any}, then
+\[
+  \ljsub{\mathtt{Q}_\text{\cjl{Union\{\}}}^\text{\cjl{Any}}}
+    {\text{\cjl{Int}}}{\mathtt{Q}}
+    {\mathtt{Q}_\text{\cjl{Int}}^\text{\cjl{Any}}},
+\]
+i.e., \cjl{Int<:Q} results in updating \cjl{Q} to \cjl{Int<:Q<:Any}.
+
+Having reconstructed the specification of Julia subtyping,
+we were able to identify its undecidability. Furthermore, this work highlighted
+several other problems, e.g. the lack of transitivity,
+which I plan to address in the thesis.
+%For example, the diagonal rule (discussed in \secref{sec:2:subtyping})
+%is applied not to an isolated type, but based on the subtyping check with
+%another type. As a result, the same existential type may be constrained to
+%a concrete type variable in one subtyping judgment but not the other.
+%This makes it hard, if not impossible, to reason about properties of subtyping
+%such as reflexivity and transitivity.
+
+\paragraph{Tag-based semantic subtyping for non-existential types.}
+Julia's subtype relation was inspired by semantic subtyping.
+The description of the original Julia design~\cite{bezanson:julia:2015}
+suggested an intuitive interpretation of types as sets of values,
+but the interpretation is not well defined.
+Furthermore, the treatment of invariant parametric types
+in the interpretation does not match
+the subtype relation. In particular, for concrete nominal \cjl{Name},
+\[
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}} =
+  \{ x\ |\ \text{\cjl{typeof}}(x) = \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}   
+\]
+does not account for the fact that there are multiple syntactic
+representations $\ty'$ corresponding to the same interpretation as \ty.
+Thus, for example, types \cjl{Vector\{Union\{Int,Any\}\}} and \cjl{Vector\{Any\}}
+are not equivalent according to the interpretation,
+but they are equivalent in Julia.
+
+In \cite{belyakova:minijl-sub:ftfjp:2019}, I proposed and mechanized in Coq
+a semantic interpretation of (a subset of) Julia
+types \ty as sets of type tags \gty (i.e. concrete types) rather than values.
+For the type language of non-parametric nominal types, tuples, and unions,
+a decidable syntactic subtyping based on disjunctive normal form
+coincides with the set inclusion of interpretations
+$\interp{\ty} \subseteq \interp{\ty'}$.
+% While the treatment of tuples and unions is completely standard, nominal types
+% are not as straightforward: interpreting an abstract type as a set of
+% its concrete subtypes (e.g. $\interp{\text{\cjl{Signed}}} =
+% \{\text{\cjl{Int8, Int16, ..., Int128}}\}$) would lead to brittle programs.
+% Namely, because subtyping is used at run time to process method definitions and 
+% dynamic dispatch, defining a new concrete subtype of an abstract type would
+% change the subtyping relation and
+% could cause the existing code to execute differently.
+%It is worth emphasizing that Julia subtyping contradicts the set-theoretic
+%interpretation in its treatment of the bottom type \cjl{Union\{\}}.
+%Semantically, both \cjl{Union\{\}} and \cjl{Tuple\{Union\{\}\}} represent the
+%empty set and are thus equivalent. However, in Julia,
+%\cjl{Tuple\{Union\{\}\}} is not a subtype of \cjl{Union\{\}}.
+
+Following up on this work, I extended the interpretation to support
+invariant type constructors such as \cjl{Vector\{...\}}.
+To account for the issue of multiple syntactic representations of types,
+in the new system, types are given an indexed interpretation $\interp{\cdot}_n$.
+In particular, a concrete type constructor \cjl{Name\{...\}} is interpreted as
+\[
+\begin{array}{lcl}
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}}_{n+1} & = &
+  \{ \text{\cjl{Name\{}}\ty'\text{\cjl{\}}}
+  \ |\ \interp{\ty'}_n = \interp{\ty}_n \}    \\
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}}_{0} & = &
+  \{ \text{\cjl{Name\{}}\ty'\text{\cjl{\}}} \},
+\end{array}
+\]
+and subtyping is defined as
+\[
+  \ty <: \ty' \quad \equiv \quad
+  \forall n.\ \interp{\ty}_n \subseteq \interp{\ty'}_n.
+\]
+Despite the more complex indexed interpretation, the subtype relation has
+an equivalent, decidable syntactic definition $\ty \leq \ty'$ where
+$\text{\cjl{Name\{}}\ty\text{\cjl{\}}} \leq
+\text{\cjl{Name\{}}\ty'\text{\cjl{\}}}$
+holds if $\ty \leq \ty'$ and $\ty' \leq \ty$.
+This extension is also mechanized in Coq.
+
+% \paragraph{A model of Julia's JIT~\cite{TODO}.}
+% Using an abstract machine modeled after Julia's JIT compiler, this work formally
+% defines the property of a method definition that impacts the ability of
+% the compiler to optimize the code: the property is called type stability.
+% Although type stability is not directly related to the topic of this thesis
+% proposal, having defined a model of the JIT compiler, I found that
+% (1)~the correctness of JIT compilation depends on the soundness of type
+% inference, and (2)~concrete types and the ability of type inference to infer
+% concrete types of expressions are conducive to optimizations.
+% These observations emphasize that despite Julia being a dynamic language,
+% subtyping and the type language are an integral part of the compiler
+% and Julia's performance.

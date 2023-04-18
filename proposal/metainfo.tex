@@ -1,0 +1,42 @@
+\title{Decidable Subtyping\\for the Julia Language}
+\subtitle{Thesis Proposal}
+
+\author{Julia Belyakova}
+
+\date{\normalsize%
+Northeastern University\\
+Khoury College of Computer Sciences\\
+Boston, Massachusetts, USA\\
+April 2023
+}
+
+\maketitle
+
+
+\begin{abstract}
+
+Julia is a dynamic, high-level, yet high-performance programming language
+for scientific computing.
+To encourage a high level of code reuse and extensibility, Julia is
+designed around symmetric multiple dynamic dispatch, which allows functions
+to have multiple implementations tailored to different argument types.
+To resolve multiple dispatch, Julia relies on a subtype relation over a complex
+language of run-time types and type annotations, which include parametric types,
+untagged unions that distribute over covariant tuples, and impredicative
+existential types.
+Notably, Julia's subtyping is undecidable.
+Unlike in statically typed languages
+with undecidable subtyping, e.g. Scala, where the undecidability manifests at
+compile time, in Julia, it leads to a run-time stack overflow error. 
+This can happen
+at almost any point during the program execution, as subtyping is used to
+resolve every function call.
+In this thesis, I propose to develop a decidable subtype relation
+for the Julia language,
+such that migrating existing code would require minimal effort.
+In particular, to provide for decidability, I will restrict the language of type
+annotations. To evaluate the migration effort, I will check whether
+type annotations used in registered Julia packages conform to the proposed
+restriction.
+
+\end{abstract}

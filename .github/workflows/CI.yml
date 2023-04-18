@@ -16,18 +16,16 @@ jobs:
       FILE: main
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Install TeXlive
-        run: | 
-          sudo apt update
-          sudo apt-get install texlive texlive-publishers texlive-science texlive-fonts-extra latexmk cm-super
-      - name: LaTeX compile
-        working-directory: ${{ env.DIR }}
-        run: latexmk -pdf -bibtex ${{ env.FILE }}
+        uses: actions/checkout@v3
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: ${{ env.DIR }}/${{ env.FILE }}.tex
+          work_in_root_file_dir: true
       - name: move
         run: mkdir -p github_artifacts && mv ${{ env.DIR }}/${{ env.FILE }}.pdf ./github_artifacts/
       - name: Upload pdf as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.FILE }}.pdf
           path: ./github_artifacts
@@ -37,8 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           path: github_artifacts
       - name: move

@@ -1,0 +1,91 @@
+@string{PACMPL = {Proc. ACM Program. Lang.}}
+
+@article{pelenitsyn:type-stability:oopsla:2021,
+  author = {Pelenitsyn, Artem and Belyakova, Julia and Chung, Benjamin and Tate, Ross and Vitek, Jan},
+  title = {Type Stability in Julia: Avoiding Performance Pathologies in JIT Compilation},
+  year = {2021},
+  volume = {5},
+  number = {OOPSLA},
+  url = {https://doi.org/10.1145/3485527},
+  doi = {10.1145/3485527},
+  abstract = {As a scientific programming language, Julia strives for performance but also provides high-level productivity features. To avoid performance pathologies, Julia users are expected to adhere to a coding discipline that enables so-called type stability. Informally, a function is type stable if the type of the output depends only on the types of the inputs, not their values. This paper provides a formal definition of type stability as well as a stronger property of type groundedness, shows that groundedness enables compiler optimizations, and proves the compiler correct. We also perform a corpus analysis to uncover how these type-related properties manifest in practice.},
+  journal = PACMPL,
+  month = {Oct},
+  articleno = {150},
+  keywords = {type inference, dynamic languages, method dispatch, compilation}
+}
+% issue_date = {October 2021},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% numpages = {26},
+
+@misc{pelenitsyn:type-stability:oopsla:2021:arx,
+      title={Type Stability in Julia: Avoiding Performance Pathologies in JIT Compilation (Extended Version)}, 
+      author={Artem Pelenitsyn and Julia Belyakova and Benjamin Chung and Ross Tate and Jan Vitek},
+      year={2021},
+      eprint={TODO},
+      archivePrefix={arXiv}
+}
+
+@article{belyakova:world-age:oopsla:2020, 
+  author = {Belyakova, Julia and Chung, Benjamin and Gelinas, Jack and Nash, Jameson and Tate, Ross and Vitek, Jan},
+  title = {World Age in Julia: Optimizing Method Dispatch in the Presence of Eval},
+  year = {2020},
+  volume = {4},
+  number = {OOPSLA},
+  url = {https://doi.org/10.1145/3428275},
+  doi = {10.1145/3428275},
+  journal = PACMPL,
+  keywords = {method dispatch, eval, compilation, dynamic languages}
+}
+% issue_date = {November 2020},
+% month = {Nov},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% numpages = {26},
+% articleno = {207},
+
+@inproceedings{belyakova:minijl-sub:ftfjp:2019,
+  author = {Belyakova, Julia},
+  title = {Decidable Tag-based Semantic Subtyping for Nominal Types, Tuples, and Unions},
+  booktitle={Workshop on Formal Techniques for Java-like Programs},
+  series = {FTfJP 2019},
+  articleno = {3},
+  year = {2019},
+  isbn = {978-1-4503-6864-3},
+  url = {http://doi.acm.org/10.1145/3340672.3341115},
+  doi = {10.1145/3340672.3341115},
+  acmid = {3341115},
+  abstract = {Semantic subtyping enables simple, set-theoretical reasoning about types by interpreting a type as the set of its values. Previously, semantic subtyping has been studied primarily in the context of statically typed languages with structural typing. In this paper, we explore the applicability of semantic subtyping in the context of a dynamic language with nominal types. Instead of static type checking, dynamic languages rely on run-time checking of type tags associated with values, so we propose using the tags for semantic subtyping. We base our work on a fragment of the Julia language and present tag-based semantic subtyping for nominal types, tuples, and unions, where types are interpreted set-theoretically as sets of type tags. The proposed subtyping relation is shown to be decidable, and a corresponding analytic definition is provided. The implications of using semantic subtyping for multiple dispatch are also discussed.},
+  keywords = {decidability, distributivity, multiple dispatch, nominal typing, semantic subtyping, type tags},
+} 
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% booktitle = {Proceedings of the 21st Workshop on Formal Techniques for Java-like Programs},
+% numpages = {11},
+% location = {London, United Kingdom},
+% series = {FTfJP '19}
+
+@article{zappa-nardelli:julia-sub:oopsla:2018,
+  author = {Francesco {Zappa Nardelli} and
+            Julia Belyakova and  Artem Pelenitsyn
+           and  Benjamin Chung and Jeff Bezanson and Jan Vitek},
+  title = "Julia Subtyping: A Rational Reconstruction",
+  journal = PACMPL,
+  series = {{OOPSLA}},
+  year =  2018,
+  volume = {2},
+  number = {OOPSLA},
+  url = {https://doi.org/10.1145/3276483},
+  doi = {10.1145/3276483},
+  abstract = {Programming languages that support multiple dispatch rely on an expressive notion of subtyping to specify method applicability. In these languages, type annotations on method declarations are used to select, out of a potentially large set of methods, the one that is most appropriate for a particular tuple of arguments. Julia is a language for scientific computing built around multiple dispatch and an expressive subtyping relation. This paper provides the first formal definition of Julia's subtype relation and motivates its design. We validate our specification empirically with an implementation of our definition that we compare against the existing Julia implementation on a collection of real-world programs. Our subtype implementation differs on 122 subtype tests out of 6,014,476. The first 120 differences are due to a bug in Julia that was fixed once reported; the remaining 2 are under discussion.},
+  month = {Oct},
+  articleno = {113},
+  keywords = {Multiple Dispatch, Subtyping},
+  doi = {10.1145/3276483}
+}
+% issue_date = {November 2018},
+% publisher = {Association for Computing Machinery},
+% address = {New York, NY, USA},
+% numpages = {27},
+

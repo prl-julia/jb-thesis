@@ -5,7 +5,7 @@ language~\cite{bezanson:julia-fresh:2017},
 originally designed for scientific computing.
 Julia aims to solve the two-language problem, combining the convenience of
 productivity languages such as Python and R, and performance of languages such
-as Fortran and C~\cite{oopsla18a}.
+as Fortran and C~\cite{bezanson:julia-dyn-perf:oopsla:2018}.
 
 Notably, to encourage a high level of code reuse and extensibility,
 Julia is designed around \emph{symmetric multiple dynamic dispatch}.
@@ -16,7 +16,7 @@ To deliver performance, Julia relies on a type-specializing just-in-time (JIT)
 compiler: with few exceptions%~\cite{TODO}, link to Julia docs on avoiding specialization
 every time a method is called with a new set of argument types,
 it is specialized for those types, creating a new method
-definition~\cite{oopsla21jules}.
+definition~\cite{pelenitsyn:type-stability:oopsla:2021}.
 Therefore, even for functions with a single user-defined method,
 more methods can accrue during the program execution,
 adding work for the dispatch mechanism.

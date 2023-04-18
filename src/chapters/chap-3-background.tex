@@ -6,7 +6,7 @@
 Julia is a high-level, dynamic programming language, originally designed 
 for scientific computing~\cite{bezanson:julia-fresh:2017}.
 It aims to solve a so-called ``two-language problem''
-by providing both good performance and productivity features~\cite{oopsla18a}.
+by providing both good performance and productivity features~\cite{bezanson:julia-dyn-perf:oopsla:2018}.
 For performance, Julia relies on an optimizing, type-specializing JIT compiler.
 For productivity, the language provides garbage collection, dynamic typing, and
 multiple dynamic dispatch.
@@ -57,7 +57,7 @@ invariant parametric types (e.g. \cjl{Vector\{T\}}),
 and so-called union-all types, written with \cjl{where} (lines~3 and 5).
 Intuitively, a union-all type \cjl{t where T} represents a union of types
 \cjl{t[t'/T]} for all valid instantiations \cjl{t'} of the type variable \cjl{T}.
-\citet{oopsla18b} provide a detailed
+\citet{zappa-nardelli:julia-sub:oopsla:2018} provide a detailed
 account of Julia types and their subtype relation, and we give a brief
 overview of subtyping in \secref{sec:2:subtyping}.
 

@@ -453,7 +453,7 @@ in constraints resolution.
 
     \inferrule[\RSS{Types}]
     { \subtyctrR{\AEnv}{\dom\UEnv}{\ty}{\ty'}{\CSet} \and
-        \solvectrdflt = \substuvars }
+        \solvectrdflt = \substvars }
     { \subtysigdflt{\ty}{\ty'} }
 \end{mathpar}
 \end{minipage}}
@@ -490,14 +490,14 @@ in constraints resolution.
         \lForEach{$\ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
             \subtyctrLdfltenv{\tylb}{\tyub_j}{\CSet_{\tyub_j}}
         }
-        $\substuvars \gets \solvectr{\AEnv}{\UEnv}{
+        $\substvars \gets \solvectr{\AEnv}{\UEnv}{
             \CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}
         }$\;
-        \KwRet{$\subst\substuvars{\substel{\va}{
-            \substuvars(\tylb) \mcup_i \tylb_i
+        \KwRet{$\subst\substvars{\substel{\va}{
+            \substvars(\tylb) \mcup_i \tylb_i
         }}$}
     }
-    %$\substuvars \gets \emptysubst$
+    %$\substvars \gets \emptysubst$
 \end{algorithm}  
 \end{minipage}
 \caption{Constraints resolution algorithm \solvectrdflt}\label{fig:ctr-solve}      
@@ -638,6 +638,24 @@ in constraints resolution.
 % \inferrule*[]
 % { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
 % { \tyvlddflt{\typair{\tysig_1}{\tysig_2}} }
+
+\begin{figure}
+\footnotesize
+\begin{mathpar}
+    \fbox{\vldinenvdflt{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \varbound{\vany}{\tylb}{\tyub} \in \AEnv. \and
+        \tyvld{\AEnv'}{\substvars(\vany)} \and
+        \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
+        \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
+    { \vldinenvdflt{\substvars} }
+\end{mathpar}
+\caption{Valid substitution}\label{fig:substuvars-validity}
+\end{figure}
+
+Substitution is defined in the usual manner.
 
 \textbf{The subtyping algorithm} is given by subtyping rules in
 Figures~\ref{fig:subtyping-base,fig:subtyping-constrained,fig:subtyping-tysigs}

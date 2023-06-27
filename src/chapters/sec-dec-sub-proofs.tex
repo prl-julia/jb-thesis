@@ -1,6 +1,6 @@
 \section{Proofs}
 
-\subsection{Decidability of subtyping}\label{subsec:dec-proof}
+\subsection{Decidability of Subtyping}\label{subsec:dec-proof}
 %% ======================================================================
 
 \begin{figure}
@@ -111,6 +111,15 @@ The syntactic size is defined in~\figref{fig:ty-size}.
     \size{\rexvarbound{\tylb}{\tyub}} &::=& \size{\tylb} + \size{\tyub}\\
     \\
     \hline
+    \multicolumn{3}{c}{\size{\dctx}} \\ 
+    \hline 
+    \size{\square} &::=& 0\\
+    \size{\typair{\dctx}{\ty}} &::=& 
+        1 + \size{\dctx} + \size{\ty}\\
+    \size{\typair{\ty}{\dctx}} &::=& 
+        1 + \size{\ty} + \size{\dctx}\\
+    \\
+    \hline
     \multicolumn{3}{c}{\size{\tysig}} \\ 
     \hline 
     \size{\tyany} &::=& 1\\
@@ -124,13 +133,22 @@ The syntactic size is defined in~\figref{fig:ty-size}.
     \size{\EmptyEnv} &::=& 0 \\
     \size{\AEnv, \varbound{\vany}{\tylb}{\tyub}} &::=& 
         \size{\AEnv} + \size{\tylb} + \size{\tyub}\\
+    \\
+    \hline
+    \multicolumn{3}{c}{\size{\dctxsig}} \\ 
+    \hline 
+    \size{\square} &::=& 0\\
+    \size{\typair{\dctxsig}{\tysig}} &::=& 
+        1 + \size{\dctxsig} + \size{\tysig}\\
+    \size{\typair{\tysig}{\dctxsig}} &::=& 
+        1 + \size{\tysig} + \size{\dctxsig}\\
 \end{array}
 \]
 \caption{Syntactic size}\label{fig:ty-size}
 \end{figure}
 
 In what follows, we will implicitly use the following facts about
-distributivity contexts (they can be proved by induction):
+distributivity contexts (proofs are straightforward by induction):
 \begin{itemize}
     \item $\plug{\dctx}{\ty} = \ty';$
     \item $\plug{\dctx}{\dctx'} = \dctx'';$
@@ -142,6 +160,8 @@ distributivity contexts (they can be proved by induction):
     \item $\tymsrdflt{\plug{\dctx}{\ty}} = \tymsrdflt{\dctx} + \tymsrdflt{\ty};$
     \item $\tymsrdflt{\plug{\dctxsig}{\tysig}} = 
         \tymsrdflt{\dctxsig} + \tymsrdflt{\tysig};$
+    \item $\substvars(\plug\dctx\ty) = 
+        \plug{\substvars(\dctx)}{\substvars(\ty)}; $    
     \item \TODO{more as needed}
 \end{itemize}
 
@@ -377,7 +397,7 @@ distributivity contexts (they can be proved by induction):
 \end{proof}
 
 
-\subsection{Properties of subtyping of types \subtydflt{\ty}{\ty'}}%
+\subsection{Properties of Subtyping of Types}%
 \label{subsec:props-subty-proof}
 %% ======================================================================
 
@@ -782,3 +802,63 @@ distributivity contexts (they can be proved by induction):
     \end{itemize}
 \end{proof}
 
+%% This fact we use implicitly
+% \begin{lemma}{Preservation of subtyping by distributivity context.}%
+%     \[
+%         \forall \AEnv, \dctx, \ty, \ty'.\quad
+%         \subtydflt{\ty}{\ty'} \quad\implies\quad
+%         \subtydflt{\plug\dctx\ty}{\plug\dctx{\ty'}}.
+%      \]
+% \end{lemma}
+% \begin{proof}
+%     Straightforward by induction on the structure of \dctx,
+%     using the assumption \subtydflt{\ty}{\ty'} in the base case
+%     and \thmref{thm:sub-ty-refl} (reflexivity) in the inductive cases.
+% \end{proof}
+
+\begin{theorem}{Soundness of subtyping of types with respect to a subsitution.}%
+\label{thm:subty-sound-subst}
+    $\forall \AEnv, \ty, \ty' \text{ s.t. } \tyvlddflt{\ty, \ty'}.\ 
+     \forall \AEnv', \substvars \text{ s.t. } \vldinenvdflt{\substvars}.$
+     \[ 
+        \subtydflt{\ty}{\ty'} \quad\implies\quad
+        \subty{\AEnv'}{\substvars(\ty)}{\substvars(\ty')}.
+     \]
+\end{theorem}
+\begin{proof}
+    By induction on the derivation of \subtydflt{\ty}{\ty'}.
+
+    Cases \RST{Top} and \RST{Bot} are straightforward by \RST{Top} and
+    \RST{Bot}, respectively. 
+
+    Case \RST{VarRefl} by \thmref{thm:sub-ty-refl} (reflexivity):
+    \subty{\AEnv'}{\substvars(\vany)}{\substvars(\vany)}.
+
+    Cases \RST{Tuple}, \RST{Inv}, \RST{UnionLeft}, and \RST{UnionRight} are
+    straightforward using inversion, the inductive hypothesis, and constructor.
+    For example, consider the case \RST{Tuple}
+    \subtydflt{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}}.
+    By inversion, \subtydflt{\ty_i}{\ty'_i}.
+    By IH, \subty{\AEnv'}{\substvars(\ty_i)}{\substvars(\ty'_i)}.
+    The case concludes by \RST{Tuple} with 
+    \[\subty{\AEnv'}{\typair{\substvars(\ty_1)}{\substvars(\ty_2)}}
+    {\typair{\substvars(\ty'_1)}{\substvars(\ty'_2)}}\]
+    and the fact that $\substvars(\typair{\ty_1}{\ty_2}) = 
+    \typair{\substvars(\ty_1)}{\substvars(\ty_2)}.$
+
+    The remaining cases \RST{VarLeft} and \RST{VarRight} are similar.
+    For example, consider \RST{VarLeft} \subtydflt{\plug{\dctx}\vany}{\ty'}.
+    By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
+    \subtydflt{\plug\dctx{\tyub}}{\ty'}.
+    By IH, \subty{\AEnv'}{\substvars(\plug\dctx{\tyub})}{\substvars(\ty')}.
+    By inversion of the assumption \vldinenvdflt{\substvars}, we know
+    \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)}.
+    Since $\substvars(\plug\dctx{\tyub}) = 
+    \plug{\substvars(\dctx)}{\substvars(\tyub)}$ and
+    \subty{\AEnv'}{\substvars(\dctx)}{\substvars(\dctx)} by reflexivity,
+    we have \subty{\AEnv'}{\plug{\substvars(\dctx)}{\substvars(\vany)}}
+    {\plug{\substvars(\dctx)}{\substvars(\tyub)}}.
+    The case concludes by \thmref{thm:sub-ty-trans} (transitivity) with the
+    middle type $\substvars(\plug\dctx{\tyub})$:
+    \[\subty{\AEnv'}{\substvars(\plug\dctx{\vany})}{\substvars(\ty')}.\]
+\end{proof}

@@ -1,0 +1,679 @@
+\chapter{Decidable Subtyping of Existential Types}%
+\label{chap:dec-sub}
+
+\TODO{intro}
+
+\section{Definition}%
+\label{sec:dec-sub:defs}
+%% ======================================================================
+
+%% Grammar
+%% *********************************************************
+
+The key to decidable subtyping is to restrict existential types within
+invariant constructors to use-site variance of the form
+\tyinv\iname{\rexvarbound{\ty_1}{\ty_1},\ldots},
+similar to Java wildcards.
+Unrestricted existential types are supported only at the top level,
+in type signatures \tysig.
+
+Types and type signatures are defined in \figref{fig:ty-grammar}.
+
+\tyinv\iname{\ty_1,\ldots} is a shorthand for
+\tyinv\iname{\rexvarbound{\ty_1}{\ty_1},\ldots}.
+
+\begin{figure}[t]
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{tabular}{l@{\hspace{4mm}}l}
+    $\begin{array}{rcll}
+        \tysig
+        &::=& & \textit{Type signature} \\
+        &\Alt& \tyany & \text{top} \\
+        &\Alt& \tybot & \text{bottom} \\
+        &\Alt& \vany
+            & \text{type variable} \\
+        &\Alt& \typair{\tysig_1}{\tysig_2}
+            & \text{covariant tuple} \\        
+        &\Alt& \tyinv\iname\rexvars
+            & \text{invariant constr.} \\
+        &\Alt& \tyunion{\tysig_1}{\tysig_2}
+            & \text{union} \\
+        &\Alt& \tyexist{\vany}{\tylb}{\tyub}{\tysig}
+            & \text{existential} \\
+        \\
+        \vany
+        &::=& & \textit{Type variable} \\
+        &\Alt& \vx, \vy, \ldots & \text{universal var.} \\
+        &\Alt& \va, \vb, \ldots & \text{unification var.} \\
+        \\
+        \rexvar
+        &::=& \rexvarbound{\tylb}{\tyub} & \textit{Restricted existential var.} \\
+    \end{array}$ 
+    &
+    $\begin{array}{rcll}
+        \ty, l, u
+        &::=& & \textit{Type} \\
+        &\Alt& \tyany & \text{top} \\
+        &\Alt& \tybot & \text{bottom} \\
+        &\Alt& \vany
+            & \text{type variable} \\
+        &\Alt& \typair{\ty_1}{\ty_2}
+            & \text{covariant tuple} \\        
+        &\Alt& \tyinv\iname\rexvars
+            & \text{invariant constr.} \\
+        &\Alt& \tyunion{\ty_1}{\ty_2}
+            & \text{union} \\
+        \\ \\ \\ \\ \\ \\ \\ \\
+    \end{array}$
+\end{tabular}
+}
+\caption{Grammar of type signatures and types}\label{fig:ty-grammar}
+\end{figure}
+
+\begin{figure}
+\footnotesize
+\[
+\begin{array}{lccccccl}
+    \dctxtysig &::=& \square &
+        \Alt& \typair{\dctxtysig}{\tysig} &
+        \Alt& \typair{\tysig}{\dctxtysig} &
+        \textit{Distributivity context for type signatures}
+    \\
+    \dctxty &::=& \square &
+        \Alt& \typair{\dctxty}{\ty} &
+        \Alt& \typair{\ty}{\dctxty} &
+        \textit{Distributivity context for types}
+    \\
+    \\
+    \AEnv, \UEnv &::=& \EmptyEnv &
+        \Alt& \AEnv, \varbound{\vany}{\tylb}{\tyub} &
+        & & 
+        \textit{Type variable environment}
+    \\
+    \UEnvD &::=& \EmptyEnv &
+        \Alt& \UEnvD, \vany &
+        & & 
+        \textit{Type variable list}
+\end{array}
+\]
+\caption{Auxiliary definitions}\label{fig:subty-aux}
+\end{figure}
+% \\
+% \\
+% \sty &::=& \tyany \Alt \tybot \Alt \vany &
+%     \Alt& \typair{\sty_1}{\sty_2} &
+%     \Alt& \tyinv\iname\rexvars &
+%     \textit{Type without top-level unions}
+
+
+%% Subtyping
+%% *********************************************************
+
+For simplicity of the presentation, we assume the following variable names 
+convention based on Barendregt's convention:
+
+\begin{definition}[Variable names convention]\label{def:var-names}
+    Everywhere in definitions and proofs, the following conditions hold:
+    \begin{itemize}
+        \item all bound variables in \ty, \tysig are different from each other 
+            and from free variables;
+        \item all variables in \AEnv, \UEnv, \UEnvD are different 
+            from each other;
+        \item whenever both \AEnv and \UEnv or \AEnv and \UEnvD
+            appear in the same judgment, 
+            $\dom{\AEnv} \cap \dom{\UEnv} = \varnothing$ and
+                $\dom{\AEnv} \cap \dom{\UEnvD} = \varnothing$;
+        % \item whenever both \AEnv and \UEnv or \AEnv and \UEnvD
+        %     appear in the same judgment:
+        %     \begin{itemize}
+        %         \item $\dom{\AEnv} \cap \dom{\UEnv} = \varnothing$ and
+        %             $\dom{\AEnv} \cap \dom{\UEnvD} = \varnothing$;
+        %         \item \AEnv contains only universal variables \vx, \vy, etc.,
+        %             with their bounds also containing only universal variables;
+        %         \item \UEnv and \UEnvD contain only unification variables
+        %             \va, \vb, etc., with their bounds (for \UEnv) also
+        %             containing only unification variables.
+        %     \end{itemize}
+        \item whenever a variable environment and a type/type signature
+            appear in the same judgment, bound variables of the type/type
+            signature are different from variables in the environment;
+        \item whenever multiple types/type signatures appear in the same
+            judgment, their bound variables are different.
+    \end{itemize}
+    These conditions can be maintained by alpha-renaming.
+\end{definition}
+
+To visually aid the perception of inference rules,
+we use \vx, \vy, etc. to denote universal variables
+and \va, \vb, etc. to denote unification variables.
+Unification variables are constrained variables.
+
+% The convention about using different sets of variables for \AEnv and \UEnv/\UEnvD
+% is not necessary, but it visually aids the perception of inference rules:
+% whenever \va or \vb is used in a judgment,
+% it is known to belong to \UEnv or \UEnvD.
+% Without this convention, we would need to always check which environment
+% the variable belongs to in order to discern its meaning.
+
+Subtyping starts with
+$\subtysigdflt\tysig{\tysig'}$, subtyping of type signatures.
+Here, we introduce all explicit existential variables into environments:
+variables from \tysig into \AEnv (universal), 
+and variables from $\tysig'$ into \UEnv (unification).
+The intuition is that for all valid instantiations of \AEnv exist valid
+instantiations of \UEnv.
+
+Once all existentials are processed, we run constraints-generating
+subtyping $\subtyctrdflt\ty{\ty'}$. It stands for either:
+\begin{itemize}
+    \item $\subtyctrRdflt\ty{\ty'}$ when unification variables are on the right, or
+    \item $\subtyctrLdflt\ty{\ty'}$ when unification variables are on the left.
+\end{itemize}
+We use \UEnvD rather than \UEnv to emphasize that declared bounds of unification
+variables are irrelevant for the judgment.
+
+Once all constraints are generated, they are resolved by \solvectrdflt
+primarily with $\subtydflt\ty{\ty'}$,
+subtyping of types that are free from unification vars.
+There is a caveat that declared bounds of unification vars need to be consistent
+with collected constraints, which is why constrained subtyping is used
+in constraints resolution.
+
+\begin{figure}
+\footnotesize
+\begin{mathpar}
+    \fbox{\subtydflt{\ty}{\ty}}
+    \\
+
+    \inferrule[\RST{Top}]
+    { }
+    { \subtydflt{\ty}{\tyany} }
+
+    \inferrule[\RST{Bot}]
+    { }
+    { \subtydflt{\plug\dctx\tybot}{\ty'} }
+    \\
+
+    \inferrule[\RST{VarRefl}]
+    { \varbound{\vany}{\tylb}{\tyub} \in \AEnv }
+    { \subtydflt{\vany}{\vany} }
+
+    \inferrule[\RST{VarLeft}]
+    { \varbound{\vany}{\tylb}{\tyub} \in \AEnv \and
+        \subtydflt{\plug\dctx{\tyub}}{\ty'} }
+    { \subtydflt{\plug{\dctx}\vany}{\ty'} }
+
+    \inferrule[\RST{VarRight}]
+    { \varbound{\vany}{\tylb}{\tyub} \in \AEnv \and
+        \subtydflt\ty{\tylb} }
+    { \subtydflt{\ty}{\vany} }
+    \\
+
+    \inferrule[\RST{Tuple}]
+    { \subtydflt{\ty_1}{\ty'_1} \and \subtydflt{\ty_2}{\ty'_2} }
+    { \subtydflt{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}} }
+
+    % \inferrule*[]
+    % { \inherits
+    %     {\tyinv{\iname}{\vx_1,\ldots,\vx_n}}
+    %     {\tyinv{\iname'}{\ty_1,\ldots,\ty_m}} \and
+    %   \forall j \in 1..m.\ 
+    %   \subtydflt
+    %     {\subst{\ty_j}
+    %         {\substel{\vx_1}{\rexvar_1},\ldots,\substel{\vx_n}{\rexvar_n}}}
+    %     {\rexvar'_j} }
+    % { \subtydflt
+    %     {\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}}
+    %     {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+
+    \inferrule[\RST{Inv}]
+    { \forall i \in 1..n. \and \subtydflt{\rexvar_i}{\rexvar'_i} }
+    { \subtydflt
+        {\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}}
+        {\tyinv\iname{\rexvar'_1,\ldots,\rexvar'_n}} }
+
+    \inferrule[\RST{UnionLeft}]
+    { \subtydflt{\plug\dctx{\ty_1}}{\ty'} \and 
+        \subtydflt{\plug\dctx{\ty_2}}{\ty'} }
+    { \subtydflt{\plug\dctx{\tyunion{\ty_1}{\ty_2}}}{\ty'} }
+
+    \inferrule[\RST{UnionRight}]
+    { \exists i.\ \ \subtydflt\ty{\ty'_i} }
+    { \subtydflt{\ty}{\tyunion{\ty'_1}{\ty'_2}} }
+
+    \\
+    \fbox{\subtydflt{\rexvar}{\rexvar}}
+    \\
+    \inferrule*[]
+    { \subtydflt{\tylb'}{\tylb} \and \subtydflt{\tyub}{\tyub'} }
+    { \subtydflt
+        {\rexvarbound{\tylb}{\tyub}}
+        {\rexvarbound{\tylb'}{\tyub'}} }
+    %
+    \\
+    \fbox{\subtydflt{\dctx}{\dctx}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \subtydflt\square\square }
+
+    \inferrule*[]
+    { \subtydflt{\dctx_1}{\dctx'_1} \and \subtydflt{\ty_2}{\ty'_2} }
+    { \subtydflt{\typair{\dctx_1}{\ty_2}}{\typair{\dctx'_1}{\ty'_2}} }
+
+    \inferrule*[]
+    { \subtydflt{\ty_1}{\ty'_1} \and \subtydflt{\dctx_2}{\dctx'_2} }
+    { \subtydflt{\typair{\ty_1}{\dctx_2}}{\typair{\ty'_1}{\dctx'_2}} }
+\end{mathpar}
+\caption{Subtyping of types (free from unification variables)
+    %Note: \dctx stands for \dctxty.
+}\label{fig:subtyping-base}
+\end{figure}
+
+
+\begin{figure}
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
+\begin{mathpar}
+    \fbox{\subtyctrdflt{\ty}{\ty}} 
+    \\
+
+    \inferrule[\RSC{Top}]
+    { }
+    { \subtyctrdfltenv{\ty}{\tyany}{\EmptyCSet} }
+
+    \inferrule[\RSC{Bot}]
+    { }
+    { \subtyctrdfltenv{\plug\dctx\tybot}{\ty'}{\EmptyCSet} }
+
+    \colorbox{light-gray}{$
+    \inferrule[\RSC{U-Bot}]
+    { \va \in \UEnvD }
+    { \subtyctrLdfltenv{\plug\dctx\va}{\ty'}{\ctrsngl\va\tybot} }
+    $}
+    \\
+
+    \inferrule[\RSC{VarRefl}]
+    { \varbound{\vx}{\tylb}{\tyub} \in \AEnv }
+    { \subtyctrdfltenv{\vx}{\vx}{\EmptyCSet} }
+
+    \colorbox{light-gray}{$
+    \inferrule[\RSC{U-VarLeft}]
+    { \va \in \UEnvD }
+    { \subtyctrLdfltenv{\va}{\ty'}{\ctrsngl{\va}{\ty'}} }
+    $}
+
+    \colorbox{light-gray}{$
+    \inferrule[\RSC{U-VarRight}]
+    { \va \in \UEnvD }
+    { \subtyctrRdfltenv{\ty}{\va}{\ctrset{\ctrsub{\ty}{\va}}} }
+    $}
+
+    \inferrule[\RSC{VarLeft}]
+    { \varbound{\vx}{\tylb}{\tyub} \in \AEnv \and
+        \subtyctrdflt{\plug\dctx{\tyub}}{\ty'} }
+    { \subtyctrdflt{\plug\dctx\vx}{\ty'} }
+
+    \inferrule[\RSC{VarRight}]
+    { \varbound{\vx}{\tylb}{\tyub} \in \AEnv \and
+        \subtyctrdflt\ty{\tylb} }
+    { \subtyctrdflt{\ty}{\vx} }
+    \\
+
+    \inferrule[\RSC{Tuple}]
+    { \subtyctrdfltenv{\ty_1}{\ty'_1}{\CSet_1} \and 
+        \subtyctrdfltenv{\ty_2}{\ty'_2}{\CSet_2} }
+    { \subtyctrdfltenv{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}}
+        {\CSet_1 \cup \CSet_2} }
+
+    \inferrule[\RSC{Inv}]
+    { \forall i \in 1..n. \and 
+        \subtyctrdfltenv{\rexvar_i}{\rexvar'_i}{\CSet_i} }
+    { \subtyctrdfltenv
+        {\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}}
+        {\tyinv\iname{\rexvar'_1,\ldots,\rexvar'_n}}
+        {\mcup_{i=1}^n \CSet_i} }
+    \\
+
+    \inferrule[\RSC{UnionLeft}]
+    { \subtyctrdfltenv{\plug\dctx{\ty_1}}{\ty'}{\CSet_1} \and 
+        \subtyctrdfltenv{\plug\dctx{\ty_2}}{\ty'}{\CSet_2} }
+    { \subtyctrdfltenv{\plug\dctx{\tyunion{\ty_1}{\ty_2}}}{\ty'}
+        {\CSet_1 \cup \CSet_2} }
+
+    \inferrule[\RSC{UnionRight}]
+    { \exists i.\ \ \subtyctrdflt\ty{\ty'_i} }
+    { \subtyctrdflt{\ty}{\tyunion{\ty'_1}{\ty'_2}} }
+
+    \colorbox{light-gray}{$
+    \inferrule[\RSC{U-UnionRight}]
+    {   \va \in \UEnvD \and \va_1, \va_2 \text{ fresh} \and
+        \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} \and
+        \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2} \\ 
+        \CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}} 
+            \and \va_1 \notin \CSet'_1 \and
+        \CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}} 
+            \and \va_2 \notin \CSet'_2  \\
+        \CSet'\ \ =\ \ \mcup_{i=1,j=1}^{i=n,j=m}
+            \ctrset{\ctrsub{\va}{\tyunion{\tyub_1^i}{\tyub_2^j}}}
+            \text{ if } n\geq1,m\geq1
+        \text{\ or\ }
+        \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}}\text{ if } m=0
+        \text{\ or\ }
+        \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}}\text{ if } n=0
+    }
+    { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
+        {\CSet'_1 \cup \CSet'_2 } \cup \CSet' }
+    $}
+%
+    \\
+    \fbox{\subtyctrdflt{\rexvar}{\rexvar}}
+    \\
+
+    \inferrule*[]
+    { \subtyctrRdfltenv{\tylb'}{\tylb}{\CSet_l} \and 
+        \subtyctrLdfltenv{\tyub}{\tyub'}{\CSet_u} }
+    { \subtyctrLdfltenv
+        {\rexvarbound{\tylb}{\tyub}}
+        {\rexvarbound{\tylb'}{\tyub'}}
+        {\CSet_l \cup \CSet_u} }
+
+    \inferrule*[]
+    { \subtyctrLdfltenv{\tylb'}{\tylb}{\CSet_l} \and 
+        \subtyctrRdfltenv{\tyub}{\tyub'}{\CSet_u} }
+    { \subtyctrRdfltenv
+        {\rexvarbound{\tylb}{\tyub}}
+        {\rexvarbound{\tylb'}{\tyub'}}
+        {\CSet_l \cup \CSet_u} }
+
+\end{mathpar}
+\end{minipage}}
+\caption{Constrained subtyping of types.
+    Note: %\dctx stands for \dctxty;
+    every rule with $\symsubctr$ is a shorthand for two rules, 
+    one where all occurrences of $\symsubctr$ are replaced with 
+    $\symsubctrL$, and another with $\symsubctrR$.
+    %$\symsubctr$ stands for either $\symsubctrL$ or $\symsubctrR$,
+    %and within one rule, all occurrences of $\symsubctr$ denote the same relation
+}\label{fig:subtyping-constrained}
+\end{figure}
+
+
+\begin{figure}
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
+\begin{mathpar}
+    \fbox{\subtysigdflt{\tysig}{\tysig}}
+    \\
+
+    \inferrule[\RSS{Top}]
+    { }
+    { \subtysigdflt{\tysig}{\tyany} }
+
+    \inferrule[\RSS{Bot}]
+    { }
+    { \subtysigdflt{\plug\dctxsig\tybot}{\tysig'} }
+    \\
+
+    \inferrule[\RSS{VarLeft}]
+    { \varbound{\vx}{\tylb}{\tyub} \in \AEnv \and
+        \subtysigdflt{\plug\dctxsig{\tyub}}{\tysig'} }
+    { \subtysigdflt{\plug\dctxsig\vx}{\tysig'} }
+
+    \inferrule[\RSS{UnionLeft}]
+    { \subtysigdflt{\plug\dctxsig{\tysig_1}}{\tysig'} \and 
+        \subtysigdflt{\plug\dctxsig{\tysig_2}}{\tysig'}}
+    { \subtysigdflt{\plug\dctxsig{\tyunion{\tysig_1}{\tysig_2}}}{\tysig'} }
+    \\
+
+    \inferrule[\RSS{InvLeft}]
+    { \vx \text{ fresh} \and 
+        \subtysig{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\UEnv}
+        {\plug\dctxsig{\tyinv\iname{\ldots,\vx,\ldots}}}{\tysig'} }
+    { \subtysigdflt{\plug\dctxsig{
+        \tyinv\iname{\ldots,\rexvarbound{\tylb}{\tyub},\ldots}}}{\tysig'} }
+
+    \inferrule[\RSS{ExistLeft}]
+    { \subtysig{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\UEnv}{\plug\dctxsig\tysig}{\tysig'} }
+    { \subtysigdflt{\plug\dctxsig{\tyexist{\vx}{\tylb}{\tyub}{\tysig}}}{\tysig'} }
+
+
+    \inferrule[\RSS{UnionRight}]
+    { \exists i.\ \subtysigdflt{\tysig}{\plug\dctxsig{\tysig'_i}} }
+    { \subtysigdflt{\tysig}{\plug\dctxsig{\tyunion{\tysig'_1}{\tysig'_2}}} }
+
+    \inferrule[\RSS{ExistRight}]
+    { \subtysig{\AEnv}{\UEnv, \varbound{\va}{\tylb}{\tyub}}{\tysig}{\plug\dctxsig{\tysig'}} }
+    { \subtysigdflt{\tysig}{\plug\dctxsig{\tyexist{\va}{\tylb}{\tyub}{\tysig'}}} }
+    \\
+
+    \inferrule[\RSS{Types}]
+    { \subtyctrR{\AEnv}{\dom\UEnv}{\ty}{\ty'}{\CSet} \and
+        \solvectrdflt = \substuvars }
+    { \subtysigdflt{\ty}{\ty'} }
+\end{mathpar}
+\end{minipage}}
+\caption{Subtyping of type signatures
+    %Note: \dctx stands for \dctxtysig.
+}\label{fig:subtyping-tysigs}
+\end{figure}
+
+
+\begin{figure}
+\footnotesize
+\centering
+\begin{minipage}{.6\linewidth}
+\begin{algorithm}[H]
+    \SetKwProg{SolveCtrs}{Solve}{}{}
+
+    \SolveCtrs{$(\AEnv;\,\EmptyEnv;\,\CSet)$}{
+        \KwRet{$\emptysubst$}
+    }
+    \BlankLine
+    \SolveCtrs{$(\AEnv;\,\UEnv,\varbound{\va}{\tylb}{\tyub};\,\CSet)$}{
+        $\CSet_{\va} \gets 
+            \ctrset{\ctrsub{\tylb'}{\va} \,|\, \ctrsub{\tylb'}{\va} \in \CSet} 
+            \cup 
+            \ctrset{\ctrsub{\va}{\tyub'} \,|\, \ctrsub{\va}{\tyub'} \in \CSet} $ \;
+        $\CSet' \gets \CSet \setminus \CSet_{\va}$ \;
+        $\UEnvD \gets \dom{\UEnv}$\;
+        \lForEach{$\ctrsub{\tylb_i}{\va}, \ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
+            \subtydflt{\tylb_i}{\tyub_j}
+        }
+        \lForEach{$\ctrsub{\tylb_i}{\va} \in \CSet_{\va}$}{%
+            \subtyctrRdfltenv{\tylb_i}{\tyub}{\CSet_{\tylb_i}}
+        }
+        \lForEach{$\ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
+            \subtyctrLdfltenv{\tylb}{\tyub_j}{\CSet_{\tyub_j}}
+        }
+        $\substuvars \gets \solvectr{\AEnv}{\UEnv}{
+            \CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}
+        }$\;
+        \KwRet{$\subst\substuvars{\substel{\va}{
+            \substuvars(\tylb) \mcup_i \tylb_i
+        }}$}
+    }
+    %$\substuvars \gets \emptysubst$
+\end{algorithm}  
+\end{minipage}
+\caption{Constraints resolution algorithm \solvectrdflt}\label{fig:ctr-solve}      
+\end{figure}
+
+
+%% Validity
+%% *********************************************************
+
+\begin{figure}
+\footnotesize
+\begin{mathpar}
+    \fbox{\tyvlddflt{\ty}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \tyvlddflt{\tyany} }
+
+    \inferrule*[]
+    { }
+    { \tyvlddflt{\tybot} }
+
+    \inferrule*[]
+    { \varbound{\vany}{\tylb}{\tyub} \in \AEnv }
+    { \tyvlddflt{\vany} }
+    \\
+
+    \inferrule*[]
+    { \tyvlddflt{\ty_1} \and \tyvlddflt{\ty_2} }
+    { \tyvlddflt{\typair{\ty_1}{\ty_2}} }
+
+    \inferrule*[]
+    { \iname \text{ has arity } n \and
+      \forall i \in 1..n.\ \tyvlddflt{\rexvar_i} }
+    { \tyvlddflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} }
+
+    \inferrule*[]
+    { \tyvlddflt{\ty_1} \and \tyvlddflt{\ty_2} }
+    { \tyvlddflt{\tyunion{\ty_1}{\ty_2}} }
+    %
+    \\
+    \fbox{\tyvlddflt{\rexvar}}
+    \\
+
+    \inferrule*[]
+    { \tyvlddflt{\tylb} \and \tyvlddflt{\tyub} \and 
+        \subtydflt{\tylb}{\tyub} }
+    { \tyvlddflt{\rexvarbound{\tylb}{\tyub}} }
+    %
+    \\
+    \fbox{\tyvlddflt{\dctx}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \tyvlddflt\square }
+
+    \inferrule*[]
+    { \tyvlddflt{\dctx} \and \tyvlddflt{\ty} }
+    { \tyvlddflt{\typair{\dctx}{\ty}} }
+
+    \inferrule*[]
+    { \tyvlddflt{\ty} \and \tyvlddflt{\dctx} }
+    { \tyvlddflt{\typair{\ty}{\dctx}} }
+    %
+    \\
+    \fbox{\tyvlddflt{\tysig}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \tyvlddflt{\tyany} }
+
+    \ldots
+
+    \inferrule*[]
+    { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
+    { \tyvlddflt{\tyunion{\tysig_1}{\tysig_2}} }
+
+    \inferrule*[]
+    { \tyvlddflt{\tylb} \and \tyvlddflt{\tyub} \and
+        \subtydflt{\tylb}{\tyub} \and
+        \tyvld{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\tysig} }
+    { \tyvlddflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} }
+    %
+    \\
+    \fbox{\tyunfvlddflt{\ty}}
+    \\
+
+    \inferrule*[]
+    { \varbound{\vx}{\tylb}{\tyub} \in \AEnv }
+    { \tyunfvlddflt{\vx} }
+
+    \inferrule*[]
+    { \va \in \UEnvD }
+    { \tyunfvlddflt{\va} }
+
+    \inferrule*[]
+    { }
+    { \tyunfvlddflt{\tyany} }
+
+    \ldots
+
+    \inferrule*[]
+    { \tyunfvlddflt{\ty_1} \and \tyunfvlddflt{\ty_2} }
+    { \tyunfvlddflt{\tyunion{\ty_1}{\ty_2}} }
+    %
+    \\
+    \fbox{\tyvld{}{\AEnv}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \tyvld{}{\EmptyEnv} }
+
+    \inferrule*[]
+    { \tyvld{}{\AEnv} \and 
+        \tyvlddflt{\tylb} \and \tyvlddflt{\tyub} \and
+        \subtydflt{\tylb}{\tyub} }
+    { \tyvld{}{\AEnv, \varbound{\vany}{\tylb}{\tyub}} }
+\end{mathpar}
+\caption{Validity of types and type signatures}\label{fig:ty-tysig-validity}
+\end{figure}
+% \inferrule*[]
+% { }
+% { \tyvlddflt{\tybot} }
+
+% \inferrule*[]
+% { \varbound{\vany}{\tylb}{\tyub} \in \AEnv }
+% { \tyvlddflt{\vany} }
+
+% \inferrule*[]
+% { \iname \text{ has arity } n \and
+%   \forall i \in 1..n.\ \tyvlddflt{\rexvar_i} }
+% { \tyvlddflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} }
+
+% \inferrule*[]
+% { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
+% { \tyvlddflt{\typair{\tysig_1}{\tysig_2}} }
+
+\textbf{The subtyping algorithm} is given by subtyping rules in
+Figures~\ref{fig:subtyping-base,fig:subtyping-constrained,fig:subtyping-tysigs}
+along with the constraints resolution algorithm in \figref{fig:ctr-solve}.
+The rules are not syntax-directed because there may be multiple rules
+applicable to a pair of types or type signatures,
+but they are \emph{analytic}~\cite{bib:martin-lof:analytic-synthetic:1994}:
+there is a finite number of applicable rules, and the premises of each rule
+are comprised of the subcomponents of its conclusion.
+
+\paragraph*{Overview of proofs.}
+Subtyping is checked only for valid types/signatures.
+The validity check ensures the absence of recursive constraints on type
+variables as well as consistency of variable bounds.
+For subtyping of types, we assume \tyvlddflt{\ty} and \tyvlddflt{\ty'}.
+For subtyping of type signatures, we assume
+\tyvlddflt{\tysig} and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}.
+
+\textbf{Termination.} The measure of a type includes the measure of its bounds.
+In all subtyping judgments, every recursive call is made with a smaller measure.
+For constraints resolution, every recursive call is made with a smaller \UEnv.
+
+\textbf{Notes.}
+Exists of unions is equivalent to the union of exists (in Julia subtyping),
+so treating parts of the union on the right independently is correct
+in subtyping of signatures.
+
+Getting the upper bound of a universal variable might be needed at either the
+signature or the type level, that's why the rules have some duplicates.
+The key is to get rid of all top-level existentials.
+
+Because the same semantic type can be represented with multiple syntactic types,
+e.g. with an explicit existential vs restricted existential, it may be necessary
+to open restricted existentials as top-level variables, but it is not always
+necessary. That's why the rule for signature subtyping of invariant
+constructor in a distibutivity context doesn't require all type arguments to be
+specified as variables.
+
+\input{chapters/sec-dec-sub-proofs.tex}

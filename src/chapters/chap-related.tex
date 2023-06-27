@@ -26,34 +26,34 @@ Even in the context of statically typed languages,
 decidability is a desirable property of static type systems and
 subtype relations, but establishing decidability can be challenging.
 For example, the \emph{un}decidability of checking subtyping for Java generics
-was established only fairly recently by~\citet{grigore:java-undec:2017},
+was established only fairly recently by~\citet{bib:grigore:java-undec:2017},
 and the previously suspected undecidability of subtyping and type checking for
 the core calculus of Scala 3,
-DOT (Dependent Object Calculus)~\cite{amin:dot:2016},
-was proven by~\citet{hu:dot-undec:2020}.
+DOT (Dependent Object Calculus)~\cite{bib:amin:dot:2016},
+was proven by~\citet{bib:hu:dot-undec:2020}.
 
 Typically, undecidability is shown by a reduction from a known undecidable
 problem. For example, the halting problem for Turing machines is used
-to prove the undecidability of Java generics~\cite{grigore:java-undec:2017}
+to prove the undecidability of Java generics~\cite{bib:grigore:java-undec:2017}
 % the culprit is recursive inheritance in Java generics
-as well as System \FSub~\cite{pierce:bound-sub-undec:1992}.
-\FSub~\cite{cardelli:fsub:1991} is a language with bounded universal types,
+as well as System \FSub~\cite{bib:pierce:bound-sub-undec:1992}.
+\FSub~\cite{bib:cardelli:fsub:1991} is a language with bounded universal types,
 where the undecidability of subtyping is caused by the combination of
 contravariance and rebounding of type variables in the context.
 %There, rebounding of type variables in the rule for subtyping universal types
 %leads to the growth of type variable context.
 Proofs by reduction from \FSub are commonly used to establish
 undecidability in languages with some form of bounded quantification.
-For instance, the undecidability of DOT~\cite{hu:dot-undec:2020} is shown
+For instance, the undecidability of DOT~\cite{bib:hu:dot-undec:2020} is shown
 by reducing a variant of \FSub to \DSub, a restriction of DOT featuring type
 members and path-dependent types. A similar approach is used
-by~\citet{mackay:path-dep-dec:2020} for \WyvCore, another simplification of
+by~\citet{bib:mackay:path-dep-dec:2020} for \WyvCore, another simplification of
 DOT featuring path-dependent and recursive types.
 In the case of Julia, the undecidability of subtyping also follows from its
 power to encode a variant of \FSub,
 as discussed in~\secref{sec:julia-sub:undec}.
 %In the context of languages with nominal inheritance and variance,
-%\citet{kennedy:nom-sub-var-dec:2007} showed the undecidability of subtyping
+%\citet{bib:kennedy:nom-sub-var-dec:2007} showed the undecidability of subtyping
 %by a reduction from the Post correspondence problem.
 
 In practice, benefits of having a more expressive type system might outweigh
@@ -73,7 +73,7 @@ run-time types are often more restrictive than static ones,
 which simplifies the corresponding subtyping problem.
 For example, in the .NET intermediate language,
 the decidability of subtyping was shown for ground types,
-which are used at run time~\cite{kennedy:nom-sub-var-dec:2007}\footnote{Due
+which are used at run time~\cite{bib:kennedy:nom-sub-var-dec:2007}\footnote{Due
 to the lack of documentation, it is not clear whether subtyping between ground
 types is still decidable in \CSharp as of 2023.}.
 In the case of Java generics, where static subtyping is undecidable,
@@ -86,15 +86,15 @@ relations remains an important challenge.
 In some cases, it might be possible to recover
 decidability by restricting the system in a way that does not affect most
 practical programs. For example, the material-shape separation for Java
-generics~\cite{greenman:f-bound-material-shape:2014}
+generics~\cite{bib:greenman:f-bound-material-shape:2014}
 enables decidability of subtyping by limiting F-bounded polymorphism %~\cite{canning:f-bound:1989}
 (i.e., recursive constraints on type variables)
 to the subset of types, called shapes, that are used exclusively as constraints;
 this separation appears to be in agreement with an industry-wide practice.
-\citet{mackay:path-dep-dec:2020} extend the material-shape separation
+\citet{bib:mackay:path-dep-dec:2020} extend the material-shape separation
 to the context of path-dependent and recursive types. %, with additional
 %restrictions to ensure decidability.
-Earlier, \citet{kennedy:nom-sub-var-dec:2007} identified three decidable
+Earlier, \citet{bib:kennedy:nom-sub-var-dec:2007} identified three decidable
 fragments of undecidable subtyping in the context of nominal inheritance
 and variance without F-bounded polymorphism: the fragments can be obtained by
 restricting either contravariance, or expansive class tables,
@@ -114,25 +114,25 @@ Still, Julia subtyping is powerful enough to encode
 the undecidable \FSub.
 
 A number of decidable subtype relations,
-e.g. \WyvSelf~\cite{mackay:path-dep-dec:2020}
-and Kernel \DSub~\cite{hu:dot-undec:2020},
+e.g. \WyvSelf~\cite{bib:mackay:path-dep-dec:2020}
+and Kernel \DSub~\cite{bib:hu:dot-undec:2020},
 adopt subtyping rules inspired by a decidable, restricted variant of \FSub
-called Kernel~\FSub~\cite{cardelli:types-poly:1985}.
+called Kernel~\FSub~\cite{bib:cardelli:types-poly:1985}.
 The downside of such relations is their rejecting more subtyping judgments
 than is desirable in practice.
 A strictly more powerful than Kernel \DSub system
-Strong Kernel \DSub~\cite{hu:dot-undec:2020} is also decidable.
+Strong Kernel \DSub~\cite{bib:hu:dot-undec:2020} is also decidable.
 This relation splits the type variable context into two parts, for the left-
 and right-hand sides of the subtyping judgment, thus avoiding the problematic
 rebounding of type variables in a single context;
 the same idea applies to \FSub to obtain the decidable, Strong Kernel \FSub.
 A similar approach with context splitting is used
-by~\citet{mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
+by~\citet{bib:mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
 In both \WyvFix and Strong Kernel systems,
 an undesired consequence of maintaining two separate contexts
 is that the resulting subtype relations lack transitivity.
 Another decidable variant of \FSub, called \FSubR, was proposed
-by~\citet{mackay:bound-poly-sub-dec:2020}. There, %contravariance is allowed
+by~\citet{bib:mackay:bound-poly-sub-dec:2020}. There, %contravariance is allowed
 rebounding of type variables is allowed
 only for type bounds that do not themselves contain bounded quantification,
 with unrestricted types resorting to the Kernel subtyping rule.
@@ -142,10 +142,10 @@ rejected by Kernel \FSub, yet does not lose transitivity.
 \section{Semantic subtyping}
 %% ======================================================================
 
-In semantic subtyping~\cite{frih:sem-sub:2008}, types are given a set-theoretic
+In semantic subtyping~\cite{bib:frisch:sem-sub:2008}, types are given a set-theoretic
 interpretation, and subtyping is defined as the set inclusion on
 interpretations.
-For example, \citet{hosoya:reg-types-XML:2000} define a static type system for
+For example, \citet{bib:hosoya:reg-types-XML:2000} define a static type system for
 an XML processing language and interpret types as sets of valid XML documents.
 Thus, semantic subtyping provides an intuitive mental
 model of types to the users. In addition, it automatically satisfies
@@ -156,16 +156,16 @@ the complexity typically comes from, especially if efficiency matters.
 For example, in the Julia language, semantic subtyping of union and tuple types
 %inspired by the semantic approach
 relies on a space-efficient algorithm that lazily explores the disjunctive
-normal form~\cite{chung:julia-sub-algo:2019}.
-In~\cite{frisch:sem-sub:2002}, which supports not only union, but also
+normal form~\cite{bib:chung:julia-sub-algo:2019}.
+In~\cite{bib:frisch:sem-sub:2002}, which supports not only union, but also
 intersection and negation types, subtyping $t \leq s$ is checked via
 the emptiness test $t \land \lnot s \approx \bot$ and also relies on
 the disjunctive normal form.
 Related to Julia's treatment of right-hand side existential variables as 
-unification variables, \citet{castagna:sem-poly-inf:2015} generate and solve
+unification variables, \citet{bib:castagna:sem-poly-inf:2015} generate and solve
 subtype constraints as a part of type inference process in their set-theoretic
 framework with union, intersection, and negation types.
-\citet{schimpf:set-types-erlang:2023} successfully apply the
+\citet{bib:schimpf:set-types-erlang:2023} successfully apply the
 same framework to typing Erlang.
 However, the approach to constraint solving does not translate to Julia
 due to the presence of invariant type constructors.%, which prevents the
@@ -174,13 +174,13 @@ due to the presence of invariant type constructors.%, which prevents the
 While types such as unions and tuples have a straightforward
 semantic interpretation, other types that are common for statically typed
 languages can be challenging to interpret.
-To this end, \citet{frisch:sem-sub:2002} provide an interpretation for
-function types, and \citet{castagna:sem-poly:2011} interpret predicative
+To this end, \citet{bib:frisch:sem-sub:2002} provide an interpretation for
+function types, and \citet{bib:castagna:sem-poly:2011} interpret predicative
 parametric polymorphism. In the latter, the interpretation needs to be
 parameterized by semantic assignments of type variables.
 In the context of object-oriented languages,
-\citet{dardha:sem-sub-obj:2016} propose an integration of structural types and
-semantic subtyping, and \citet{ancona:sem-sub-imp:2016} study semantic
+\citet{bib:dardha:sem-sub-obj:2016} propose an integration of structural types and
+semantic subtyping, and \citet{bib:ancona:sem-sub-imp:2016} study semantic
 subtyping for imperative languages with mutable fields.
 In the case of the Julia language, %which does not have function types and is not
 %concerned with static type checking,
@@ -190,30 +190,30 @@ impredicative bounded existential types and invariant type constructors.
 \section{Java wildcards}
 %% ======================================================================
 
-The wildcards mechanism of Java generics~\cite{torgersen:wildcards:2004}
+The wildcards mechanism of Java generics~\cite{bib:torgersen:wildcards:2004}
 provides use-site variance of parametric
-types~\cite{thorup:unif-genericity:1999}.
+types~\cite{bib:thorup:unif-genericity:1999}.
 For example, a variable of type \code{List<? \textbf{extends} Number>}
 can be assigned any list with the element type that is a subtype of \code{Number};
 using the variable, elements of the list can be safely read at type \code{Number}.
 Use-site variance has been recognized as a restricted form of bounded existential
-types~\cite{igarashi:variance:2002}.
+types~\cite{bib:igarashi:variance:2002}.
 Thus, the wildcard-typed list above represents an existential
 type \code{$\exists$X<:Number.List<X>}.
 There have been multiple formalizations of Java wildcards,
-such as WildFJ~\cite{torgersen:wildfj:2005} and
-TameFJ~\cite{cameron:java-wildcards:2008}, but they
+such as WildFJ~\cite{bib:torgersen:wildfj:2005} and
+TameFJ~\cite{bib:cameron:java-wildcards:2008}, but they
 were focused on type soundness rather than a decidable subtyping algorithm.
-\citet{smith:java-type-inf:2008} found inconsistencies in Java's type inference
+\citet{bib:smith:java-type-inf:2008} found inconsistencies in Java's type inference
 and subtyping algorithms and proposed a solution using a limited form of union
 types, with a conjecture on the decidability of subtyping.
 
 Subtyping Java wildcards is challenging and, as shown
-by~\citet{grigore:java-undec:2017},
+by~\citet{bib:grigore:java-undec:2017},
 undecidable.
-\citet{wehr:dec-bounded-exist:2009} identify multiple undecidable subtype
+\citet{bib:wehr:dec-bounded-exist:2009} identify multiple undecidable subtype
 relations for bounded existential types in formal models inspired by Java.
-\citet{tate:taming-wildcards:2011} highlight multiple sources of 
+\citet{bib:tate:taming-wildcards:2011} highlight multiple sources of 
 non-termination in Java subtyping,
 e.g. the presence of recursive constraints on type variables
 and wildcards being allowed in the inheritance hierarchy;

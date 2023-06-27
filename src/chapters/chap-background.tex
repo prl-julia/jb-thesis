@@ -32,8 +32,8 @@ elements of the argument array \cjl{A}.}%
 \label{fig:code:subtraction}
 \end{figure}
 
-\tdef{Multiple dynamic dispatch}~\cite{bobrow:common-loops:1986,%
-chambers:multi-cecil:1992} is at the core of the Julia language.
+\tdef{Multiple dynamic dispatch}~\cite{bib:bobrow:common-loops:1986,%
+bib:chambers:multi-cecil:1992} is at the core of the Julia language.
 The dispatch mechanism allows a function, called \emph{generic
 function}, to have multiple implementations, called \emph{methods}, that are
 tailored to different argument types. For example, \figref{fig:code:subtraction}
@@ -105,7 +105,7 @@ subtyping definition}
 
 Nominal types are induced by user-defined datatype declarations and constitute
 a single-parent inheritance hierarchy.
-Unlike mainstream object-oriented languages such as C\# and Java,
+Unlike mainstream object-oriented languages such as \CSharp and Java,
 Julia does not support data inheritance: only \emph{abstract} types,
 which \emph{cannot} be instantiated with values, can be inherited,
 i.e. used as declared supertypes of other nominal types.
@@ -229,7 +229,7 @@ sub5(x::String) = x * "-5"
 %\end{wrapfigure}
 
 Method resolution for a dispatched function call \cjl{f(a1, a2, ...)}
-relies on tuple subtyping~\cite{leavens:tuple-dispatch:1998}
+relies on tuple subtyping~\cite{bib:leavens:tuple-dispatch:1998}
 between run-time argument types and method type signatures.
 Namely, argument types are combined into a tuple of concrete types
 \begin{center}

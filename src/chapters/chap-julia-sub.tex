@@ -35,7 +35,7 @@ a subtype of \cjl{Rational\{Signed\}}.
 
 Abstract union-all types \cjl{t where tl<:T<:tu} are better known
 in the literature as \tdef{bounded existential types}, which also model
-Java wildcards~\cite{torgersen:wildcards:2004}\footnote{In Julia syntax, 
+Java wildcards~\cite{bib:torgersen:wildcards:2004}\footnote{In Julia syntax, 
 a Java wildcard type
 \cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}.}.
 In what follows, we will call types \cjl{t where tl<:T<:tu} existential types;
@@ -188,7 +188,7 @@ guaranteed to be called only with primitive integers of the same concrete type.
 
 It is not unusual for a statically typed programming language 
 to have undecidable subtyping,
-as witnessed by Java and Scala~\cite{grigore:java-undec:2017,hu:dot-undec:2020}.
+as witnessed by Java and Scala~\cite{bib:grigore:java-undec:2017,bib:hu:dot-undec:2020}.
 In practice, the undecidability means that the
 compiler might not terminate on some programs. Although undesirable,
 such property can be acceptable if it manifests rarely and
@@ -201,12 +201,12 @@ That is why the decidability of subtyping was one of the explicit goals
 of the original design of the Julia language~\cite{bib:bezanson:julia:2015}.
 To this end, Julia disallowed several features that were known to cause
 undecidability, such as recursive constraints on type variables and
-circularities in the inheritance hierarchy~\cite{tate:taming-wildcards:2011}.
+circularities in the inheritance hierarchy~\cite{bib:tate:taming-wildcards:2011}.
 
 Despite the intentional simplifications in the type language,
 Julia subtyping is in fact \emph{undecidable}.
 As shown in~\TODO{Ben's thesis}, Julia can encode system
-\FSubN, which is known to be undecidable~\cite{pierce:bound-sub-undec:1992}.
+\FSubN, which is known to be undecidable~\cite{bib:pierce:bound-sub-undec:1992}.
 \figref{fig:FSub-encoding} shows the encoding\footnote{Arrow %of \FSubN types
 type is dropped as irrelevant to the undecidability result.},
 with $\ty_1 \leq \ty_2$ in \FSubN defined as

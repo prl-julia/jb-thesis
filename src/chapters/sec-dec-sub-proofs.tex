@@ -199,7 +199,7 @@ distributivity contexts (proofs are straightforward by induction):
     for each premise \subtyctrdflt{\ty_p}{\ty'_p}
     of the conclusion \subtyctrdflt{\ty}{\ty'}.
     
-    The only interesting case is \RSC{U-UnionRight}.
+    The only interesting case is \RSC{UVar-UnionRight}.
     By the variable names convention~\ref{def:var-names}, $\va \notin \AEnv$.
     Therefore, $\tymsrdflt{\va} = \tymsrdflt{\va_1} = \tymsrdflt{\va_2}$.
 \end{proof}
@@ -861,4 +861,99 @@ distributivity contexts (proofs are straightforward by induction):
     The case concludes by \thmref{thm:sub-ty-trans} (transitivity) with the
     middle type $\substvars(\plug\dctx{\tyub})$:
     \[\subty{\AEnv'}{\substvars(\plug\dctx{\vany})}{\substvars(\ty')}.\]
+\end{proof}
+
+
+\subsection{Properties of Constrained Subtyping of Types}%
+\label{subsec:props-subtyctr-proof}
+%% ======================================================================
+
+\begin{lemma}{Constrained subtyping coincides with subtyping on
+    unification-free types.}%
+\label{lem:subtyctr-subty}
+    $\forall \AEnv, \ty, \ty' \text{ s.t. } 
+    \tyvld{}{\AEnv} \ \land\ \tyvlddflt{\ty} \ \land\ \tyvlddflt{\ty'}$ 
+    the following holds:
+    \begin{enumerate}
+        \item $\forall \UEnvD.\ \subtyctrdflt{\ty}{\ty'} \quad\implies\quad
+            \CSet = \EmptyCSet\ \land\ \subtydflt{\ty}{\ty'};$
+        \item $\subtydflt{\ty}{\ty'} \quad\implies\quad 
+            \forall \UEnvD.\ \subtyctrdfltenv{\ty}{\ty'}{\EmptyCSet}.$
+    \end{enumerate}
+\end{lemma}
+\begin{proof}
+    Straightforward by induction on the derivation of:
+    \begin{enumerate}
+        \item \subtyctrdflt{\ty}{\ty'} (more precisely, by mutual induction
+            on \subtyctrLdflt{\ty}{\ty'} and \subtyctrRdflt{\ty}{\ty'});
+        \item \subtydflt{\ty}{\ty'}.
+    \end{enumerate}
+
+    In the first case, the rules \RSC{UBot}, \RSC{UVarLeft}, \RSC{UVarRight},
+    and \RSC{UVar-UnionRight} could not have been used to build the derivation
+    because they refer a unification variable \va from \UEnvD,
+    and both \ty and $\ty'$ are valid in \AEnv alone.
+    All other rules of constrained subtyping have matching subtyping rules.
+
+    In the second case, all subtyping rules have matching rules of constrained
+    subtyping.
+
+    The assumption \tyvld{}{\AEnv} and \lemref{lem:subty-weakening} (context
+    weakening) allow for concluding 
+    \tyvlddflt{\plug\dctx\tyub} and \tyvlddflt{\tylb} 
+    to apply the inductive hypothesis in the rules
+    \RSC{VarLeft}/\RST{VarLeft} and \RSC{VarRight}/\RST{VarRight}.
+\end{proof}
+
+\begin{theorem}{Soundness of constrained subtyping.}%
+\label{thm:subtyctr-sound}
+\TODO{Any other validity requirements?}
+    $\forall \AEnv, \UEnvD, \ty, \ty' \text{ s.t. }$
+    \[\subtyctrRdflt{\ty}{\ty'} \ \land\ 
+        \tyvlddflt{\ty} \ \land\  \tyunfvlddflt{\ty'}\] 
+    or
+    \[\subtyctrLdflt{\ty}{\ty'} \ \land\ 
+        \tyunfvlddflt{\ty} \ \land\  \tyvlddflt{\ty'},\]
+    $\forall \substvars \text{ s.t. } 
+        \dom{\substvars} \supseteq \UEnvD \ \land\ 
+        \dom{\substvars} \cap \dom{\AEnv} = \varnothing \ \land\ 
+        \vldinenv{\AEnv}{\CSet}{\substvars}.$
+     \[ 
+        \subtydflt{\substvars(\ty)}{\substvars(\ty')}.
+     \]
+\end{theorem}
+\begin{proof}
+    By strong induction on $\tymsrdflt{\ty} + \tymsrdflt{\ty'}.$
+    \begin{itemize}
+        \item Case \RSC{Top} \subtyctrdfltenv{\ty}{\tyany}{\EmptyCSet}.
+            By definition, $\substvars(\tyany) = \tyany$.
+            Thus, the case concludes by \RST{Top}:
+            \subtydflt{\substvars(\ty)}{\tyany}.
+        \item Case \RSC{Bot} by \RST{Bot}, similarly to \RSC{Top}.
+        \item Case \RSC{UBot}
+            \subtyctrLdfltenv{\plug\dctx\va}{\ty'}{\ctrsngl\va\tybot}.
+            Since $\substvars(\plug\dctx\va) = 
+                \plug{\substvars(\dctx)}{\substvars(\va)} = 
+                \plug{\dctx'}{\substvars(\va)}$ for some $\dctx'$
+            and by assumption, \subtydflt{\substvars(\va)}{\tybot},
+            we have \subtydflt{\plug{\dctx'}{\substvars(\va)}}{\plug{\dctx'}\tybot}.
+            By \RST{Bot}, \subtydflt{\plug{\dctx'}\tybot}{\substvars(\ty')}.
+            Therefore, the case concludes by transitivity:
+            \subtydflt{\plug{\dctx'}{\substvars(\va)}}{\substvars(\ty')}.
+        \item Case \RSC{VarRefl} by \RST{VarRefl}, for $\substvars(\vx) = \vx.$
+        \item Case \RSC{UVarLeft} 
+            \subtyctrLdfltenv{\va}{\ty'}{\ctrsngl{\va}{\ty'}} by assumption
+            \subtydflt{\substvars(\va)}{\ty'}, since $\substvars(\ty') = \ty'$
+            due to \tyvlddflt{\ty'}.
+        \item Case \RSC{UVarRight} similarly to \RSC{UVarLeft}.
+        \item Case \RSC{VarLeft} (\RSC{VarRight}) by inversion, IH, and
+            \RST{VarLeft} (\RST{VarRight}), for $\substvars(\vx) = \vx$
+            and $\substvars(\tyub) = \tyub$ ($\substvars(\tylb) = \tylb$).
+        \item Cases \RSC{Tuple}, \RSC{Inv}, \RSC{UnionLeft}, and \RSC{UnionRight}
+            are all similar: by inversion, IH, and the corresponding subtyping
+            constructor.
+        \item \textbf{Case \RSC{UVar-UnionRight}} 
+            \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
+            {\CSet'_1 \cup \CSet'_2 \cup \CSet'} .
+    \end{itemize}
 \end{proof}

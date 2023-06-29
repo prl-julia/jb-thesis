@@ -290,7 +290,7 @@ in constraints resolution.
     { \subtyctrdfltenv{\plug\dctx\tybot}{\ty'}{\EmptyCSet} }
 
     \colorbox{light-gray}{$
-    \inferrule[\RSC{U-Bot}]
+    \inferrule[\RSC{UBot}]
     { \va \in \UEnvD }
     { \subtyctrLdfltenv{\plug\dctx\va}{\ty'}{\ctrsngl\va\tybot} }
     $}
@@ -301,13 +301,13 @@ in constraints resolution.
     { \subtyctrdfltenv{\vx}{\vx}{\EmptyCSet} }
 
     \colorbox{light-gray}{$
-    \inferrule[\RSC{U-VarLeft}]
+    \inferrule[\RSC{UVarLeft}]
     { \va \in \UEnvD }
     { \subtyctrLdfltenv{\va}{\ty'}{\ctrsngl{\va}{\ty'}} }
     $}
 
     \colorbox{light-gray}{$
-    \inferrule[\RSC{U-VarRight}]
+    \inferrule[\RSC{UVarRight}]
     { \va \in \UEnvD }
     { \subtyctrRdfltenv{\ty}{\va}{\ctrset{\ctrsub{\ty}{\va}}} }
     $}
@@ -349,7 +349,7 @@ in constraints resolution.
     { \subtyctrdflt{\ty}{\tyunion{\ty'_1}{\ty'_2}} }
 
     \colorbox{light-gray}{$
-    \inferrule[\RSC{U-UnionRight}]
+    \inferrule[\RSC{UVar-UnionRight}]
     {   \va \in \UEnvD \and \va_1, \va_2 \text{ fresh} \and
         \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} \and
         \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2} \\ 
@@ -366,7 +366,7 @@ in constraints resolution.
         \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}}\text{ if } n=0
     }
     { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
-        {\CSet'_1 \cup \CSet'_2 } \cup \CSet' }
+        {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
     $}
 %
     \\
@@ -393,9 +393,11 @@ in constraints resolution.
 \end{minipage}}
 \caption{Constrained subtyping of types.
     Note: %\dctx stands for \dctxty;
-    every rule with $\symsubctr$ is a shorthand for two rules, 
+    every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
     one where all occurrences of $\symsubctr$ are replaced with 
     $\symsubctrL$, and another with $\symsubctrR$.
+    Thus, the figure defines two mutually recursive relations,
+    \subtyctrLdflt{\ty}{\ty'} and \subtyctrRdflt{\ty}{\ty'}.
     %$\symsubctr$ stands for either $\symsubctrL$ or $\symsubctrR$,
     %and within one rule, all occurrences of $\symsubctr$ denote the same relation
 }\label{fig:subtyping-constrained}
@@ -651,8 +653,20 @@ in constraints resolution.
         \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
         \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
     { \vldinenvdflt{\substvars} }
+    
+    \\
+    \fbox{\vldinenv{\AEnv}{\CSet}{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \ctrsub{\ty}{\va} \in \CSet.\ \ 
+        \subtydflt{\ty}{\substvars(\va)} \and 
+      \forall \ctrsub{\va}{\ty'} \in \CSet.\ \  
+        \subtydflt{\substvars(\va)}{\ty'} }
+    { \vldinenv{\AEnv}{\CSet}{\substvars} }
 \end{mathpar}
-\caption{Valid substitution}\label{fig:substuvars-validity}
+\caption{Validity of substitution with respect to environment and constrains}%
+\label{fig:substuvars-validity}
 \end{figure}
 
 Substitution is defined in the usual manner.

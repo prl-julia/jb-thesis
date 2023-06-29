@@ -72,6 +72,7 @@
 
 %% medium sized cup
 \newcommand{\mcup}{\textstyle\bigcup}
+\newcommand{\msqcap}{\textstyle\bigsqcap}
 
 %% plugging
 \newcommand{\plug}[2]{\EM{#1[#2]}}
@@ -171,14 +172,6 @@
 
 \newcommand{\Alt}{~\vert~}                  %% |
 
-\DeclareMathOperator{\symsub}{<:}               %% subtyping
-
-\DeclareMathOperator{\symsubctr}{\lessdot}   %% constrained subtyping
-\DeclareMathOperator{\symsubctrL}{\bullet\!\!\lessdot} %% constrained left subtyping
-\DeclareMathOperator{\symsubctrR}{\lessdot\!\!\bullet} %% constrained right subtyping
-
-\DeclareMathOperator{\symrexvarsub}{\ll}        %% restricted existential bounds
-
 %% Type Constructors
 %% *********************************************************
 
@@ -222,20 +215,15 @@
 %% Meta functions
 %% *********************************************************
 
-\DeclareMathOperator{\fvop}{\mathit{FV}}
-\DeclareMathOperator{\domop}{\mathit{dom}}
-\DeclareMathOperator{\occop}{\mathit{occ}}
-
 %\DeclareMathOperator{\ubop}{\mathit{ub}}    %% upper bound
 %\DeclareMathOperator{\lbop}{\mathit{lb}}    %% lower bound
 
-\DeclareMathOperator{\solvectrop}{\mathbf{Solve}}
-
-\DeclareMathOperator{\msrop}{\mathcal{M}}
-
+\DeclareMathOperator{\fvop}{\mathit{FV}}
+\DeclareMathOperator{\domop}{\mathit{dom}}
 \newcommand{\fv}[1]{\EM{\fvop(#1)}}
 \newcommand{\dom}[1]{\EM{\domop(#1)}}
 
+\DeclareMathOperator{\occop}{\mathit{occ}}
 \newcommand{\occ}[2]{\EM{\occop(#1;#2)}}
 \newcommand{\occdflt}[1]{\occ{\vany}{#1}}
 
@@ -244,12 +232,20 @@
 %\newcommand{\lb}[2]{\EM{\lbop(#1, #2)}}
 %\newcommand{\lbdflt}[1]{\lb{\AEnv}{#1}}
 
+\DeclareMathOperator{\solvectrop}{\mathbf{Solve}}
 \newcommand{\solvectr}[3]{\EM{\solvectrop(#1;#2;#3)}}
 \newcommand{\solvectrdflt}{\solvectr{\AEnv}{\UEnv}{\CSet}}
 
 \newcommand{\size}[1]{\EM{|#1|}}
+
+\DeclareMathOperator{\msrop}{\mathcal{M}}
 \newcommand{\tymsr}[2]{\EM{\msrop(#1;#2)}}
 \newcommand{\tymsrdflt}[1]{\tymsr{\AEnv}{#1}}
+
+\newcommand{\tyjoin}[3]{\EM{#2 \sqcup_{#1} #3}}
+\newcommand{\tyjoindflt}[2]{\tyjoin{\AEnv}{#1}{#2}}
+\newcommand{\tymeet}[3]{\EM{#2 \sqcap_{#1} #3}}
+\newcommand{\tymeetdflt}[2]{\tymeet{\AEnv}{#1}{#2}}
 
 %% Relations
 %% *********************************************************
@@ -270,6 +266,14 @@
 \newcommand{\inherits}[2]{\EM{#1 \text{ inherits } #2}}
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Subtyping
+
+\DeclareMathOperator{\symsub}{<:}               %% subtyping
+
+\DeclareMathOperator{\symsubctr}{\lessdot}   %% constrained subtyping
+\DeclareMathOperator{\symsubctrL}{\bullet\!\!\lessdot} %% constrained left subtyping
+\DeclareMathOperator{\symsubctrR}{\lessdot\!\!\bullet} %% constrained right subtyping
+
+\DeclareMathOperator{\symrexvarsub}{\ll}        %% restricted existential bounds
 
 %% Subtyping signatures Γ|Δ |- s1 <: s2
 \newcommand{\subtysig}[4]{\EM{#1\Alt#2\ \vdash\ #3 \symsub #4}}

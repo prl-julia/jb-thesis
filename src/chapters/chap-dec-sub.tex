@@ -277,6 +277,56 @@ in constraints resolution.
 \footnotesize
 \makebox[\textwidth][c]{
 \begin{minipage}{\ruleswidth}  
+\[
+\begin{array}{ccccll}
+    \hline
+    \multicolumn{6}{c}{\tyjoindflt{\ty}{\ty'}} \\ 
+    \hline 
+    \ty &\sqcup_{\AEnv}& \ty' &=& \ty' & \text{if } \subtydflt{\ty}{\ty'} \\
+    \ty &\sqcup_{\AEnv}& \ty' &=& \ty  & \text{if } \subtydflt{\ty'}{\ty} \\
+    \ty &\sqcup_{\AEnv}& \ty' &=& \tyunion{\ty}{\ty'} & \text{otherwise} \\
+    \\
+    \hline
+    \multicolumn{6}{c}{\tymeetdflt{\ty}{\ty'}} \\ 
+    \hline 
+    \ty &\sqcap_{\AEnv}& \ty' &=& \ty  & \text{ if } \subtydflt{\ty}{\ty'} \\
+    \ty &\sqcap_{\AEnv}& \ty' &=& \ty' & \text{ if } \subtydflt{\ty'}{\ty} \\
+    \tyunion{\ty_1}{\ty_2} &\sqcap_{\AEnv}& \ty' &=& 
+        \tyunion{(\tymeetdflt{\ty_1}{\ty'})}{(\tymeetdflt{\ty_2}{\ty'})} &  \\
+    \ty &\sqcap_{\AEnv}& \tyunion{\ty'_1}{\ty'_2} &=& 
+        \tyunion{(\tymeetdflt{\ty}{\ty'_1})}{(\tymeetdflt{\ty}{\ty'_2})} &  \\
+    \vany &\sqcap_{\AEnv}& \ty' &=& 
+        \tymeetdflt{\tylb}{\ty'} & 
+        \text{ where } \varbound{\vany}{\tylb}{\tyub} \in \AEnv \\
+    \ty &\sqcap_{\AEnv}& \vany &=& 
+        \tymeetdflt{\ty}{\tylb} & 
+        \text{ where } \varbound{\vany}{\tylb}{\tyub} \in \AEnv \\
+    \typair{\ty_1}{\ty_2} &\sqcap_{\AEnv}& \typair{\ty'_1}{\ty'_2} &=& 
+        \typair{(\tymeetdflt{\ty_1}{\ty'_1})}{(\tymeetdflt{\ty_2}{\ty'_2})} &  \\
+    \tyinv\iname{\ldots,\rexvarbound{\tylb_i}{\tyub_i},\ldots} 
+        &\sqcap_{\AEnv}& \tyinv\iname{\ldots,\rexvarbound{\tylb'_i}{\tyub'_i},\ldots} &=& 
+        \tyinv\iname{\ldots,\rexvarbound{(\tyjoindflt{\tylb_i}{\tylb'_i})}
+            {(\tymeetdflt{\tyub_i}{\tyub'_i})},\ldots} &  \\
+    & & & & \multicolumn{2}{l}{\text{where } \forall i.\ 
+        \subtydflt{(\tyjoindflt{\tylb_i}{\tylb'_i})}
+        {(\tymeetdflt{\tyub_i}{\tyub'_i})} } \\
+    \ty &\sqcap_{\AEnv}& \ty' &=& \tybot & \text{otherwise} \\
+\end{array}
+\]
+\end{minipage}}
+\caption{Join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$) of types.
+Both definitions should be read top to bottom, i.e. earlier cases have
+precedence over later cases.
+Some cases (e.g. where \ty or $\ty'$ are \tybot or \tyany, 
+and where both are the same type variable)
+are omitted because they are covered by \subtydflt{\ty}{\ty'} and 
+\subtydflt{\ty'}{\ty}.}\label{fig:ty-join-meet}
+\end{figure}
+
+\begin{figure}
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
 \begin{mathpar}
     \fbox{\subtyctrdflt{\ty}{\ty}} 
     \\
@@ -353,12 +403,13 @@ in constraints resolution.
     {   \va \in \UEnvD \and \va_1, \va_2 \text{ fresh} \and
         \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} \and
         \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2} \\ 
-        \CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}} 
+        \CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{\tyub_1^i}} 
             \and \va_1 \notin \CSet'_1 \and
-        \CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}} 
+        \CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{\tyub_2^j}} 
             \and \va_2 \notin \CSet'_2  \\
-        \CSet'\ \ =\ \ \mcup_{i=1,j=1}^{i=n,j=m}
-            \ctrset{\ctrsub{\va}{\tyunion{\tyub_1^i}{\tyub_2^j}}}
+        \CSet'\ \ =\ \ 
+            \ctrsngl{\va}{\tyunion{\msqcap_{i=1}^n \tyub_1^i}
+                {\msqcap_{j=1}^m \tyub_2^j}} 
             \text{ if } n\geq1,m\geq1
         \text{\ or\ }
         \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}}\text{ if } m=0
@@ -388,7 +439,6 @@ in constraints resolution.
         {\rexvarbound{\tylb}{\tyub}}
         {\rexvarbound{\tylb'}{\tyub'}}
         {\CSet_l \cup \CSet_u} }
-
 \end{mathpar}
 \end{minipage}}
 \caption{Constrained subtyping of types.
@@ -402,6 +452,27 @@ in constraints resolution.
     %and within one rule, all occurrences of $\symsubctr$ denote the same relation
 }\label{fig:subtyping-constrained}
 \end{figure}
+%% old definition of UVar-UnionRight: unclear how to prove its soundness
+% \colorbox{light-gray}{$
+% \inferrule[\RSC{UVar-UnionRight}]
+% {   \va \in \UEnvD \and \va_1, \va_2 \text{ fresh} \and
+%     \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} \and
+%     \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2} \\ 
+%     \CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{\tyub_1^i}} 
+%         \and \va_1 \notin \CSet'_1 \and
+%     \CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{\tyub_2^j}} 
+%         \and \va_2 \notin \CSet'_2  \\
+%     \CSet'\ \ =\ \ \mcup_{i=1,j=1}^{i=n,j=m}
+%         \ctrset{\ctrsub{\va}{\tyunion{\tyub_1^i}{\tyub_2^j}}}
+%         \text{ if } n\geq1,m\geq1
+%     \text{\ or\ }
+%     \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}}\text{ if } m=0
+%     \text{\ or\ }
+%     \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}}\text{ if } n=0
+% }
+% { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
+%     {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
+% $}
 
 
 \begin{figure}

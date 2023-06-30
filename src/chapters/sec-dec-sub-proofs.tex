@@ -186,6 +186,22 @@ distributivity contexts (proofs are straightforward by induction):
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}.\]
 \end{proof}
 
+
+\begin{lemma}{Termination of join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$).}%
+\label{lem:meet-terminates}
+    $\forall \AEnv, \ty, \ty'$ both
+    \tyjoindflt{\ty}{\ty'} and \tymeetdflt{\ty}{\ty'} terminate.
+\end{lemma}
+\begin{proof}
+    \tyjoindflt{\ty}{\ty'} terminates because subtyping of types terminates
+    by~\thmref{thm:subty-terminates}.
+
+    \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates
+    and for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
+    \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
+    is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
+\end{proof}
+
 \begin{theorem}{Termination of\ \ \subtyctrdflt{\ty}{\ty'}.}%
 \label{thm:subtyctr-terminates}
     The subtyping algorithm built from the rules of
@@ -201,7 +217,13 @@ distributivity contexts (proofs are straightforward by induction):
     
     The only interesting case is \RSC{UVar-UnionRight}.
     By the variable names convention~\ref{def:var-names}, $\va \notin \AEnv$.
-    Therefore, $\tymsrdflt{\va} = \tymsrdflt{\va_1} = \tymsrdflt{\va_2}$.
+    Therefore, $\tymsrdflt{\va} = \tymsrdflt{\va_1} = \tymsrdflt{\va_2}$
+    and the measure of the left-hand side type is the same in both premises
+    and the conclusion,
+    while the measure of the right-hand side type in both premises 
+    is strictly smaller than in conclusion.
+    Furthermore, $\msqcap_{i=1}^n \tyub_1^i$ and $\msqcap_{j=1}^m \tyub_2^j$
+    terminate by~\lemref{lem:meet-terminates}.
 \end{proof}
 
 \begin{theorem}{Termination of\ \solvectrdflt.}%
@@ -816,7 +838,7 @@ distributivity contexts (proofs are straightforward by induction):
 %     and \thmref{thm:sub-ty-refl} (reflexivity) in the inductive cases.
 % \end{proof}
 
-\begin{theorem}{Soundness of subtyping of types with respect to a subsitution.}%
+\begin{theorem}{Soundness of subtyping of types with respect to subsitution.}%
 \label{thm:subty-sound-subst}
     $\forall \AEnv, \ty, \ty' \text{ s.t. } \tyvlddflt{\ty, \ty'}.\ 
      \forall \AEnv', \substvars \text{ s.t. } \vldinenvdflt{\substvars}.$
@@ -835,7 +857,7 @@ distributivity contexts (proofs are straightforward by induction):
     \subty{\AEnv'}{\substvars(\vany)}{\substvars(\vany)}.
 
     Cases \RST{Tuple}, \RST{Inv}, \RST{UnionLeft}, and \RST{UnionRight} are
-    straightforward using inversion, the inductive hypothesis, and constructor.
+    straightforward using inversion, the induction hypothesis, and constructor.
     For example, consider the case \RST{Tuple}
     \subtydflt{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}}.
     By inversion, \subtydflt{\ty_i}{\ty'_i}.
@@ -862,6 +884,105 @@ distributivity contexts (proofs are straightforward by induction):
     middle type $\substvars(\plug\dctx{\tyub})$:
     \[\subty{\AEnv'}{\substvars(\plug\dctx{\vany})}{\substvars(\ty')}.\]
 \end{proof}
+
+
+\subsection{Properties of Join and Meet}%
+\label{subsec:props-join-meet-proof}
+%% ======================================================================
+
+\begin{theorem}{Soundness of join.}%
+\label{thm:join-sound}
+    Join produces a valid upper bound, i.e., 
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+    \[
+        \tyvlddflt{\tyjoindflt{\ty}{\ty'}}
+        \quad\text{and}\quad
+        \subtydflt{\ty}{(\tyjoindflt{\ty}{\ty'})}
+        \quad\text{and}\quad
+        \subtydflt{\ty'}{(\tyjoindflt{\ty}{\ty'})}.
+    \]
+    Furthermore, \tyjoindflt{\ty}{\ty'} is the least upper bound
+    of \ty and $\ty'$, i.e.,
+    $\forall \tyub$ s.t. \tyvlddflt{\tyub},
+    \subtydflt{\ty}{\tyub} and \subtydflt{\ty'}{\tyub}.
+    \[
+        \subtydflt{(\tyjoindflt{\ty}{\ty'})}{\tyub}.
+    \]
+\end{theorem}
+\begin{proof}
+    Straightforward by the definition of $\sqcup_{\AEnv}$,
+    using \thmref{thm:sub-ty-refl} (reflexivity), 
+    \RST{UnionLeft}, and \RST{UnionRight}.
+\end{proof}
+
+\begin{lemma}{Symmetry of join.}
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+    \[
+        \subtydflt{(\tyjoindflt{\ty}{\ty'})}{(\tyjoindflt{\ty'}{\ty})}
+        \quad\text{and}\quad
+        \subtydflt{(\tyjoindflt{\ty'}{\ty})}{(\tyjoindflt{\ty}{\ty'})}.
+    \]
+\end{lemma}
+\begin{proof}
+    Straightforward by the definition of $\sqcup_{\AEnv}$,
+    using \thmref{thm:sub-ty-refl} (reflexivity), 
+    \RST{UnionLeft}, and \RST{UnionRight}.
+\end{proof}
+
+\begin{theorem}{Soundness of meet.}%
+\label{thm:meet-sound}
+    Meet produces a valid lower bound, i.e., 
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+    \[
+        \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
+        \quad\text{and}\quad
+        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
+        \quad\text{and}\quad
+        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
+    \]
+\end{theorem}
+\begin{proof}
+    Straightforward by strong induction on
+    $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
+
+    For example, the case where \subtydflt{\ty}{\ty'} follows from
+    the assumptions and reflexivity \subtydflt{\ty}{\ty},
+    and the catch-all case $\tymeetdflt{\ty}{\ty'} = \tybot$
+    follows from \RST{Bot}.
+
+    In the case \tymeetdflt{(\tyunion{\ty_1}{\ty_2})}{\ty'},
+    we know by IH that \tymeetdflt{\ty_1}{\ty'} and \tymeetdflt{\ty_2}{\ty'}
+    are valid lower bounds of $\ty_1,\ty'$ and $\ty_2,\ty'$, respectively.
+    Thus, the case concludes by \RST{UnionLeft}.
+
+    In the case \tymeetdflt{\vany}{\ty'}, we have \subtydflt{\tylb}{\vany}
+    by \thmref{thm:sub-ty-refl} (reflexivity) and \RST{VarRight}.
+    Then, by IH, \subtydflt{\tymeetdflt{\tylb}{\ty'}}{\tylb}.
+    The case concludes by \thmref{thm:sub-ty-trans} (transitivity):
+    \subtydflt{\tymeetdflt{\tylb}{\ty'}}{\vany}.
+    
+    The remaining cases for tuples and invariant constructors
+    use the induction hypotheses and constructors \RST{Tuple} and \RST{Inv},
+    respectively, as well as \thmref{thm:join-sound} (soundness of join)
+    in the invariant case.
+\end{proof}
+
+\begin{lemma}{Symmetry of meet.}
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+    \[
+        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{(\tymeetdflt{\ty'}{\ty})}
+        \quad\text{and}\quad
+        \subtydflt{(\tymeetdflt{\ty'}{\ty})}{(\tymeetdflt{\ty}{\ty'})}.
+    \]
+\end{lemma}
+\begin{proof}
+    Straightforward by strong induction on
+    $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$,
+    using the definition of $\sqcap_{\AEnv}$,
+    \thmref{thm:sub-ty-refl} (reflexivity),
+    and \RST{} constructors.
+\end{proof}
+
 
 
 \subsection{Properties of Constrained Subtyping of Types}%
@@ -897,24 +1018,22 @@ distributivity contexts (proofs are straightforward by induction):
 
     In the second case, all subtyping rules have matching rules of constrained
     subtyping.
-
     The assumption \tyvld{}{\AEnv} and \lemref{lem:subty-weakening} (context
     weakening) allow for concluding 
     \tyvlddflt{\plug\dctx\tyub} and \tyvlddflt{\tylb} 
-    to apply the inductive hypothesis in the rules
+    to apply the induction hypothesis in the rules
     \RSC{VarLeft}/\RST{VarLeft} and \RSC{VarRight}/\RST{VarRight}.
 \end{proof}
 
 \begin{theorem}{Soundness of constrained subtyping.}%
 \label{thm:subtyctr-sound}
-\TODO{Any other validity requirements?}
-    $\forall \AEnv, \UEnvD, \ty, \ty' \text{ s.t. }$
+    $\forall \AEnv, \UEnvD, \ty, \ty' \text{ s.t. } \tyvld{}{\AEnv},$ if
     \[\subtyctrRdflt{\ty}{\ty'} \ \land\ 
         \tyvlddflt{\ty} \ \land\  \tyunfvlddflt{\ty'}\] 
     or
     \[\subtyctrLdflt{\ty}{\ty'} \ \land\ 
         \tyunfvlddflt{\ty} \ \land\  \tyvlddflt{\ty'},\]
-    $\forall \substvars \text{ s.t. } 
+    then $\forall \substvars \text{ s.t. } 
         \dom{\substvars} \supseteq \UEnvD \ \land\ 
         \dom{\substvars} \cap \dom{\AEnv} = \varnothing \ \land\ 
         \vldinenv{\AEnv}{\CSet}{\substvars}.$
@@ -954,6 +1073,122 @@ distributivity contexts (proofs are straightforward by induction):
             constructor.
         \item \textbf{Case \RSC{UVar-UnionRight}} 
             \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
-            {\CSet'_1 \cup \CSet'_2 \cup \CSet'} .
+            {\CSet'_1 \cup \CSet'_2 \cup \CSet'}.
+            Since \tyvlddflt{\tyunion{\ty'_1}{\ty'_2}}, we have
+            $\substvars(\tyunion{\ty'_1}{\ty'_2}) = \tyunion{\ty'_1}{\ty'_2}.$
+            By assumption,
+            \vldinenv{\AEnv}{\CSet'_1 \cup \CSet'_2 \cup \CSet'}{\substvars}.
+            By inversion, 
+            \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} 
+            and
+            \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2},
+            where $\CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{\tyub_1^i}}$
+            and $\CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{\tyub_2^j}}$.
+            
+            When $n=0$ or $m=0$, we can take $\substvars_1 = 
+                \subst{\substvars}{\substel{\va_1}{\substvars(\va)}}$
+            and $\substvars_2 = 
+                \subst{\substvars}{\substel{\va_2}{\substvars(\va)}}$.
+            In both subcases ($n=0$ and $m=0$), we have 
+            \vldinenv{\AEnv}{\CSet_1}{\substvars_1} and
+            \vldinenv{\AEnv}{\CSet_2}{\substvars_2}, because $\substvars(\va)$
+            satisfies the constraints on $\va_1$ and $\va_2$.
+            Therefore, by the induction hypotheses,
+            \subtydflt{\substvars_1(\plug\dctx{\va_1})}{\tyunion{\ty'_1}{\ty'_2}}
+            and
+            \subtydflt{\substvars_2(\plug\dctx{\va_2})}{\tyunion{\ty'_1}{\ty'_2}}.
+            Clearly, $\substvars(\plug\dctx{\va}) = 
+                \substvars_1(\plug\dctx{\va_1}) = 
+                \substvars_2(\plug\dctx{\va_2})$,
+            and thus, the subcases conclude by \RST{UnionRight}.
+
+            The most interesting case is when $n \geq 1, m \geq 1$.
+            Let $\msqcap_{i=1}^n \tyub_1^i$ be denoted with $\tyub_1$
+            and $\msqcap_{j=1}^m \tyub_2^j$ with $\tyub_2$.
+            By~\thmref{thm:meet-sound} (soundness of meet), we have
+            \subtydflt{\tyub_1}{\tyub_1^i} and \subtydflt{\tyub_2}{\tyub_2^j}
+            for all $i, j$. Therefore, we can take 
+            $\substvars_1 = \subst{\substvars}{\substel{\va_1}{\tyub_1}}$ and
+            $\substvars_2 = \subst{\substvars}{\substel{\va_2}{\tyub_2}}$,
+            and it holds that \vldinenv{\AEnv}{\CSet_1}{\substvars_1} and
+            \vldinenv{\AEnv}{\CSet_2}{\substvars_2}.
+            Therefore, the induction hypotheses are applicable, and we get
+            \subtydflt{\plug{\substvars_1(\dctx)}{\tyub_1}}{\ty'_1} (H$_1$) and
+            \subtydflt{\plug{\substvars_2(\dctx)}{\tyub_2}}{\ty'_2} (H$_2$).
+            By assumption on \substvars, we have
+            \subtydflt{\substvars(\va)}{\tyunion{\tyub_1}{\tyub_2}}.
+            Therefore, \subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}
+                {\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}.
+            Since $\va_1, \va_2$ were fresh, we know
+            $\substvars(\dctx) = \substvars_1(\dctx) = \substvars_2(\dctx)$.
+            Therefore, by \RST{UnionLeft} applied to H$_1$, H$_2$,
+            \subtydflt{\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}
+                {\tyunion{\ty'_1}{\ty'_2}}.
+            Finally, the subcase $n \geq 1, m \geq 1$ concludes by transitivity:
+            \subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}{\tyunion{\ty'_1}{\ty'_2}}.
     \end{itemize}
 \end{proof}
+
+\begin{theorem}{Soundness of constrains resolution.}%
+\label{thm:solvectr-sound}
+    $\forall \AEnv, \UEnv$ s.t. $\tyvld{}{\AEnv, \UEnv}$.
+    $\forall \CSet$ s.t. $\forall \ctrsub{\tylb}{\va} \in \CSet.
+        \ \tyvlddflt{\tylb}\ \land\ \tyvld{\UEnv}{\va}$ and 
+        $\forall \ctrsub{\va}{\tyub} \in \CSet.
+        \ \tyvld{\UEnv}{\va} \ \land\ \tyvlddflt{\tyub}.$
+    \[
+        \solvectrdflt = \substvars
+        \quad\implies\quad
+        \vldinenv{\AEnv}{\UEnv}{\substvars}\ \ \land\ \ 
+        \vldinenv{\AEnv}{\CSet}{\substvars}.
+    \]
+\end{theorem}
+\begin{proof}
+    By induction on \UEnv. The base case is trivial ($\CSet = \EmptyCSet$
+    because $\UEnv = \EmptyEnv$).
+
+    In the inductive step $\UEnv,\varbound{\va}{\tylb}{\tyub}$,
+    the induction hypothesis applies to the call \solvectr{\AEnv}{\UEnv}{
+        \CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}
+    }, which returns \substvars.
+    Therefore, we know that \vldinenv{\AEnv}{\UEnv}{\substvars} and
+    \vldinenv{\AEnv}{\CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}}{\substvars}.
+
+    Let $\substvars(\tylb) \mcup_i \tylb_i$ be denoted with $\ty_{\va}$
+    and \subst\substvars{\substel{\va}{\ty_{\va}}} with $\substvars_{\va}.$
+    %be denoted with $\substvars_{\va}.$
+    By~\thmref{thm:subtyctr-sound} (soundness of constrained subtyping)
+    applied to \subtyctrRdfltenv{\tylb_i}{\tyub}{\CSet_{\tylb_i}} with
+    \vldinenv{\AEnv}{\CSet_{\tylb_i}}{\substvars} and
+    \subtyctrLdfltenv{\tylb}{\tyub_j}{\CSet_{\tyub_j}} with
+    \vldinenv{\AEnv}{\CSet_{\tyub_j}}{\substvars},
+    we know 
+    \[
+        \subtydflt{\tylb_i}{\substvars(\tyub)}\ (\textrm{H}_{l_i})\ 
+        \ \text{ and }\ 
+        \subtydflt{\substvars(\tylb)}{\tyub_j}\ (\textrm{H}_{u_j}).
+    \]
+    % Since $\lnot\occ{\va}{\tylb}, \lnot\occ{\va}{\tyub}$, we have
+    % $\substvars(\tylb) = \substvars_{\va}(\tylb)$ and
+    % $\substvars(\tyub) = \substvars_{\va}(\tyub)$.
+    By \RST{UnionRight} and reflexivity, we know 
+    \subtydflt{\substvars(\tylb)}{\ty_{\va}}.
+    By \thmref{thm:subty-sound-subst} (soundness of subtyping with respect to
+    substitution), \subtydflt{\substvars(\tylb)}{\substvars(\tyub)} (H),
+    for \subty{\UEnv}{\tylb}{\tyub} by the \UEnv validity assumption. 
+    Thus, we have %\subtydflt{\substvars(\tylb)}{\ty_{\va}} and
+    \subtydflt{\ty_{\va}}{\substvars(\tyub)}
+    by \RST{UnionLeft}, H, and H$_{l_i}$.
+    Since \vldinenv{\AEnv}{\UEnv}{\substvars} and \va does not occur in \UEnv,
+    it holds that \vldinenv{\AEnv}{\UEnv}{\substvars_{\va}}, and we get 
+    \[ \vldinenv{\AEnv}{\UEnv, \varbound{\va}{\tylb}{\tyub}}{\substvars_{\va}}. \]
+
+    Finally, we know that $\forall i,j,$ \subtydflt{\tylb_i}{\ty_{\va}} holds by
+    \RST{UnionRight} and reflexivity, and \subtydflt{\ty_{\va}}{\tyub_j} holds
+    by \RST{UnionLeft}, H$_{u_j}$, and \subtydflt{\tylb_i}{\tyub_j},
+    which means \vldinenv{\AEnv}{\CSet_{\va}}{\substvars_{\va}}.
+    Since \va does not occur in $\CSet'$, we also know 
+    \vldinenv{\AEnv}{\CSet'}{\substvars_{\va}}.
+    Thus, \vldinenv{\AEnv}{\CSet}{\substvars_{\va}}, which concludes the proof.
+\end{proof}
+

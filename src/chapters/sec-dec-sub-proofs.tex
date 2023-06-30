@@ -10,52 +10,52 @@
     \hline
     \multicolumn{3}{c}{\tymsrdflt{\ty}} \\ 
     \hline 
-    \tymsrdflt{\tyany} &::=& 1\\
-    \tymsrdflt{\tybot} &::=& 1\\
-    \tymsr{\,\EmptyEnv\,}{\vany} &::=& 1\\
-    \tymsr{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\vany} &::=& 
+    \tymsrdflt{\tyany} &=& 1\\
+    \tymsrdflt{\tybot} &=& 1\\
+    \tymsr{\,\EmptyEnv\,}{\vany} &=& 1\\
+    \tymsr{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\vany} &=& 
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}\\
-    \tymsr{\AEnv, \varbound{\vany'}{\tylb}{\tyub}}{\vany} &::=& 
+    \tymsr{\AEnv, \varbound{\vany'}{\tylb}{\tyub}}{\vany} &=& 
         \tymsrdflt{\vany} \\
-    \tymsrdflt{\typair{\ty_1}{\ty_2}} &::=& 
+    \tymsrdflt{\typair{\ty_1}{\ty_2}} &=& 
         1 + \tymsrdflt{\ty_1} + \tymsrdflt{\ty_2}\\
-    \tymsrdflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &::=&
+    \tymsrdflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &=&
         1 + \tymsrdflt{\rexvar_1} + \ldots + \tymsrdflt{\rexvar_n}\\
-    \tymsrdflt{\tyunion{\ty_1}{\ty_2}} &::=& 
+    \tymsrdflt{\tyunion{\ty_1}{\ty_2}} &=& 
         1 + \tymsrdflt{\ty_1} + \tymsrdflt{\ty_2}\\
     \\
     \hline
     \multicolumn{3}{c}{\tymsrdflt{\rexvar}} \\ 
     \hline 
-    \tymsrdflt{\rexvarbound{\ty}{\ty}} &::=& \tymsrdflt{\ty}\\
-    \tymsrdflt{\rexvarbound{\tylb}{\tyub}} &::=& 
+    \tymsrdflt{\rexvarbound{\ty}{\ty}} &=& \tymsrdflt{\ty}\\
+    \tymsrdflt{\rexvarbound{\tylb}{\tyub}} &=& 
         2\times(1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub})\\
     \\
     \hline
     \multicolumn{3}{c}{\tymsrdflt{\dctx}} \\ 
     \hline 
-    \tymsrdflt{\square} &::=& 0\\
-    \tymsrdflt{\typair{\dctx}{\ty}} &::=& 
+    \tymsrdflt{\square} &=& 0\\
+    \tymsrdflt{\typair{\dctx}{\ty}} &=& 
         1 + \tymsrdflt{\dctx} + \tymsrdflt{\ty}\\
-    \tymsrdflt{\typair{\ty}{\dctx}} &::=& 
+    \tymsrdflt{\typair{\ty}{\dctx}} &=& 
         1 + \tymsrdflt{\ty} + \tymsrdflt{\dctx}\\
     \\
     \hline
     \multicolumn{3}{c}{\tymsrdflt{\tysig}} \\ 
     \hline 
-    \tymsrdflt{\tyany} &::=& 1\\
+    \tymsrdflt{\tyany} &=& 1\\
     \multicolumn{3}{l}{\ldots} \\
-    \tymsrdflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &::=& 
+    \tymsrdflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &=& 
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub} + 
         \tymsr{\AEnv,\varbound{\vany}{\tylb}{\tyub}}{\tysig}\\
     \\
     \hline
     \multicolumn{3}{c}{\tymsrdflt{\dctxsig}} \\ 
     \hline 
-    \tymsrdflt{\square} &::=& 0\\
-    \tymsrdflt{\typair{\dctxsig}{\tysig}} &::=& 
+    \tymsrdflt{\square} &=& 0\\
+    \tymsrdflt{\typair{\dctxsig}{\tysig}} &=& 
         1 + \tymsrdflt{\dctxsig} + \tymsrdflt{\tysig}\\
-    \tymsrdflt{\typair{\tysig}{\dctxsig}} &::=& 
+    \tymsrdflt{\typair{\tysig}{\dctxsig}} &=& 
         1 + \tymsrdflt{\tysig} + \tymsrdflt{\dctxsig}\\
 \end{array}
 \]
@@ -97,50 +97,50 @@ The syntactic size is defined in~\figref{fig:ty-size}.
     \hline
     \multicolumn{3}{c}{\size{\ty}} \\ 
     \hline 
-    \size{\tyany} &::=& 1\\
-    \size{\tybot} &::=& 1\\
-    \size{\vany}  &::=& 1\\
-    \size{\typair{\ty_1}{\ty_2}}  &::=& 1 + \size{\ty_1} + \size{\ty_2}\\
-    \size{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &::=&
+    \size{\tyany} &=& 1\\
+    \size{\tybot} &=& 1\\
+    \size{\vany}  &=& 1\\
+    \size{\typair{\ty_1}{\ty_2}}  &=& 1 + \size{\ty_1} + \size{\ty_2}\\
+    \size{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &=&
         1 + \size{\rexvar_1} + \ldots + \size{\rexvar_n}\\
-    \size{\tyunion{\ty_1}{\ty_2}} &::=& 1 + \size{\ty_1} + \size{\ty_2}\\
+    \size{\tyunion{\ty_1}{\ty_2}} &=& 1 + \size{\ty_1} + \size{\ty_2}\\
     \\
     \hline
     \multicolumn{3}{c}{\size{\rexvar}} \\ 
     \hline 
-    \size{\rexvarbound{\tylb}{\tyub}} &::=& \size{\tylb} + \size{\tyub}\\
+    \size{\rexvarbound{\tylb}{\tyub}} &=& \size{\tylb} + \size{\tyub}\\
     \\
     \hline
     \multicolumn{3}{c}{\size{\dctx}} \\ 
     \hline 
-    \size{\square} &::=& 0\\
-    \size{\typair{\dctx}{\ty}} &::=& 
+    \size{\square} &=& 0\\
+    \size{\typair{\dctx}{\ty}} &=& 
         1 + \size{\dctx} + \size{\ty}\\
-    \size{\typair{\ty}{\dctx}} &::=& 
+    \size{\typair{\ty}{\dctx}} &=& 
         1 + \size{\ty} + \size{\dctx}\\
     \\
     \hline
     \multicolumn{3}{c}{\size{\tysig}} \\ 
     \hline 
-    \size{\tyany} &::=& 1\\
+    \size{\tyany} &=& 1\\
     \multicolumn{3}{l}{\ldots} \\
-    \size{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &::=& 
+    \size{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &=& 
         1 + \size{\tylb} + \size{\tyub} + \size{\tysig}\\
     \\
     \hline
     \multicolumn{3}{c}{\size{\AEnv}} \\ 
     \hline 
-    \size{\EmptyEnv} &::=& 0 \\
-    \size{\AEnv, \varbound{\vany}{\tylb}{\tyub}} &::=& 
+    \size{\EmptyEnv} &=& 0 \\
+    \size{\AEnv, \varbound{\vany}{\tylb}{\tyub}} &=& 
         \size{\AEnv} + \size{\tylb} + \size{\tyub}\\
     \\
     \hline
     \multicolumn{3}{c}{\size{\dctxsig}} \\ 
     \hline 
-    \size{\square} &::=& 0\\
-    \size{\typair{\dctxsig}{\tysig}} &::=& 
+    \size{\square} &=& 0\\
+    \size{\typair{\dctxsig}{\tysig}} &=& 
         1 + \size{\dctxsig} + \size{\tysig}\\
-    \size{\typair{\tysig}{\dctxsig}} &::=& 
+    \size{\typair{\tysig}{\dctxsig}} &=& 
         1 + \size{\tysig} + \size{\dctxsig}\\
 \end{array}
 \]
@@ -249,35 +249,35 @@ distributivity contexts (proofs are straightforward by induction):
     \hline
     \multicolumn{3}{c}{\occdflt{\ty}} \\ 
     \hline 
-    \occdflt{\tyany} &::=& \false\\
-    \occdflt{\tybot} &::=& \false\\
-    \occdflt{\vany}  &::=& \true\\
-    \occdflt{\vany'}  &::=& \false\\
-    \occdflt{\typair{\ty_1}{\ty_2}}  &::=& \occdflt{\ty_1} \lor \occdflt{\ty_2}\\
-    \occdflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &::=&
+    \occdflt{\tyany} &=& \false\\
+    \occdflt{\tybot} &=& \false\\
+    \occdflt{\vany}  &=& \true\\
+    \occdflt{\vany'}  &=& \false\\
+    \occdflt{\typair{\ty_1}{\ty_2}}  &=& \occdflt{\ty_1} \lor \occdflt{\ty_2}\\
+    \occdflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &=&
         \occdflt{\rexvar_1} \lor \ldots \lor \occdflt{\rexvar_n}\\
-    \occdflt{\tyunion{\ty_1}{\ty_2}} &::=& \occdflt{\ty_1} \lor \occdflt{\ty_2}\\
+    \occdflt{\tyunion{\ty_1}{\ty_2}} &=& \occdflt{\ty_1} \lor \occdflt{\ty_2}\\
     \\
     \hline
     \multicolumn{3}{c}{\occdflt{\rexvar}} \\ 
     \hline 
-    \occdflt{\rexvarbound{\tylb}{\tyub}} &::=& \occdflt{\tylb} \lor \occdflt{\tyub}\\
+    \occdflt{\rexvarbound{\tylb}{\tyub}} &=& \occdflt{\tylb} \lor \occdflt{\tyub}\\
     \\
     \hline
     \multicolumn{3}{c}{\occdflt{\tysig}} \\ 
     \hline 
-    \occdflt{\tyany} &::=& \false\\
+    \occdflt{\tyany} &=& \false\\
     \multicolumn{3}{l}{\ldots} \\
-    \occdflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &::=& \true\\
-    \occdflt{\tyexist{\vany'}{\tylb}{\tyub}{\tysig}} &::=& 
+    \occdflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &=& \true\\
+    \occdflt{\tyexist{\vany'}{\tylb}{\tyub}{\tysig}} &=& 
         \occdflt{\tylb} \lor \occdflt{\tyub} \lor \occdflt{\tysig}\\
     \\
     \hline
     \multicolumn{3}{c}{\occdflt{\AEnv}} \\ 
     \hline 
-    \occdflt{\EmptyEnv} &::=& \false \\
-    \occdflt{\AEnv, \varbound{\vany}{\tylb}{\tyub}} &::=& \true\\
-    \occdflt{\AEnv, \varbound{\vany'}{\tylb}{\tyub}} &::=& 
+    \occdflt{\EmptyEnv} &=& \false \\
+    \occdflt{\AEnv, \varbound{\vany}{\tylb}{\tyub}} &=& \true\\
+    \occdflt{\AEnv, \varbound{\vany'}{\tylb}{\tyub}} &=& 
         \occdflt{\AEnv} \lor \occdflt{\tylb} \lor \occdflt{\tyub}\\
 \end{array}
 \]

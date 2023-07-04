@@ -72,7 +72,10 @@ Briefly, the type language supports:
         e.g. \cjl{AbstractArray\{T,N\}}\footnote{Julia allows unbounded type
         variables such as the dimensionality parameter \cjl{N} 
         of \cjl{AbstractArray\{T,N\}}
-        to be instantiated with ``plain bits'' values, e.g. numbers, booleans.
+        to be instantiated with ``plain bits'' values such as numbers or
+        booleans, for which
+        \href{https://docs.julialang.org/en/v1/base/base/\#Base.isbits}{\cjl{isbits}}
+        function returns \cjl{true}.
         Thus, \cjl{AbstractArray\{Int64,1\}} is a valid nominal type.}
         in line~5;
   \item set-theoretic union types, e.g. 

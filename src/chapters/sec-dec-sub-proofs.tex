@@ -892,22 +892,27 @@ distributivity contexts (proofs are straightforward by induction):
 
 \begin{theorem}{Soundness of join.}%
 \label{thm:join-sound}
-    Join produces a valid upper bound, i.e., 
-    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
-    \[
-        \tyvlddflt{\tyjoindflt{\ty}{\ty'}}
-        \quad\text{and}\quad
-        \subtydflt{\ty}{(\tyjoindflt{\ty}{\ty'})}
-        \quad\text{and}\quad
-        \subtydflt{\ty'}{(\tyjoindflt{\ty}{\ty'})}.
-    \]
-    Furthermore, \tyjoindflt{\ty}{\ty'} is the least upper bound
-    of \ty and $\ty'$, i.e.,
-    $\forall \tyub$ s.t. \tyvlddflt{\tyub},
-    \subtydflt{\ty}{\tyub} and \subtydflt{\ty'}{\tyub}.
-    \[
-        \subtydflt{(\tyjoindflt{\ty}{\ty'})}{\tyub}.
-    \]
+    \tyjoindflt{\ty}{\ty'} computes a join of $\ty, \ty'$, namely:
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
+    and \tyvlddflt{\ty, \ty'}.
+    \begin{enumerate}
+        \item \tyjoindflt{\ty}{\ty'} is a valid upper bound
+            of \ty and $\ty'$, i.e., 
+            \[
+                \tyvlddflt{\tyjoindflt{\ty}{\ty'}}
+                \quad\text{and}\quad
+                \subtydflt{\ty}{(\tyjoindflt{\ty}{\ty'})}
+                \quad\text{and}\quad
+                \subtydflt{\ty'}{(\tyjoindflt{\ty}{\ty'})};
+            \]
+        \item \tyjoindflt{\ty}{\ty'} is the least upper bound
+            of \ty and $\ty'$, i.e.,
+            $\forall \tyub$ s.t. \tyvlddflt{\tyub},
+            \subtydflt{\ty}{\tyub} and \subtydflt{\ty'}{\tyub}.
+            \[
+                \subtydflt{(\tyjoindflt{\ty}{\ty'})}{\tyub}.
+            \]
+    \end{enumerate}
 \end{theorem}
 \begin{proof}
     Straightforward by the definition of $\sqcup_{\AEnv}$,
@@ -931,24 +936,36 @@ distributivity contexts (proofs are straightforward by induction):
 
 \begin{theorem}{Soundness of meet.}%
 \label{thm:meet-sound}
-    Meet produces a valid lower bound, i.e., 
-    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
-    \[
-        \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
-        \quad\text{and}\quad
-        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
-        \quad\text{and}\quad
-        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
-    \]
+    \tymeetdflt{\ty}{\ty'} defines a meet of $\ty, \ty'$, namely:
+    $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
+    and \tyvlddflt{\ty, \ty'}.
+    \begin{enumerate}
+        \item \tymeetdflt{\ty}{\ty'} is a valid lower bound
+            of \ty and $\ty'$, i.e., 
+            \[
+                \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
+                \quad\text{and}\quad
+                \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
+                \quad\text{and}\quad
+                \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
+            \]
+        \item \tymeetdflt{\ty}{\ty'} is the least upper bound
+            of \ty and $\ty'$, i.e.,
+            $\forall \tylb$ s.t. \tyvlddflt{\tylb},
+            \subtydflt{\tylb}{\ty} and \subtydflt{\tylb}{\ty'}.
+            \[
+                \subtydflt{\tylb}{(\tymeetdflt{\ty}{\ty'})}.
+            \]
+    \end{enumerate}
 \end{theorem}
 \begin{proof}
+    \TODO{either prove the second part or rename meet}
     Straightforward by strong induction on
     $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
+    %and induction on the derivation of \subty.
 
     For example, the case where \subtydflt{\ty}{\ty'} follows from
-    the assumptions and reflexivity \subtydflt{\ty}{\ty},
-    and the catch-all case $\tymeetdflt{\ty}{\ty'} = \tybot$
-    follows from \RST{Bot}.
+    the assumptions and reflexivity \subtydflt{\ty}{\ty}.
 
     In the case \tymeetdflt{(\tyunion{\ty_1}{\ty_2})}{\ty'},
     we know by IH that \tymeetdflt{\ty_1}{\ty'} and \tymeetdflt{\ty_2}{\ty'}
@@ -965,6 +982,9 @@ distributivity contexts (proofs are straightforward by induction):
     use the induction hypotheses and constructors \RST{Tuple} and \RST{Inv},
     respectively, as well as \thmref{thm:join-sound} (soundness of join)
     in the invariant case.
+
+    The catch-all case $\tymeetdflt{\ty}{\ty'} = \tybot$
+    follows from \RST{Bot}.
 \end{proof}
 
 \begin{lemma}{Symmetry of meet.}

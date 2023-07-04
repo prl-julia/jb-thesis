@@ -26,29 +26,29 @@ so types \cjl{Tuple\{Union\{Int,String\}\}} and
 
 User-defined parametric datatypes are invariant in the type parameter
 regardless of whether the datatype is
-mutable or immutable, meaning that \cjl{Name\{t11, t12, ...\}} is a subtype of 
-\cjl{Name\{t21, t22, ...\}} only if the corresponding type arguments are equivalent,
-i.e., \cjl{t11 <:> t21}, \cjl{t21 <:> t22, ...}.
+mutable or immutable, meaning that \cjl{Name\{t1, t2, ...\}} is a subtype of 
+\cjl{Name\{t1', t2', ...\}} only if the corresponding type arguments are equivalent,
+i.e., \cjl{t1 <:> t1'}, \cjl{t2 <:> t2', ...}.
 Thus, the immutable invariant datatype \cjl{Rational\{Int\}} is \emph{not}
 a subtype of \cjl{Rational\{Signed\}}.
 %while the covariant tuple \cjl{Tuple\{Int\} <: Tuple\{Signed\}}.
 
-Abstract union-all types \cjl{t where tl<:T<:tu} are better known
+Abstract union-all types \cjl{t where l<:T<:u} are better known
 in the literature as \tdef{bounded existential types}, which also model
 Java wildcards~\cite{bib:torgersen:wildcards:2004}\footnote{In Julia syntax, 
 a Java wildcard type
 \cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}.}.
-In what follows, we will call types \cjl{t where tl<:T<:tu} existential types;
+In what follows, we will call types \cjl{t where l<:T<:u} existential types;
 if lower (upper) bound on the type variable is omitted, it defaults to the
 bottom type \cjl{Union\{\}} (top type \cjl{Any}).
 Intuitively, an existential type denotes a union of \cjl{t[t'/T]} for all
-instantiations of the type variable \cjl{T} such that \cjl{tl <: t' <: tu}.
+instantiations of the type variable \cjl{T} such that \cjl{l <: t' <: u}.
 Similarly to subtyping of finite union types, the intent is that:
 \begin{itemize}
-  \item \cjl{(t where tl<:T<:tu) <: t2} if \emph{for all} valid instantiations
-    \cjl{t'}, it holds that \cjl{t[t'/T] <: t2}, and
-  \item \cjl{t1 <: (t where tl<:T<:tu)} if \emph{there exists} at least one 
-    \cjl{t'} such that \cjl{t1 <: t[t'/T]}.
+  \item \cjl{(t where l<:T<:u) <: t2} if \emph{for all} valid instantiations
+    \cjl{l<:t'<:u}, it holds that \cjl{t[t'/T] <: t2}, and
+  \item \cjl{t1 <: (t where l<:T<:u)} if \emph{there exists} at least one 
+    \cjl{l<:t'<:u} such that \cjl{t1 <: t[t'/T]}.
 \end{itemize}
 For example, \cjl{Vector\{Int\}} is a subtype of \cjl{Vector\{T\} where
 T<:Integer} because \cjl{T} can be instantiated with \cjl{Int},
@@ -168,6 +168,309 @@ guaranteed to be called only with primitive integers of the same concrete type.
 \section{Specification of Julia Subtyping}\label{sec:julia-sub:lambda-julia}
 %% ======================================================================
 
+For Julia programmers, reasoning about the subtype relation is necessary
+to understand and correctly use multiple dynamic dispatch.
+However, the language documentation does not provide a specification
+of subtyping: instead, subtyping is mentioned in multiple sections related to
+type constructors and multiple dispatch.
+Initially, an incomplete (and soon outdated) definition of subtyping existed 
+only in~\cite{bib:bezanson:julia:2015}, with the actual implementation of 
+subtyping ($\sim$3000 lines of heavily optimized C~code as of May 2023)
+being the only reference point.
+
+In this section, I present a fragment of the specification of Julia subtyping
+from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
+In that work, my collaborators and I defined, implemented, and empirically
+validated a subtype relation,
+thus providing the first complete\footnote{The only omitted feature is the
+\cjl{Vararg\{T,N\}} construct, which can be used as the last
+parameter of a tuple to denote N trailing arguments of type \cjl{T}.}
+specification of Julia subtyping.
+Having reconstructed the subtype relation,
+we were able to identify multiple issues such as
+counterexamples to reflexivity and transitivity,
+and suspected the undecidability of subtyping,
+which was later proved by~\TODO{Ben's thesis}.
+Most of the bugs we reported have been fixed by Julia developers.
+Furthermore, the treatment of union types in the diagonal rule has changed
+based on our proposal.
+%\TODO{perhaps provide more details here}
+
+The subtyping fragment is presented in~\figref{fig:jlsubex}. 
+It includes only features relevant to the undecidability of subtyping, namely:
+unions, tuples, invariant constructors, and existential types.
+Following the paper, types are written as in the Julia language:
+for example, existential types are represented with \cjl{where}.
+``Plain bits'' values, nominal subtyping, 
+subtyping of \cjl{Type\{t\}}, and the diagonal
+rule\footnote{The treatment of union types in the diagonal rule has changed
+since the paper was published, but the paper contains a discussion of the
+issue.} are omitted, but they can be found
+in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
+
+\begin{figure}
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\[
+  t\ ::=\ \anytyp 
+    \Alt \uniontyp{\t_1, \ldots, \t_n}
+    \Alt \tupletyp{\t_1, \ldots, \t_n}
+    \Alt \cstrt{name}{\t_1, \ldots, \t_n}
+    \Alt \wheret{\t}{l <: \T <: u}
+    \Alt \T
+\]
+\begin{mathpar}
+\\
+\fbox{\ljsub{E}{t}{t}{E}}
+\\
+
+\inferrule[Top]
+    {  }
+    { E \vdash \t <: \anytyp \vdash E }
+
+\inferrule[Refl]
+    {  }
+    { E \vdash \t <: \t \vdash E }
+
+\inferrule[Tuple]
+    { E \vdash \t_1 <: \t'_1 \vdash E_1 \\ \ldots \\ 
+      E_{n-1} \vdash \t_n <: \t'_n \vdash E_n}
+    { E \vdash \tupletyp{\t_1, \ldots, \t_n} <: 
+      \tupletyp{\t'_1, \ldots, \t'_n} \vdash E_n }
+
+\inferrule[Tuple\_Lift\_Union]
+    { \t' = \mathit{lift\_union}(\tupletyp{\t_1, \ldots, \t_n}) \\
+      E \vdash \t' <: \t \vdash E' }
+    { E \vdash \tupletyp{\t_1, \ldots, \t_n} <: \t' \vdash E' }
+
+\inferrule[Tuple\_Unlift\_Union]
+    { \t' = \mathit{unlift\_union}(\uniontyp{\t_1, \ldots, \t_n}) \\
+      E \vdash \t' <: \t \vdash E' }
+    { E \vdash \t <: \uniontyp{\t_1, \ldots, \t_n} \vdash E' }
+
+\inferrule[Union\_Left]
+    { E \vdash \t_1 <: \t \vdash E_1 \\ \ldots \\ 
+      E_{n-1} \vdash \t_n <: \t \vdash E_n}
+    { E \vdash \uniontyp{\t_1, \ldots, \t_n} <: \t \vdash E_n }
+
+\inferrule[Union\_Right]
+    { \exists j.\ E \vdash \t <: \t_j \vdash E' }
+    { E \vdash t <: \uniontyp{\t_1, \ldots, \t_n} \vdash E' }
+
+\inferrule[App\_Inv]
+    { E_0 = \mathit{add}(E, \text{Barrier}) \\ 
+      \forall\, 0 < i \leq n. \  
+      E_{i-1} \vdash \t_i <: \t'_i \vdash E'_i \ \wedge\  
+      E'_i \vdash \t'_i <: \t_i \vdash E_i \\
+    }
+    { E \vdash \cstrt{name}{\t_1, \ldots, \t_n} <: 
+      \cstrt{name}{\t'_1, \ldots, \t'_n} \vdash \mathit{del}(\text{Barrier}, E_n)}
+
+\inferrule[L\_Intro]
+    { \mathit{add}(^L \T_{l}^{u}, E) \vdash \t <: \t' \vdash E'}
+    { E \vdash (\wheret{\t}{l <: \T <: u}) <: \t' \vdash \mathit{del}(\T, E') }
+
+\inferrule[R\_Intro]
+    { \mathit{add}(^R \T_{l}^{u}, E) \vdash \t <: \t' \vdash E' \\
+      \mathit{consistent}(\T, E') }
+    { E \vdash \t <: (\wheret{\t'}{l <: \T <: u}) \vdash \mathit{del}(\T, E') }
+
+\inferrule[L\_Left]{
+  \mathit{search}(\T, E) = {^L \T}_{l}^{u} \\
+  E \vdash u <: \t \vdash E' }
+  { E \vdash \T <: \t \vdash E' }
+
+\inferrule[L\_Right]{
+  \mathit{search}(\T, E) = {^L \T}_{l}^{u} \\
+  E \vdash \t <: l \vdash E' }
+  { E \vdash \t <: \T \vdash E' }
+\\
+\inferrule[R\_Left]{
+  \mathit{search}(\T, E) = {^R \T}_{l}^{u} \\\\
+  E \vdash l <: \t \vdash E' }
+  { E \vdash \T <: \t \vdash \mathit{upd}({^R \T}_{l}^{t}, E') }
+
+\inferrule[R\_Right]{
+  \mathit{search}(\T, E) = {^R \T}_{l}^{u} \\
+  (\mathit{is\_var}(\t) \wedge \mathit{search}(\t, E) = {^L \S}_{l'}^{u'}) 
+    \implies \lnot \mathit{outside}(\T, \S, E) \\\\
+  E \vdash \t <: u \vdash E' }
+  { E \vdash \t <: \T \vdash \mathit{upd}({^R T}_{\uniontyp{l, \t}}^{u}, E') }
+
+\inferrule[R\_L]{
+  \mathit{search}(\T_1, E) = {^R \T_1}_{l_1}^{u_1} \\
+  \mathit{search}(\T_2, E) = {^L \T_2}_{l_2}^{u_2} \\
+  \mathit{outside}(\T_1, \T_2, E) \implies E \vdash u_2 <: l_2 \vdash E' \\
+  E \vdash u_1 <: l_2 \vdash E''
+}
+    { E \vdash \T_1 <: \T_2 \vdash 
+    \mathit{upd}(^R {\T_1}_{\uniontyp{\T_1, l_1}}^{u_1}, E') }
+\end{mathpar}
+\end{minipage}}
+\caption{Julia subtyping (extract from
+\cite{bib:zappa-nardelli:julia-sub:oopsla:2018})}
+\label{fig:jlsubex}
+\end{figure}
+
+In~\figref{fig:jlsubex}, subtyping is defined in the form of a judgment
+\[
+  \ljsub{E}{t}{t'}{E'},
+\]
+which should be read as:
+\emph{in the environment $E$, type $t$ is a subtype of~$t'$,
+with updated constraints $E'$}.
+$E$ is a type variable environment that contains two kinds of variables,
+forall (also called left) and exist (also called right).
+A variable \T introduced by an existential \emph{on the left} of the subtyping
+judgment is recorded as $^L \T_l^u$, and a variable introduced
+\emph{on the right} as $^L \T_l^u$; 
+$l$ and $u$ are the lower-bound and upper-bound types of the variable.
+Within the subtype judgment, left and right variables behave differently.
+\begin{itemize}
+  \item Left variables never change in the environment, and subtyping should
+  hold with respect to their declared bounds.
+  Thus, if a left \T appears on the
+  left of the judgment, then the judgment can be satisfied
+  only if the upper bound of \T is smaller than $t$:
+  \[ ^L \T_l^u \vdash \T <: t \vdash ^L\! \T_l^u\ \ \text{ if }\ \ 
+     ^L \T_l^u \vdash u <: t \vdash ^L\!\T_l^u. \]
+  If \T appears on the right, then
+  it is the lower bound of \T that must be a supertype of $t$:
+  %
+  \[ ^L \T_l^u \vdash t <: \T \vdash ^L\! \T_l^u \ \ \text{ if }\ \ 
+     ^L \T_l^u \vdash t <: l \vdash ^L\!\T_l^u. \]
+  This corresponds to the intuition that for a left-hand side existential type,
+  subtyping should hold for all possible instantiations of the type variable.
+  \item Right variables, on the other hand, may accrue subtype constraints
+  in addition to their declared bounds;
+  updated bounds are recorded in the output environment~$E'$.
+  For example, if a right \T appears on the right of the judgment,
+  its lower bound can become larger (but not larger than the upper bound):
+  \[ ^R \T_{\uniontyp{}}^{\anytyp} \vdash \jlname{Int} <: \T \vdash 
+     ^R\!\T_{\jlname{Int}}^{\anytyp}. \]
+  If all the constraints
+  are consistent, subtyping succeeds, which corresponds to the intuition that
+  for a right-hand side existential type, subtyping holds
+  if there exists a valid instantiation of the type variable.  
+\end{itemize}
+The following paragraphs provide examples and describe the structure of the
+judgment in more detail, before focusing on the exact rules.
+
+\TODO{Tuple and Inv}
+
+\paragraph{Environment structure.}
+The environment has a non-trivial structure.  First, an
+environment $E$ is composed of two lists, denoted by
+$E.curr$ and $E.past$.  The former, $E.curr$, is a
+stack of variables currently in scope (growing on the right),
+reflecting the order in which variables have been added to the scope.
+In addition to variables, $E.curr$ records \emph{barriers}: tags pushed
+to the environment whenever the subtype check encounters an invariant
+constructor.  Barriers will be discussed later.
+The second list, $E.past$,
+keeps track of variables that are not any longer in scope.  Consider
+the judgment:
+\[
+    \tupletyp{\wheret{\cstrt{\jlname{Ref}}{\S}}{\S <: \jlname{Int}}} \ <:\ 
+    \wheret{\tupletyp{\cstrt{\jlname{Ref}}{\T}}}{\T}.
+\]
+In the derivation, the variable
+\T is introduced before the variable \S, but \T's bounds refer to \S
+in the judgment
+\[ ^R \T_{\uniontyp{}}^{\anytyp}, ^L \S_{\uniontyp{}}^{\jlname{Int}} \vdash
+   \cstrt{\jlname{Ref}}{\S} <: \cstrt{\jlname{Ref}}{\T} \vdash 
+   ^R\!\T_S^S, ^L \S_{\uniontyp{}}^{\jlname{Int}}, \]
+which appears in the derivation tree.
+Discharged variables are thus stored in \(E.past\) and accessed whenever
+required.  The subtyping rules guarantee that it is never necessary to
+update the bounds of a no-longer-in-scope variable.  Relying on a
+separate \(E.past\) environment avoids confusion when rules must
+determine precisely the scope of each variable.
+%, as motivated in the next paragraph.
+
+Variables can be subject to unsatisfiable
+constraints.  For instance, the subtype relation
+\[
+    \tupletyp{\anytyp, \reftyp{\inttyp}} \nless: 
+    \wheret{\wheret{\tupletyp{\S, \reftyp{\T}}}{\S<:\T}}{\T}
+\]
+does not hold because the type variables are subject to the three
+unsatisfiable constraints below, for \cjl{Any} is not a subtype of \cjl{Int}:
+\[
+\anytyp <: \S \qquad\quad \S <: \T \qquad\quad  \inttyp <: \T <: \inttyp.
+\]
+The subtyping algorithm records these constraints in the environment
+as \( ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \), and whenever
+a right-variable is discharged, it checks that its lower bound is a subtype of
+its upper bound.  In the example above, the derivation is invalidated
+by the failure of the consistency check for \S:
+%
+\[ ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \vdash \anytyp \nless: \T. \]
+
+\paragraph{From forall/exist to exist/forall.}  In some cases,
+enforcing the correct ordering of type variable quantifications
+requires extra care.  Consider the judgment:
+\[ \vectyp{\wheret{\vectyp{\T}}{\T}} \nless: 
+  \wheret{\vectyp{\vectyp{\S}}}{\S}. \]
+The type on the left denotes the set of all the vectors of
+vectors of elements of some type; the type on the right
+requires a common type for all the inner
+vectors.  For instance, the value
+\cjl{[ [1,2],["a","b"] ]} belongs to the first, but
+not the second, type.
+If the subtyping algorithm simply introduced variables \S and \T into
+the environment, the following judgments would succeed, because
+for all instances of \(T\) there is a matching type for \(S\):
+\[
+  ^R \S_{\uniontyp{}}^{\anytyp}, ^L\!\T_{\uniontyp{}}^{\anytyp} \vdash \T <: \S
+  \qquad\text{ and }\qquad
+  ^R \S_{\uniontyp{}}^{\anytyp}, ^L\!T_{\uniontyp{}}^{\anytyp} \vdash \S <: \T
+\]
+However, we must instead find an instance of \(\S\) such that 
+the judgment holds forall \T: perhaps surprisingly, the outer invariant
+construct \(\jlname{Vector}\) forces the inversion of the order of quantifications.
+Instead of a forall/exist query we must solve an \emph{exist/forall} one.
+To correctly account for inversion in the order of quantifications,
+derivations must keep track of the relative ordering of
+variable introductions and invariant constructors.  For this, the
+environment \(E.curr\) is kept ordered, and
+\emph{barrier} tags are pushed into \(E.curr\) whenever the derivation goes through
+an invariant constructor.
+
+We say that a variable \(\S\) is \emph{outside} a variable
+\(\T\) in an environment \(E\) if \(\S\) precedes \(\T\)
+in \(E.curr\) and they are separated by a barrier tag in~\(E.curr\).  
+
+In our running example, the first check thus becomes:
+\[ ^R \S_{\uniontyp{}}^{\anytyp}, \Barrier, ^L\!\T_{\uniontyp{}}^{\anytyp} 
+\vdash \T <: \S. \]
+\noindent The environment correctly identifies the variable \S
+as outside \T, and the judgment should thus be interpreted as
+\emph{there exists an instance of \S such that, forall instances of
+\T, \( \T <: \S \) holds}.  The variable \S must thus be
+compared with the upper bound of \T, deriving \anytyp as the lower bound:
+\[ 
+  ^R \S_{\uniontyp{}}^{\anytyp}, \Barrier, ^L\!\T_{\uniontyp{}}^{\anytyp} 
+  \vdash \anytyp <: \S \vdash ^R \S_{\anytyp}^{\anytyp}.
+\]
+Again, given \S outside \T, the right-to-left check must now prove
+\[ ^R \S_{\anytyp}^{\anytyp}, \Barrier, ^L\!T_{\uniontyp{}}^{\anytyp} 
+\vdash \S <: \T, \]
+that is, it must conclude that there exists an instance of \S
+such that, forall instances of \T, \(\S <: \T\) holds.  In
+other terms, the variable \S must be a subtype of the lower
+bound of \T.  This fails, as expected.
+
+Note that whenever the forall variable is constrained tightly and
+quantifies over only one type, the exist/forall quantification can still
+correctly succeed, as in the valid judgment below:
+\[ 
+  \reftyp{\wheret{\reftyp{\inttyp{<:}\T{<:}\inttyp}}{\T}} <: 
+  \wheret{\reftyp{\reftyp{\S}}}{\S}.
+\]
+
+
 \TODO{Lambda-Julia}
 
 \section{Undecidability of Julia Subtyping}\label{sec:julia-sub:undec}
@@ -225,10 +528,37 @@ does not necessarily mean that decidable subtyping for the same
 language of types does not exist, I \emph{conjecture} that
 \begin{quotation}\emph{
   there is no decidable subtype relation for Julia's language of types
-  that would agree with the intended subtyping judgments
-  described in \secref{sec:julia-sub:overview}.\TODO{be more careful here}
+  that would agree with the intended subtyping behavior
+  described in \secref{sec:julia-sub:overview}.
 }\end{quotation}
 The problem lies in the interaction of
-impredicative existential types, invariant constructors, and unions.
+impredicative existential types, invariant constructors, and unions,
+as discussed in more detail below.
+In the discussion, I intentionally depart from the notation of the subtyping
+specification presented in the previous section \ref{sec:julia-sub:lambda-julia},
+as I am interested in the existence of some other, decidable subtype relation.
+\TODO{fix if this is not precise}
+
+First, recall that parametric datatypes are invariant, meaning that
+types such as \cjl{Ref\{t\}} and \cjl{Ref\{t'\}} are subtypes
+only if their type arguments \cjl{t} and \cjl{t'} are equivalent.
+The equivalence of types can be expressed via subtyping:
+$t$ and $t'$ are equivalent
+if both $t <: t'$ and $t' <: t$ hold.
+To check for equivalence, one can either rely on subtyping directly
+or use a separate relation $t \approx t'$ such that 
+$t \approx t' \ \implies\ t <: t'\ \land\ t' <: t$.
+
+Next, recall that a union-all type \cjl{t where l<:X<:u} is meant to represent
+a union of types $t[t_X/X]$ for all possible valid instantiations
+$l <: t_X <: u$ of the type variable $X$.
+Thus, whenever subtyping is checked for some 
+\cjl{t' <: (t where l<:X<:u)}, the subtyping algorithm needs to check that
+there exists a valid instantiation of $X$.
+I will refer to such variable...
+
+and it is the ``flipped'' subtyping check \subty{}{t'}{t} 
+An alternative approach would be to use a separate equivalence relation.
+
 
 \TODO{consider the example from the proposal}

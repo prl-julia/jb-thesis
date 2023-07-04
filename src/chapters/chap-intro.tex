@@ -60,7 +60,7 @@ and the second component is a string. Therefore, both
 of the above type, and that type is equivalent to the union of the two
 tuples, \cjl{Union\{Tuple\{String, Int64\}, Tuple\{String, UInt64\}\}}.
 In addition to finite unions, Julia supports existential types, referred to as
-union-all types. For example, \cjl{Vector\{T\} where T}
+union-all types or iterated unions. For example, \cjl{Vector\{T\} where T}
 represents an infinite union of vectors \cjl{Vector\{t\}} for all valid
 instantiations \cjl{t} of the type variable \cjl{T}.
 A~more detailed account of Julia types and subtyping

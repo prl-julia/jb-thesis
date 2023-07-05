@@ -194,18 +194,18 @@ which was later proved by~\TODO{Ben's thesis}.
 Most of the bugs we reported have been fixed by Julia developers.
 Furthermore, the treatment of union types in the diagonal rule has changed
 based on our proposal.
-%\TODO{perhaps provide more details here}
+%\TODO{perhaps provide more details about bugs and the diagonal rule here}
 
 The subtyping fragment is presented in~\figref{fig:jlsubex}. 
-It includes only features relevant to the undecidability of subtyping, namely:
+It includes features relevant to the undecidability of subtyping, namely:
 unions, tuples, invariant constructors, and existential types.
 Following the paper, types are written as in the Julia language:
 for example, existential types are represented with \cjl{where}.
 ``Plain bits'' values, nominal subtyping, 
 subtyping of \cjl{Type\{t\}}, and the diagonal
 rule\footnote{The treatment of union types in the diagonal rule has changed
-since the paper was published, but the paper contains a discussion of the
-issue.} are omitted, but they can be found
+since the paper was published, but the paper contains discusses the issue.}
+are omitted, but they can be found
 in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 
 \begin{figure}
@@ -231,7 +231,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 
 \inferrule[Refl]
     {  }
-    { E \vdash \t <: \t \vdash E }
+    { E \vdash \T <: \T \vdash E }
 
 \inferrule[Tuple]
     { E \vdash \t_1 <: \t'_1 \vdash E_1 \\ \ldots \\ 
@@ -308,7 +308,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
     \mathit{upd}(^R {\T_1}_{\uniontyp{\T_1, l_1}}^{u_1}, E') }
 \end{mathpar}
 \end{minipage}}
-\caption{Julia subtyping (extract from
+\caption{Julia subtyping (excerpt from
 \cite{bib:zappa-nardelli:julia-sub:oopsla:2018})}
 \label{fig:jlsubex}
 \end{figure}
@@ -321,21 +321,101 @@ which should be read as:
 \emph{in the environment $E$, type $t$ is a subtype of~$t'$,
 with updated constraints $E'$}.
 $E$ is a type variable environment that contains two kinds of variables,
-forall (also called left) and exist (also called right).
-A variable \T introduced by an existential \emph{on the left} of the subtyping
-judgment is recorded as $^L \T_l^u$, and a variable introduced
-\emph{on the right} as $^L \T_l^u$; 
-$l$ and $u$ are the lower-bound and upper-bound types of the variable.
-Within the subtype judgment, left and right variables behave differently.
+forall (also called left, introduced by existential types on the left
+and recorded as $^L \T$) and exist (also called right, introduced by 
+existential types on the right and recorded as $^R \T$).
+Variables are recorded with their declared lower and upper bounds $l$ and $u$
+as $\T_l^u$; bounds on exist (right) variables can get tighter during subtype
+checking, which is reflected in the updated environment $E'$.
+For example, consider the following judgment:
+\[ 
+  \tupletyp{\inttyp} <: \wheret{\tupletyp{\T}}{\uniontyp{}{<:}\T{<:}\anytyp}.
+\]
+First, the right variable \T is introduced into the environment with its
+declared bounds $\uniontyp{}$ and \anytyp:
+\[ 
+  ^R \T_{\uniontyp{}}^{\anytyp} \vdash \tupletyp{\inttyp} <: \tupletyp{\T} \vdash\ ?
+\]
+Next, since tuples are covariant, it should be the case that \inttyp is
+a subtype of \T.
+Recall the intuition that for existential types on the right,
+subtyping holds if there exists a valid instantiation of the variable
+that would satisfy the judgment.
+In the example, subtyping $\inttyp <: \T$ holds if the variable \T is
+instantiated with a type that is a supertype of \inttyp. Therefore, this very
+constraint is recorded in an updated environment as $^R \T_{\inttyp}^{\anytyp}$
+(note the larger lower bound):
+\[ 
+  ^R \T_{\uniontyp{}}^{\anytyp} \vdash \inttyp <: \T 
+  \vdash ^R\!\T_{\inttyp}^{\anytyp},
+\]
+and the new environment is propagated to the tuples:
+\[ 
+  ^R \T_{\uniontyp{}}^{\anytyp} \vdash \tupletyp{\inttyp} <: \tupletyp{\T}
+  \vdash ^R\!\T_{\inttyp}^{\anytyp}.
+\]
+
+With the exception of \RLJ{Tuple\_Lift\_Union} and \RLJ{Tuple\_Unlift\_Union},
+which are discussed later,
+the rules for subtyping tuples, unions, and invariant constructors are
+mostly straightforward.
+The rule~\RLJ{Tuple} checks covariant subtyping of the tuple elements.
+The rules~\RLJ{Union\_Left} and~\RLJ{Union\_Right}
+implement the forall and exist semantics for union types on the left
+and on the right of the subtyping judgment;
+furthermore, the rule \RLJ{Union\_Left} allows for
+deriving that \(\uniontyp{}\) is a subtype of all
+types, because its hypothesis is trivially validated by the forall
+quantification over an empty set.
+In the rule \RLJ{App\_Inv} for invariant constructors,
+the equality of corresponding type arguments $\t_i$ and $\t'_i$ is
+ensured by checking both $\t_i <: \t'_i$ and $\t'_i <: \t_i$,
+referred to as left-to-right and right-to-left checks, respectively;
+the \Barrier construct is discussed later.
+%Note that because of such right-to-left checks, type variables introduced 
+%on one side of the judgment can appear on the opposite side.
+
+Because the same right variable can appear in multiple positions, environment
+updates $E'_i$ need to be propagated across all the elements of
+a tuple/union/invariant constructor.
+For instance, consider the following judgment:
+\[ 
+  ^R \T_{\uniontyp{}}^{\anytyp} \vdash 
+  \tupletyp{\anytyp, \reftyp{\inttyp}} \nless: \tupletyp{\T, \reftyp{\T}}.
+\]
+After the first recursive call to subtyping,
+\[ 
+  ^R \T_{\uniontyp{}}^{\anytyp} \vdash \anytyp <: \T 
+  \vdash ^R\!\T_{\anytyp}^{\anytyp},
+\]
+the variable \T is know to be a supertype of \anytyp.
+Thus, subtyping between $\reftyp{\inttyp}$ and $\reftyp{\T}$ is invoked
+in the updated environment:
+\[ 
+  ^R \T_{\anytyp}^{\anytyp} \vdash 
+  \reftyp{\inttyp} \nless: \reftyp{\T}.
+\]
+The left-to-right check succeeds, but the right-to-left check fails because
+the lower bound of \T---$\anytyp$---is not a subtype of $\inttyp$:
+\[ 
+  ^R \T_{\anytyp}^{\anytyp} \vdash \inttyp <: \T \vdash ^R \T_{\anytyp}^{\anytyp},
+  \qquad 
+  ^R \T_{\anytyp}^{\anytyp} \vdash \T \nless: \inttyp.
+\]
+Without environment propagation, the constraint $\anytyp{<:}\T$ would have been
+lost and the subtyping check succeeded.
+
+\paragraph{Left and right variables.}
+Left and right variables are treated differently by the subtyping algorithm.
 \begin{itemize}
   \item Left variables never change in the environment, and subtyping should
   hold with respect to their declared bounds.
-  Thus, if a left \T appears on the
+  Thus, if a left variable \T appears on the
   left of the judgment, then the judgment can be satisfied
   only if the upper bound of \T is smaller than $t$:
   \[ ^L \T_l^u \vdash \T <: t \vdash ^L\! \T_l^u\ \ \text{ if }\ \ 
      ^L \T_l^u \vdash u <: t \vdash ^L\!\T_l^u. \]
-  If \T appears on the right, then
+  If $^L \T$ appears on the right, then
   it is the lower bound of \T that must be a supertype of $t$:
   %
   \[ ^L \T_l^u \vdash t <: \T \vdash ^L\! \T_l^u \ \ \text{ if }\ \ 
@@ -345,23 +425,22 @@ Within the subtype judgment, left and right variables behave differently.
   \item Right variables, on the other hand, may accrue subtype constraints
   in addition to their declared bounds;
   updated bounds are recorded in the output environment~$E'$.
-  For example, if a right \T appears on the right of the judgment,
+  For example, if a right variable \T appears on the right of the judgment,
   its lower bound can become larger (but not larger than the upper bound):
-  \[ ^R \T_{\uniontyp{}}^{\anytyp} \vdash \jlname{Int} <: \T \vdash 
-     ^R\!\T_{\jlname{Int}}^{\anytyp}. \]
-  If all the constraints
-  are consistent, subtyping succeeds, which corresponds to the intuition that
+  \[ ^R \T_l^u \vdash \t <: \T \vdash ^R\!\T_{\uniontyp{l, t}}^u \ \ \text{ if }\ \ 
+     \t <:u. \]
+  If the resulting constraints on a right variable are consistent,
+  as checked by $\mathit{consistent}(\T, E)$, subtyping succeeds.
+  This corresponds to the intuition that
   for a right-hand side existential type, subtyping holds
   if there exists a valid instantiation of the type variable.  
 \end{itemize}
-The following paragraphs provide examples and describe the structure of the
-judgment in more detail, before focusing on the exact rules.
-
-\TODO{Tuple and Inv}
+% The following paragraphs provide examples and describe the structure of the
+% judgment in more detail, before focusing on the exact rules.
 
 \paragraph{Environment structure.}
 The environment has a non-trivial structure.  First, an
-environment $E$ is composed of two lists, denoted by
+environment $E$ is composed of two stacks, denoted by
 $E.curr$ and $E.past$.  The former, $E.curr$, is a
 stack of variables currently in scope (growing on the right),
 reflecting the order in which variables have been added to the scope.
@@ -389,24 +468,34 @@ separate \(E.past\) environment avoids confusion when rules must
 determine precisely the scope of each variable.
 %, as motivated in the next paragraph.
 
-Variables can be subject to unsatisfiable
-constraints.  For instance, the subtype relation
-\[
-    \tupletyp{\anytyp, \reftyp{\inttyp}} \nless: 
-    \wheret{\wheret{\tupletyp{\S, \reftyp{\T}}}{\S<:\T}}{\T}
-\]
-does not hold because the type variables are subject to the three
-unsatisfiable constraints below, for \cjl{Any} is not a subtype of \cjl{Int}:
-\[
-\anytyp <: \S \qquad\quad \S <: \T \qquad\quad  \inttyp <: \T <: \inttyp.
-\]
-The subtyping algorithm records these constraints in the environment
-as \( ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \), and whenever
-a right-variable is discharged, it checks that its lower bound is a subtype of
-its upper bound.  In the example above, the derivation is invalidated
-by the failure of the consistency check for \S:
-%
-\[ ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \vdash \anytyp \nless: \T. \]
+%% \TODO{this example would fail before the consistency check. Is there another
+% example to motivate consistency?}
+% Because of the dependencies between right variables, the satisfiability of
+% constraints needs to be checked before a right variable is discharged.
+% For instance, the subtype relation
+% \[
+%     \tupletyp{\anytyp, \reftyp{\inttyp}} \nless: 
+%     \wheret{\wheret{\tupletyp{\S, \reftyp{\T}}}{\S<:\T}}{\T}
+% \]
+% does not hold because the type variables are subject to the three
+% unsatisfiable constraints below, for \cjl{Any} is not a subtype of \cjl{Int}:
+% \[
+% \anytyp <: \S \qquad\quad \S <: \T \qquad\quad  \inttyp <: \T <: \inttyp.
+% \]
+% The subtyping algorithm records these constraints in the environment
+% as \( ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \).
+% Note that initially, \T is introduced as $^R \T_{\uniontyp{}}^{\anytyp}$,
+% so the check 
+% \[
+%   ^R \T_{\uniontyp{}}^{\anytyp}, ^R\!\S_{\uniontyp{}}^{\T} \vdash
+%   \anytyp <: \S 
+% \]
+% and whenever
+% a right-variable is discharged, it checks that its lower bound is a subtype of
+% its upper bound.  In the example above, the derivation is invalidated
+% by the failure of the consistency check for \S:
+% %
+% \[ ^R \T_{\inttyp}^{\inttyp}, ^R\!\S_{\anytyp}^{\T} \vdash \anytyp \nless: \T. \]
 
 \paragraph{From forall/exist to exist/forall.}  In some cases,
 enforcing the correct ordering of type variable quantifications
@@ -436,7 +525,7 @@ derivations must keep track of the relative ordering of
 variable introductions and invariant constructors.  For this, the
 environment \(E.curr\) is kept ordered, and
 \emph{barrier} tags are pushed into \(E.curr\) whenever the derivation goes through
-an invariant constructor.
+an invariant constructor in the rule \RLJ{App\_Inv}.
 
 We say that a variable \(\S\) is \emph{outside} a variable
 \(\T\) in an environment \(E\) if \(\S\) precedes \(\T\)
@@ -470,8 +559,178 @@ correctly succeed, as in the valid judgment below:
   \wheret{\reftyp{\reftyp{\S}}}{\S}.
 \]
 
+\paragraph{Operations on environment.}
+Recall that an \emph{environment}, denoted by \(E\),
+is composed by two stacks, denoted \(E.curr\) and \(E.past\),
+of variable definitions and barriers.
+The following operations are
+defined on environments, where \(v\)  ranges over variable
+definitions and barriers:
+\begin{description}
+\item[\normalfont\(\mathit{add}(v,E)\):] push \(v\) at top of
+  \(E.curr\);
+\item[\normalfont\(\mathit{del}(\T,E)\):] pop \(v\) from
+  \(E.curr\), check that it defines the variable \(\T\), and
+  push \(v\) at top of \(E.past\);
 
-\TODO{Lambda-Julia}
+\item[\normalfont\(\mathit{del}(\Barrier,E)\):] pop \(v\) from
+  \(E.curr\) and check that it is a barrier tag;
+
+\item[\normalfont\(\mathit{search}(\T,E)\):] return the variable definition
+  found for \(\T\) in \(E.curr\) or \(E.past\); fail if
+  the variable definition is not found;
+
+\item[\normalfont\(\mathit{update}(^R \T_l^u, E)\):] update the lower
+  and upper bounds of the variable definition \(\T\) in
+  \(E.curr\); %if the variable is found in \(E\) after a
+  %barrier then increase the invariant occurrence counter, and the
+  %covariant occurrence counter otherwise. 
+  fail if the variable definition is not found;
+
+\item[\normalfont\(\mathit{consistent}(\T,E)\):] search \(\T\) in
+  \(E\).  If the search returns \(^L \T_l^u\), then return
+  true if \(E \vdash l <: u\) and false otherwise; while building this judgment,
+  recursive consistency checks are disabled.
+  If the search returns \(^R \T_l^u\),
+  then check if \(E \vdash l <: u\) is derivable.  If not, return
+  false. % If yes, additionally check the diagonal rule: if
+  % \(\textit{co} > 1\) and \(\textit{io} = 0\) then its lower-bound
+  % \([[lb]]\) must be a concrete type, as checked by the
+  % \([[is_concrete(lb)]]\) function.  The definition of this function
+  % is non-trivial as a lower bound might depend on the values of other
+  % type variable bounds. For example, \([[Vector{T}]]\) is equivalent
+  % to a concrete type \([[Vector{Int}]]\) only if both the upper and
+  % lower bounds of \([[T]]\) equal \([[Int]]\). At the time of writing,
+  % Julia's implementation of \(\textit{is\_concrete}\) is heuristic and
+  % does not catch all possible concrete types.  We omit its
+  % formalisation but our artifact includes a
+  % simple implementation.  
+  The shorthand \(\mathit{consistent}(E)\) checks the consistency of all
+  variables in the environment \(E\).
+\end{description}
+
+\paragraph{Distributivity.}
+The rule~\RLJ{Tuple\_Lift\_Union}
+rewrites tuple types on the left-hand side of the judgment into
+disjunctive normal forms, making the distributivity of unions
+with respect to tuples derivable.  This rule can be invoked multiple
+times in a subtype derivation, enabling rewriting tuples
+into disjunctive normal form even inside invariant
+constructors.
+Rewriting is performed by the auxiliary function
+\(\mathit{lift\_union}(\t)\), which pulls unions and existential types out of
+tuples, anticipating
+syntactically the forall quantifications in a derivation.
+Symmetrically, the rule~\RLJ{Tuple\_Unlift\_Union} performs
+the opposite rewriting, delaying syntactically the exist
+quantifications on union types appearing on the right-hand side of
+a judgment.  The auxiliary function \(\mathit{unlift\_union}(\t)\) returns
+a type \(\t'\) such that \(\t = \mathit{lift\_union}(\t')\). 
+
+The need for the
+\RLJ{Tuple\_Unlift\_Union} rule is
+due to the \emph{complex interaction between invariant constructors, union
+types, and existentials}.  For instance, the following judgment
+\[
+  \reftyp{\uniontyp{\tupletyp{\inttyp, \jlname{Bool}}}} <:
+  \wheret{\reftyp{\tupletyp{\T}}}{\T}
+\]
+is valid because \(\T\) can be instantiated with
+$\uniontyp{\inttyp, \jlname{Bool}}$.  However, building a derivation without the
+\RLJ{Tuple\_Unlift\_Union} rule fails.  Initially, the
+left-to-right check for invariant application generates the constraint
+\(\T >: \uniontyp{\inttyp, \jlname{Bool}}\).  Thus, the right-to-left check
+\[ ^R \T_{\uniontyp{\inttyp, \jlname{Bool}}}^{\anytyp} \vdash
+  \tupletyp{\T} <: \uniontyp{\tupletyp{\inttyp, \jlname{Bool}}} \]
+gets stuck trying to prove \(\T<:\inttyp\) or \(\T<:\jlname{Bool}\).  Rule
+\RLJ{Tuple\_Unlift\_Union} enables rewriting the
+right-to-left check into 
+\[ ^R \T_{\uniontyp{\inttyp, \jlname{Bool}}}^{\anytyp} \vdash
+  \tupletyp{\T} <: \tupletyp{\uniontyp{\inttyp, \jlname{Bool}}}, \]
+which is provable because the existential quantifications is syntactically
+delayed  due to the union on the right-hand side.
+
+\paragraph{Subtyping existentials and variables.}
+Rules~\RLJ{L\_Intro} and \RLJ{R\_Intro} add a
+\wheret{}{}-introduced variable to the current environment, 
+specifying the relevant forall (\textit{L}) or exist (\textit{R})
+semantics, and attempt to build a subtype derivation in this extended
+environment.  When the variable gets out of scope, it
+is deleted from the \texttt{curr} list and added to the
+\texttt{past} list of the environment. 
+Variables with exist semantics might have had
+their bounds updated in unsatisfiable way; before discarding them, the
+consistency of their bounds is checked by the \(\mathit{consistent}(\T,E)\)
+auxiliary function.
+
+Note that existential types with inconsistent bounds, such as
+\[
+  \wheret{\tupletyp{\T}}{\anytyp{<:}\T{<:}\inttyp},
+\]
+are considered well-formed, but they are not subtypes of $\uniontyp{}$.
+In Julia, attempting to instantiate such a type will produce an error:
+\begin{lstlisting}
+julia> (Tuple{T} where Any<:T<:Int){Int}
+ERROR: TypeError: in Tuple, in T, expected Any<:T<:Int, got Type{Int}  
+\end{lstlisting}
+
+Subtyping for type variables is governed by
+rules~\RLJ{L\_Left}, \RLJ{L\_Right},
+\RLJ{R\_Left}, and \RLJ{R\_Right}.  Type variables
+with forall semantics are replaced with the hardest-to-satisfy bound:
+the upper bound if the variable is on the left of the judgment, and
+the lower bound if the variable is on the right.  Variables with exist
+semantics are instead replaced with their easiest-to-satisfy bound,
+and, to keep track of the match, bounds of these variables are updated
+if a successful derivation is found, reflecting their new bound.  By
+symmetry, one would expect the rule~\RLJ{R\_Left} to update
+\(\T\) upper bound with \(\t \cap u\). 
+Until our work on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018} started, it
+was believed that, because of invariance, the explicit ordering of the
+checks performed by rule~\RLJ{App\_Inv} would ensure that \(\t <: u\) had
+already been checked by rule~\RLJ{R\_Right}.  Therefore, it
+would always hold that \(\t = \t \cap u\), avoiding the need
+to compute intersections of Julia types. This
+turned out to be false.  Consider the following example:
+\[
+  \begin{array}{c}
+    \vectyp{\vectyp{\anytyp}} \\
+    <: \\
+    \wheret{\vectyp{\uniontyp{\vectyp{\anytyp}, \vectyp{\T}}}}{\T{<:}\inttyp}.  
+  \end{array}
+\]\label{juliabug:rleft}
+\noindent This judgment contradicts the idea that \(\vectyp{\T}\)
+can be a subtype of \(\vectyp{\anytyp}\) only if \(\T\) is
+equivalent to \(\anytyp\), which is not possible here.  However,
+at the time working on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018},
+both Julia and our specification could build a derivation for it: due to
+the existential on the right-hand side, the check that ought to ensure
+\(\t <: u\), that is \(\anytyp <: \inttyp\), is skipped when
+performing the left-to-right subtype check of the invariant
+constructor \(\jlname{Vector}\). 
+In response to this finding, Julia developers introduced a
+\cjl{simple\_meet} function\footnote{Julia codebase already included a complex
+algorithm that computes an approximation of intersection of two types, which
+is used internally to compute dataflow information, but the algorithm is too
+slow (and bug-ridden) to be integrated in the subtyping algorithm.}
+to compute intersection in simple cases.
+As of May 2023, the problematic judgment above does not hold.
+
+To account for the exist/forall
+quantification inversion, the \RLJ{R\_Right} does not apply
+if the type on the left is
+a left variable and the variables are in the exists/forall quantification
+(the check \(\lnot\mathit{outside}(\T,\S,E)\) is responsible for this).
+%Similar reasoning works for the rule \ottdrulename{R\_left}.
+Matching R-L
+variables is specially dealt by the \RLJ{R\_L} rule, which
+also performs the necessary outside check: if the \(R\)-variable is
+outside, then the bounds on the \(L\)-variable must constrain it to
+only one type.  For this, the check \(u_2 <: l_2\) is sufficient, as the
+other direction is later verified by the environment consistency check.
+
+% \TODO{reflexivity in the paper is for all types and plain-bits values;
+% here, I use it only for variables}
 
 \section{Undecidability of Julia Subtyping}\label{sec:julia-sub:undec}
 %% ======================================================================

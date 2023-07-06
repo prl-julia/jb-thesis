@@ -168,8 +168,8 @@ framework with union, intersection, and negation types.
 \citet{bib:schimpf:set-types-erlang:2023} successfully apply the
 same framework to typing Erlang.
 However, the approach to constraint solving does not translate to Julia
-due to the presence of invariant type constructors.%, which prevents the
-%possibility of rewriting constraints into the right form.
+due to the presence of invariant constructors and impredicativity.
+%, which prevents the possibility of rewriting constraints into the right form.
 
 While types such as unions and tuples have a straightforward
 semantic interpretation, other types that are common for statically typed

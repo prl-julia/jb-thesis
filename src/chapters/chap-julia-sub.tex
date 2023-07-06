@@ -735,19 +735,6 @@ other direction is later verified by the environment consistency check.
 \section{Undecidability of Julia Subtyping}\label{sec:julia-sub:undec}
 %% ======================================================================
 
-\begin{figure}
-\[
-\begin{array}{rcl}
-  \interp{\mathit{Top}} &=& \text{\cjl{Union\{\}}}\\
-  \interp{\alpha} &=& \alpha\\
-  \interp{\forall\alpha\leq\ty.\ty'} &=&
-    \text{\cjl{Tuple\{Ref\{}}\alpha\text{\cjl{\}, }}
-    \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
-\end{array}
-\]
-\caption{Encoding of \FSubN types in Julia}\label{fig:FSub-encoding}
-\end{figure}
-
 It is not unusual for a statically typed programming language 
 to have undecidable subtyping,
 as witnessed by Java and Scala~\cite{bib:grigore:java-undec:2017,bib:hu:dot-undec:2020}.
@@ -764,6 +751,19 @@ of the original design of the Julia language~\cite{bib:bezanson:julia:2015}.
 To this end, Julia disallowed several features that were known to cause
 undecidability, such as recursive constraints on type variables and
 circularities in the inheritance hierarchy~\cite{bib:tate:taming-wildcards:2011}.
+
+\begin{figure}
+\[
+\begin{array}{rcl}
+  \interp{\mathit{Top}} &=& \text{\cjl{Union\{\}}}\\
+  \interp{\alpha} &=& \alpha\\
+  \interp{\forall\alpha\leq\ty.\ty'} &=&
+    \text{\cjl{Tuple\{Ref\{}}\alpha\text{\cjl{\}, }}
+    \interp{\ty'}\text{\cjl{\} where\ }}\alpha\text{\cjl{\ >:\ }}\interp{\ty}\\
+\end{array}
+\]
+\caption{Encoding of \FSubN types in Julia}\label{fig:FSub-encoding}
+\end{figure}
 
 Despite the intentional simplifications in the type language,
 Julia subtyping is in fact \emph{undecidable}.
@@ -784,40 +784,187 @@ and terminates the program when the stack reaches a certain limit.
 
 Although the undecidability of a particular subtyping algorithm
 does not necessarily mean that decidable subtyping for the same
-language of types does not exist, I \emph{conjecture} that
+language of types does not exist, I {conjecture} that
 \begin{quotation}\emph{
-  there is no decidable subtype relation for Julia's language of types
-  that would agree with the intended subtyping behavior
-  described in \secref{sec:julia-sub:overview}.
+  in the case of Julia's type language, there is no decidable subtype relation 
+  that would match the intended subtyping behavior
+  described in Sections \ref{sec:julia-sub:overview} and
+  \ref{sec:julia-sub:lambda-julia}.
 }\end{quotation}
-The problem lies in the interaction of
-impredicative existential types, invariant constructors, and unions,
-as discussed in more detail below.
-In the discussion, I intentionally depart from the notation of the subtyping
-specification presented in the previous section \ref{sec:julia-sub:lambda-julia},
+The key problem is the interaction of
+impredicative existential types, invariant constructors, and unions.
+In what follows, I intentionally depart from the subtyping judgment
+presented in the previous section~\ref{sec:julia-sub:lambda-julia},
 as I am interested in the existence of some other, decidable subtype relation.
-\TODO{fix if this is not precise}
 
 First, recall that parametric datatypes are invariant, meaning that
-types such as \cjl{Ref\{t\}} and \cjl{Ref\{t'\}} are subtypes
-only if their type arguments \cjl{t} and \cjl{t'} are equivalent.
-The equivalence of types can be expressed via subtyping:
+types such as $\reftyp{t}$ and $\reftyp{t'}$ are subtypes
+only if their type arguments $t$ and $t'$ are equivalent.
+The equivalence of types is expressed via subtyping:
 $t$ and $t'$ are equivalent
 if both $t <: t'$ and $t' <: t$ hold.
-To check for equivalence, one can either rely on subtyping directly
+To check for equivalence, one can either rely on subtyping directly,
 or use a separate relation $t \approx t'$ such that 
 $t \approx t' \ \implies\ t <: t'\ \land\ t' <: t$.
 
-Next, recall that a union-all type \cjl{t where l<:X<:u} is meant to represent
-a union of types $t[t_X/X]$ for all possible valid instantiations
-$l <: t_X <: u$ of the type variable $X$.
+Next, recall that an existential type $\wheret{t}{l{<:}\T{<:}u}$ is meant to 
+represent a union of types $t[t'/\T]$ for all possible valid instantiations
+$l <: t' <: u$ of the type variable $\T$.
 Thus, whenever subtyping is checked for some 
-\cjl{t' <: (t where l<:X<:u)}, the subtyping algorithm needs to check that
-there exists a valid instantiation of $X$.
-I will refer to such variable...
+$t_1 <: (\wheret{t}{l{<:}\T{<:}u})$, the subtyping algorithm needs to check that
+there exists a valid instantiation $t'$ of $\T$ such that $t_1 <: t[t'/\T]$.
+From now on, I will refer to such variable \T (that is, a variable introduced
+by an existential type on the right-hand side of the judgment) as a
+\textbf{unification variable}; in \secref{sec:julia-sub:lambda-julia},
+it was called an exist/right variable.
 
-and it is the ``flipped'' subtyping check \subty{}{t'}{t} 
-An alternative approach would be to use a separate equivalence relation.
+Consider the following subtype query 
+\[
+  \begin{array}{ll}
+    \jlname{Tuple}\{\vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}, &
+      t'\,\}\\
+    \multicolumn{2}{c}{<:} \\
+    \jlname{Tuple}\{\vectyp{t_1^{\T}}, & t_2^{\T}\} 
+      \ \textbf{\texttt{where}}\ l{<:}\T{<:}u,
+  \end{array}
+\]
+where \S occurs in $t'^S$ and \T occurs in both $t_1^{\T}$ and $t_2^{\T}$.
+Let us walk through possible steps of a subtyping algorithm \algo.
+\begin{enumerate}
+  \item Because the right-hand side type is an existential,
+    \T is a unification variable; \algo can remember the variable and proceed
+    to subtyping of
+    \[ 
+      \begin{array}{c}
+        \tupletyp{\vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}, t'} \\
+        <: \\
+        \tupletyp{\vectyp{t_1^{\T}}, t_2^{\T}}. 
+      \end{array}
+    \]
+  \item Both sides of the subtyping query are now tuples of the matching length.
+    Tuples are covariant, so \algo needs to check that ther corresponding 
+    components are subtypes, i.e.,
+    \[ 
+      \vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
+      \ \ \text{and}\ \ t' <: t_2^{\T}.
+    \]
+    Since the unification variable \T appears in both $t_1^{\T}$ and $t_2^{\T}$,
+    \emph{both subtyping queries can impose constraints on \T}.
+    \begin{enumerate}
+      \item The first tuple components are both invariant constructors,
+        \[ 
+          \vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}} 
+          \ <:\  
+          \vectyp{t_1^{\T}}, 
+        \]
+        so \algo needs to check that their type arguments are equivalent.
+        Let \algo use subtyping for the equivalence check and focus
+        on the second, right-to-left check:
+        \[ t_1^{\T}\ <:\ \wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}. \]
+        \begin{enumerate}
+          \item The right-hand side type is an existential, so \S is unification
+            variable; \algo can remember the variable and proceed to 
+            subtyping of \[ t_1^{\T} <: \reftyp{\t'^S}. \]
+          \item Let us assume that \algo successfully processes this subtyping
+            query. Note that \emph{both sides of the query contain
+            unification variables}, for \T occurs in $t_1^{\T}$
+            and \S occurs in $\reftyp{\t'^S}$.
+            Thus, the unification variables \S and \T might
+            be \emph{constraining each other}.
+          \item\label{item:sub-stuck} \algo needs to resolve the unification variable \S, that is,
+            check that constraints that were necessary to satisfy 
+            \[ t_1^{\T} <: \reftyp{\t'^S} \]
+            are consistent with each other as well as the declared bounds
+            $l'$ and $u'$.
+            However, \S might be constrained by the unification variable \T,
+            and not all constraints on \T are known, for $t' <: t_2^{\T}$
+            has not been processed yet.
+            Thus, \textbf{the subtyping algorithm \algo is stuck.}
+        \end{enumerate}
+    \end{enumerate}
+  %\item Check that all the constraints
+\end{enumerate}
 
+How can the problem in \ref{item:sub-stuck} be addressed?
+%\emph{Delayed resolution of unification variables.}
+In the example, \S cannot be resolved because not all relevant constraints
+are available. Perhaps, instead of trying to resolve the variable at the point 
+where it goes out of lexical scope, \algo could instead 
+store the constraints and resolve them later.
+However, another---more challenging---problem is that the two unification
+variables \S and \T may be \textbf{arbitrarily constraining each other},
+i.e. appear in arbitrary positions within constraining types. In the presence of
+impredicative existential types, constraints may have non-trivial solutions.
+For example, the following constraint set is satisfiable when both
+\S and \T are instantiated with $\wheret{\reftyp{\Q}}{\Q}$:
+\[
+  \{ \reftyp{\T} <: \S, \quad \reftyp{\reftyp{\S}} <: \T, \quad \S <: \T \}
+\]
+In general, for an arbitrary set of constraints containing mutually
+dependent unification variables, finding a solution algorithmically is
+not straightforward if not undecidable.
+% In general,
+% \begin{quotation}\emph{there does not appear to be an ordering of unification 
+% variables that would guarantee both the termination of constraints resolution
+% and finding a solution when it exists.
+% }\end{quotation}
+%and need to be resolved simultaneously.
+% \begin{quotation}\emph{
+%   In general, there does not seem to be an order of unification variables
+%   that would allow for complete constraints resolution.
+% }\end{quotation}
+%
+% T <: Ref{Q}
+% Ref{S} <: T
+% S <: Q
+% S --> T <-- Q
+% ^-----------|
+%
+Instead, I suggest \textbf{eliminating mutual dependencies
+between unification variables}
+and consider two possible angles of attack.
+\begin{enumerate}
+  \item \emph{Prevent unification variables from moving to the left-hand side
+    of subtyping.} Recall that unification variables are introduced by
+    existential types on the right. The only way for a unification variable to
+    ``travel'' to the left is a right-to-left subtyping check for an
+    invariant constructor. Thus, instead of using subtyping to check for
+    equivalence of types, \algo could rely on a separate relation
+    $t \approx t'$ and keep unification variables on the right.
+    Unfortunately, due to union types, checking for equivalence
+    without relying on subtyping might not be possible.
+    For instance, consider the following example:
+    \[
+      \vectyp{\reftyp{\inttyp}} 
+      <: 
+      \wheret{\vectyp{\uniontyp{\reftyp{\inttyp}, \reftyp{\T}}}}{\T}.
+    \]
+    Instantiating \T with \inttyp is the only solution that would make types
+    $\reftyp{\inttyp}$ and $\uniontyp{\reftyp{\inttyp}, \reftyp{\T}}$
+    equivalent. However, to find the solution, \algo would effectively need
+    to check $\reftyp{\T} <: \reftyp{\inttyp}$, bringing the unification
+    variable to the left.
+  \item\label{item:remove-uni-vars} 
+    \emph{Prevent new unification variables from appearing on the right-hand
+    side of subtyping.} Assuming that \algo has to rely on subtyping 
+    for the equivalence check, unification variables introduced by top-level
+    existential types (i.e. existential types bound outside invariant
+    constructors) will appear on the left-hand side. Once that happens,
+    existential types bound \emph{inside} invariant constructors will be the
+    only source of new unification variables on the right.
+    Thus, the elimination of variable-introducing existential types inside 
+    invariant constructors would prevent \algo from producing unwanted
+    dependencies between unification variables.
+\end{enumerate}
 
-\TODO{consider the example from the proposal}
+In the next chapter, I present a decidable subtype relation that
+follows the strategy \ref{item:remove-uni-vars} by restricting
+existential types inside invariant constructors.
+A simpler approach would be to eliminate impredicative existential types
+entirely, that is, allow only top-level existential types such as
+\[ \wheret{\vectyp{\vectyp{\T}}}{\T} \]
+but not
+\[ \vectyp{\wheret{\vectyp{\T}}{\T}}. \]
+However, as previously discussed, %impredicative existential types
+types like the latter \jlname{Vector} type above are used by Julia programmers 
+to represent heterogeneous data, so the simple approach seems unsatisfactory.

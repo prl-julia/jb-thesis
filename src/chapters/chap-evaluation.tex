@@ -1,0 +1,72 @@
+\chapter{Evaluation}\label{chap:eval}
+
+\paragraph{Packages.}
+Used \url{https://github.com/julbinb/JuliaPkgsList.jl} to get a list of
+Julia packages.
+The info is taken from a JSON file at
+\url{https://juliahub.com/app/packages/info}.
+(JuliaHub is listed as a service for searching all registered packages
+here: \url{https://julialang.org/packages/}).
+
+There were 9355 entries listed as of 2022-05-28.
+The tool extracts package name and latest version.
+Some entries in the JSON file were not proper registered packages,
+e.g. it contained the Julia repo itself, which is not a registered package.
+Some repositories are no longer open and cannot be accessed.
+Some repos did not have a version (31).
+
+9315 packages were successfully downloaded using
+\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}.
+
+\paragraph{Analysis.}
+Static analysis of type annotations in the downloaded packages.
+Here is cloc info:
+
+\begin{verbatim}
+-------------------------------------------------------------------
+Language         files          blank        comment           code
+-------------------------------------------------------------------
+Julia            172024        3830817        1937753       19476938
+\end{verbatim}
+
+All Julia files (i.e. files with .jl extension) were parsed using
+the Julia parser.
+
+206 packages had files that could not be parsed.
+
+After parsing, type annotations were extracted using MacroTools.jl:
+\begin{itemize}
+    \item method signatures, e.g. \cjl{f(x::T, v::Vector\{T\}) where T}
+      is transformed into \cjl{Tuple\{T, Vector\{T\}\} where T}
+    \item if there is a return type anotation, it is counted as a separate type
+    \item with the exception of method type signatures, all \cjl{t} from
+        \cjl{::t}, which includes field type annotations, run-time type assertions,
+        and local variable type annotations
+\end{itemize}
+
+Some type annotations could not be properly processed, e.g. because of macros
+\begin{verbatim}
+Error: Couldn't process type annotation
+  tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
+  err = AssertionError: Unsupported lb-var-ub format
+
+Error: Couldn't process type annotation
+  tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
+  err = AssertionError: Unsupported lb-var-ub format
+\end{verbatim}
+Total of 1629 packages had at least one error like that.
+
+Total 2136609 type annotations were found. Out of those:
+\begin{itemize}
+    \item 1573 couldn't be processed at all (e.g. as described above): usually
+        because a type variable binding couldn't be parsed
+    \item 22396 were partially processed, e.g. if one element of a tuple was
+        a \$-thingy, it was ignored when type variable occurrence was analyzed
+\end{itemize}
+
+2135030 satisfy the restriction, 6 were reported as not satisfying.
+
+2135030 + 6 + 1573 (errors) = 2136609, checks out.
+
+Types that syntactically do not fit the restriction but are trivially
+equivalent (involve tuples) were considered good by the analysis.

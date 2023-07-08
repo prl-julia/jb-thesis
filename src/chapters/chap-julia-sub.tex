@@ -793,9 +793,20 @@ language of types does not exist, I {conjecture} that
 }\end{quotation}
 The key problem is the interaction of
 impredicative existential types, invariant constructors, and unions.
-In what follows, I intentionally depart from the subtyping judgment
-presented in the previous section~\ref{sec:julia-sub:lambda-julia},
-as I am interested in the existence of some other, decidable subtype relation.
+Note that the encoding of \FSubN does not involve unions, meaning that Julia
+subtyping is undecidable even if union types are removed.
+However, as discussed later, the presence of unions limits available strategies
+of addressing the undecidability.
+
+In what follows, I briefly revisit subtyping of invariant constructors
+and existential types, discuss why their interaction is challenging,
+and conclude with possible ways of addressing the challenge.
+I intentionally depart from the subtyping judgment
+$E \vdash t <: t' \vdash E'$
+presented in the previous section~(\ref{sec:julia-sub:lambda-julia})
+and instead use a simpler $t <: t'$ notation,
+as I am exploring the space of possible subtyping algorithms.
+%as I am interested in the existence of some other, decidable subtype relation.
 
 First, recall that parametric datatypes are invariant, meaning that
 types such as $\reftyp{t}$ and $\reftyp{t'}$ are subtypes
@@ -821,7 +832,7 @@ it was called an exist/right variable.
 Consider the following subtype query 
 \[
   \begin{array}{ll}
-    \jlname{Tuple}\{\vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}, &
+    \jlname{Tuple}\{\vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}, &
       t'\,\}\\
     \multicolumn{2}{c}{<:} \\
     \jlname{Tuple}\{\vectyp{t_1^{\T}}, & t_2^{\T}\} 
@@ -835,17 +846,15 @@ Let us walk through possible steps of a subtyping algorithm \algo.
     \T is a unification variable; \algo can remember the variable and proceed
     to subtyping of
     \[ 
-      \begin{array}{c}
-        \tupletyp{\vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}, t'} \\
-        <: \\
+      \tupletyp{\vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}, t'}
+        \ <:\ 
         \tupletyp{\vectyp{t_1^{\T}}, t_2^{\T}}. 
-      \end{array}
     \]
   \item Both sides of the subtyping query are now tuples of the matching length.
-    Tuples are covariant, so \algo needs to check that ther corresponding 
+    Tuples are covariant, so \algo needs to check that their corresponding 
     components are subtypes, i.e.,
     \[ 
-      \vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
+      \vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
       \ \ \text{and}\ \ t' <: t_2^{\T}.
     \]
     Since the unification variable \T appears in both $t_1^{\T}$ and $t_2^{\T}$,
@@ -853,27 +862,27 @@ Let us walk through possible steps of a subtyping algorithm \algo.
     \begin{enumerate}
       \item The first tuple components are both invariant constructors,
         \[ 
-          \vectyp{\wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}} 
+          \vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}} 
           \ <:\  
           \vectyp{t_1^{\T}}, 
         \]
         so \algo needs to check that their type arguments are equivalent.
         Let \algo use subtyping for the equivalence check and focus
         on the second, right-to-left check:
-        \[ t_1^{\T}\ <:\ \wheret{\reftyp{\t'^S}}{l'{<:}\S{<:}u'}. \]
+        \[ t_1^{\T}\ <:\ \wheret{\t'^S}{l'{<:}\S{<:}u'}. \]
         \begin{enumerate}
-          \item The right-hand side type is an existential, so \S is unification
+          \item The right-hand side type is an existential, so \S is a unification
             variable; \algo can remember the variable and proceed to 
-            subtyping of \[ t_1^{\T} <: \reftyp{\t'^S}. \]
+            subtyping of \[ t_1^{\T} <: \t'^S. \]
           \item Let us assume that \algo successfully processes this subtyping
             query. Note that \emph{both sides of the query contain
             unification variables}, for \T occurs in $t_1^{\T}$
-            and \S occurs in $\reftyp{\t'^S}$.
+            and \S occurs in $\t'^S$.
             Thus, the unification variables \S and \T might
             be \emph{constraining each other}.
           \item\label{item:sub-stuck} \algo needs to resolve the unification variable \S, that is,
             check that constraints that were necessary to satisfy 
-            \[ t_1^{\T} <: \reftyp{\t'^S} \]
+            \[ t_1^{\T} <: \t'^S \]
             are consistent with each other as well as the declared bounds
             $l'$ and $u'$.
             However, \S might be constrained by the unification variable \T,
@@ -892,16 +901,17 @@ are available. Perhaps, instead of trying to resolve the variable at the point
 where it goes out of lexical scope, \algo could instead 
 store the constraints and resolve them later.
 However, another---more challenging---problem is that the two unification
-variables \S and \T may be \textbf{arbitrarily constraining each other},
-i.e. appear in arbitrary positions within constraining types. In the presence of
-impredicative existential types, constraints may have non-trivial solutions.
+variables \S and \T may be \textbf{arbitrarily constraining each other}. %,
+%i.e., appear in arbitrary positions within constraining types.
+In the presence of impredicative existential types, 
+constraints may have non-trivial solutions.
 For example, the following constraint set is satisfiable when both
 \S and \T are instantiated with $\wheret{\reftyp{\Q}}{\Q}$:
 \[
   \{ \reftyp{\T} <: \S, \quad \reftyp{\reftyp{\S}} <: \T, \quad \S <: \T \}
 \]
-In general, for an arbitrary set of constraints containing mutually
-dependent unification variables, finding a solution algorithmically is
+In general, for an arbitrary set of constraints with mutually
+constraining unification variables, finding a solution algorithmically is
 not straightforward if not undecidable.
 % In general,
 % \begin{quotation}\emph{there does not appear to be an ordering of unification 
@@ -920,9 +930,9 @@ not straightforward if not undecidable.
 % S --> T <-- Q
 % ^-----------|
 %
-Instead, I suggest \textbf{eliminating mutual dependencies
-between unification variables}
-and consider two possible angles of attack.
+Therefore, instead, I suggest \textbf{eliminating mutually constraining
+unification variables}.
+For this, I consider two possible angles of attack.
 \begin{enumerate}
   \item \emph{Prevent unification variables from moving to the left-hand side
     of subtyping.} Recall that unification variables are introduced by
@@ -952,19 +962,20 @@ and consider two possible angles of attack.
     constructors) will appear on the left-hand side. Once that happens,
     existential types bound \emph{inside} invariant constructors will be the
     only source of new unification variables on the right.
-    Thus, the elimination of variable-introducing existential types inside 
-    invariant constructors would prevent \algo from producing unwanted
+    Thus, eliminating variable-introducing existential types inside 
+    invariant constructors would prevent unwanted
     dependencies between unification variables.
 \end{enumerate}
+% \TODO{one variable in the bound of another is fine}
 
 In the next chapter, I present a decidable subtype relation that
-follows the strategy \ref{item:remove-uni-vars} by restricting
+follows the strategy \ref{item:remove-uni-vars} by \emph{restricting}
 existential types inside invariant constructors.
-A simpler approach would be to eliminate impredicative existential types
-entirely, that is, allow only top-level existential types such as
+A simpler approach would be to entirely eliminate impredicative existentials,
+that is, allow only top-level existential types such as
 \[ \wheret{\vectyp{\vectyp{\T}}}{\T} \]
 but not
 \[ \vectyp{\wheret{\vectyp{\T}}{\T}}. \]
-However, as previously discussed, %impredicative existential types
+However, as discussed previously, %impredicative existential types
 types like the latter \jlname{Vector} type above are used by Julia programmers 
-to represent heterogeneous data, so the simple approach seems unsatisfactory.
+to represent heterogeneous data, so the simple approach appears unsatisfactory.

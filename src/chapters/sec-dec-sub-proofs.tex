@@ -21,6 +21,9 @@ At a high-level, the subtyping algorithm terminates because:
         and \UEnv argument decreases with each recursive call.
 \end{enumerate}
 
+Note: particularly interesting elements of the proofs are highlighted
+in \textbf{bold}.
+
 % \paragraph*{Overview of proofs.}
 % Subtyping is checked only for valid types/signatures.
 % The validity check ensures the absence of recursive constraints on type
@@ -49,7 +52,7 @@ At a high-level, the subtyping algorithm terminates because:
 % constructor in a distibutivity context doesn't require all type arguments to be
 % specified as variables.
 
-\subsection{Decidability of Subtyping}\label{subsec:dec-proof}
+\subsection{Decidability}\label{subsec:dec-proof}
 %% ======================================================================
 
 \begin{figure}
@@ -112,13 +115,13 @@ At a high-level, the subtyping algorithm terminates because:
 \end{figure}
 
 To show the decidability of the subtyping algorithm,
-we will use the measure $\msrop$ of types and type signatures,
+I will use the measure $\msrop$ of types and type signatures,
 as defined in \figref{fig:ty-measure}.
 The measure function is defined recursively and is
-similar to the syntactic size,
+similar to syntactic size,
 except for the treatment of type variables: for variables from~\AEnv,
 the measure of a variable includes the measures of its bounds.
-The definition of the measure for restricted existential variables \rexvar
+The definition of measure for restricted existential variables \rexvar
 reflects the fact that \tyinv\iname{\rexvar_1,\ldots,\rexvar_n} represents both
 invariant constructors and restricted existential types.
 When $\rexvar_i$ represents a single type $\ty_i$,
@@ -196,8 +199,9 @@ The syntactic size is defined in~\figref{fig:ty-size}.
 \caption{Syntactic size}\label{fig:ty-size}
 \end{figure}
 
-In what follows, we will implicitly use the following facts about
-distributivity contexts (proofs are straightforward by induction):
+In what follows, the following facts about
+the distributivity contexts
+will be used implicitly (proofs are straightforward by induction):
 \begin{itemize}
     \item $\plug{\dctx}{\ty} = \ty';$
     \item $\plug{\dctx}{\dctx'} = \dctx'';$
@@ -206,14 +210,23 @@ distributivity contexts (proofs are straightforward by induction):
     \item $\subtydflt{\dctx}{\dctx'} \land \subtydflt{\ty}{\ty'}
         \implies \subtydflt{\plug{\dctx}{\ty}}{\plug{\dctx'}{\ty'}};$
     \item $\size{\plug{\dctx}{\ty}} = \size{\dctx} + \size{\ty};$
+    \item $\size{\plug{\dctxsig}{\tysig}} = \size{\dctxsig} + \size{\tysig};$
     \item $\tymsrdflt{\plug{\dctx}{\ty}} = \tymsrdflt{\dctx} + \tymsrdflt{\ty};$
     \item $\tymsrdflt{\plug{\dctxsig}{\tysig}} = 
         \tymsrdflt{\dctxsig} + \tymsrdflt{\tysig};$
     \item $\substvars(\plug\dctx\ty) = 
-        \plug{\substvars(\dctx)}{\substvars(\ty)}; $    
-    \item \TODO{more as needed}
+        \plug{\substvars(\dctx)}{\substvars(\ty)}.$    
+    %\item \TODO{more as needed}
 \end{itemize}
 
+The following key properties are presented in the remainder of this section:
+\begin{itemize}
+    \item termination of \subtydflt{\ty}{\ty'} (\thmref{thm:subty-terminates});
+    \item termination of \tymeetdflt{\ty}{\ty'} (\lemref{lem:meet-terminates});
+    \item termination of \subtyctrdflt{\ty}{\ty'} (\thmref{thm:subtyctr-terminates});
+    \item termination of \solvectrdflt (\thmref{thm:solvectr-terminates});
+    \item termination of \subtysigdflt{\tysig}{\tysig'} (\thmref{thm:subtysig-terminates}).
+\end{itemize}
 
 \begin{theorem}{Termination of\ \ \subtydflt{\ty}{\ty'}.}%
 \label{thm:subty-terminates}
@@ -235,17 +248,27 @@ distributivity contexts (proofs are straightforward by induction):
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}.\]
 \end{proof}
 
+% \begin{lemma}{Termination of join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$).}%
+% \label{lem:meet-terminates}
+%     $\forall \AEnv, \ty, \ty'$ both
+%     \tyjoindflt{\ty}{\ty'} and \tymeetdflt{\ty}{\ty'} terminate.
+% \end{lemma}
+% \begin{proof}
+%     \tyjoindflt{\ty}{\ty'} terminates because subtyping of types terminates
+%     by~\thmref{thm:subty-terminates}.
 
-\begin{lemma}{Termination of join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$).}%
+%     \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates
+%     and for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
+%     \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
+%     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
+% \end{proof}
+\begin{lemma}{Termination of intersection ($\sqcap_{\AEnv}$).}%
 \label{lem:meet-terminates}
-    $\forall \AEnv, \ty, \ty'$ both
-    \tyjoindflt{\ty}{\ty'} and \tymeetdflt{\ty}{\ty'} terminate.
+    $\forall \AEnv, \ty, \ty',$
+    \tymeetdflt{\ty}{\ty'} terminates.
 \end{lemma}
 \begin{proof}
-    \tyjoindflt{\ty}{\ty'} terminates because subtyping of types terminates
-    by~\thmref{thm:subty-terminates}.
-
-    \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates
+    \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates,
     and for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
     \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
@@ -265,7 +288,7 @@ distributivity contexts (proofs are straightforward by induction):
     of the conclusion \subtyctrdflt{\ty}{\ty'}.
     
     The only interesting case is \RSC{UVar-UnionRight}.
-    By the variable names convention~\ref{def:var-names}, $\va \notin \AEnv$.
+    By the variable names convention~(\defref{def:var-names}), $\va \notin \AEnv$.
     Therefore, $\tymsrdflt{\va} = \tymsrdflt{\va_1} = \tymsrdflt{\va_2}$
     and the measure of the left-hand side type is the same in both premises
     and the conclusion,
@@ -350,7 +373,13 @@ distributivity contexts (proofs are straightforward by induction):
 \begin{proof}
     By strong induction on $n = \size{\AEnv} + \size{\AEnv'} + \size{\tysig}$.
 
-    Case $n = 0$ is not possible, as the minimal size of a type signature is 1.
+    Case $n = 0$ is not possible: the minimal size of a type signature is 1.
+
+    Base cases for \tyany and \tybot are straightforward; in the base case
+    for $\vany'$, environment $\concat{\AEnv}{\AEnv'}$ is empty and
+    $\vany \neq \vany'$, 
+    meaning that \[\tymsr{\EmptyEnv}{\vany'} = 1 = 
+    \tymsr{\varbound{\vany}{\tylb}{\tyub}}{\vany'}.\]
     
     In the inductive step for $n$, the induction hypothesis (IH) states that
     $\forall n'<n. \forall \tysig', \AEnv'', \AEnv'''  \text{ s.t. }
@@ -390,9 +419,14 @@ distributivity contexts (proofs are straightforward by induction):
             \end{itemize}
         \item Case \tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}.
             By definition,
-            \[\tymsr{\concat{\AEnv}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}} =
-            1 + \tymsr{\concat{\AEnv}{\AEnv'}}{\tylb'} + \msrop(\ldots\tyub') +
-            \tymsr{\concat{\AEnv}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\tysig}.\]
+            \[
+                \begin{array}{c}
+                    \tymsr{\concat{\AEnv}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}} \\
+                    = \\
+                    1 + \tymsr{\concat{\AEnv}{\AEnv'}}{\tylb'} + \msrop(\ldots\tyub') +
+                    \tymsr{\concat{\AEnv}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\tysig}.
+                \end{array}    
+            \]
             Similarly to the last subcase of the $\vany'$ case, the IH applies
             to $\tylb'$ and $\tyub'$.
             Furthermore, since $\size{\AEnv} + \size{\AEnv'} + 
@@ -440,13 +474,17 @@ distributivity contexts (proofs are straightforward by induction):
             = \tymsr{\concat{\AEnv}{\UEnv}}{\tysig'}.$
 
             By the definition of $\msrop$,
-            \[\tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\vx} =
-            1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub} <
-            2\times(1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}) =
-            \tymsrdflt{\rexvarbound{\tylb}{\tyub}},\]
+            \[
+                \begin{array}{cl}
+                    & \tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\vx} \\
+                  = & 1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub} \\
+                  < & 2\times(1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}) \\
+                  = & \tymsrdflt{\rexvarbound{\tylb}{\tyub}},
+                \end{array}
+            \]
             which concludes the case.
         \item \RSS{ExistLeft}. By the variables names
-            convention~\defref{def:var-names}, \vx is different from variables
+            convention~(\defref{def:var-names}), \vx is different from variables
             in \AEnv, \UEnv, as well as bound variables of \dctxsig, \tysig,
             and $\tysig'$. Therefore, by~\lemref{lem:msr-weakening} (weakening),
             $\tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\dctxsig} = 
@@ -468,46 +506,22 @@ distributivity contexts (proofs are straightforward by induction):
 \end{proof}
 
 
-\subsection{Properties of Subtyping of Types}%
+\subsection{Unification-Free Subtyping}%
 \label{subsec:props-subty-proof}
 %% ======================================================================
 
-\begin{figure}
-\footnotesize
-\begin{mathpar}
-    \fbox{\vldinenvdflt{\substvars}}
-    \\
-
-    \inferrule*[]
-    { \forall \varbound{\vany}{\tylb}{\tyub} \in \AEnv. \and
-        \tyvld{\AEnv'}{\substvars(\vany)} \and
-        \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
-        \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
-    { \vldinenvdflt{\substvars} }
-    
-    \\
-    \fbox{\vldinenv{\AEnv}{\CSet}{\substvars}}
-    \\
-
-    \inferrule*[]
-    { \forall \ctrsub{\ty}{\va} \in \CSet.\ \ 
-        \subtydflt{\ty}{\substvars(\va)} \and 
-        \forall \ctrsub{\va}{\ty'} \in \CSet.\ \  
-        \subtydflt{\substvars(\va)}{\ty'} }
-    { \vldinenv{\AEnv}{\CSet}{\substvars} }
-\end{mathpar}
-\caption{Validity of substitution with respect to environment and constrains}%
-\label{fig:substuvars-validity}
-\end{figure}
-
-%We will use an implicit assumption that all types are valid
-%in the given context.
+This section presents the following key properties:
+\begin{itemize}
+    \item reflexivity \subtydflt{\ty}{\ty} (\thmref{thm:sub-ty-refl});
+    \item transitivity $\subtydflt{\ty_1}{\ty_2} \ \ \land\ \ 
+        \subtydflt{\ty_2}{\ty_3} \implies \subtydflt{\ty_1}{\ty_3}$
+        (\thmref{thm:sub-ty-trans});
+    \item soundness with respect to substitution (\thmref{thm:subty-sound-subst}).
+\end{itemize}
 
 \begin{theorem}{Reflexivity of subtyping of types.}\label{thm:sub-ty-refl}
-    $
-        \forall \ty, \AEnv, \text{ s.t. } \tyvlddflt{\ty}.\quad
-        \subtydflt{\ty}{\ty}.
-    $
+    $\forall \ty, \AEnv, \text{ s.t. } \tyvlddflt{\ty}.$
+    \[\subtydflt{\ty}{\ty}.\]
 \end{theorem}
 \begin{proof}
     By induction on the structure of \ty.
@@ -709,7 +723,7 @@ distributivity contexts (proofs are straightforward by induction):
     $\forall \AEnv, \ty, \ty'.\ \forall \AEnv' \text{ s.t. }$\\
     $\dom{\AEnv'} \cap \dom{\AEnv} = \varnothing \land 
     (\forall \vany \in \dom{\AEnv'}. 
-        \lnot \occ{\vany}{\ty} \land \lnot \occ{\vany}{\ty}),$
+        \lnot \occ{\vany}{\ty} \land \lnot \occ{\vany}{\ty'}),$
     \[ \subtydflt{\ty}{\ty'} \quad\implies\quad 
     \subty{\concat{\AEnv}{\AEnv'}}{\ty}{\ty'}. \]
 \end{lemma}
@@ -722,7 +736,7 @@ distributivity contexts (proofs are straightforward by induction):
     $\forall \ty_1, \ty_2, \ty_3, \AEnv, \text{ s.t. }
     \tyvlddflt{\ty_1, \ty_2, \ty_3} \land \tyvld{\,}{\AEnv}.$
     \[
-        \subtydflt{\ty_1}{\ty_2} \land \subtydflt{\ty_2}{\ty_3}
+        \subtydflt{\ty_1}{\ty_2} \ \ \land\ \  \subtydflt{\ty_2}{\ty_3}
         \quad\implies\quad
         \subtydflt{\ty_1}{\ty_3}.
     \]
@@ -736,7 +750,7 @@ distributivity contexts (proofs are straightforward by induction):
     n' = \tymsrdflt{\ty'_1} + 2\times\tymsrdflt{\ty'_2} + \tymsrdflt{\ty'_3},$
     it holds that
     \[
-        \subtydflt{\ty'_1}{\ty'_2} \land \subtydflt{\ty'_2}{\ty'_3}
+        \subtydflt{\ty'_1}{\ty'_2} \ \ \land\ \  \subtydflt{\ty'_2}{\ty'_3}
         \quad\implies\quad
         \subtydflt{\ty'_1}{\ty'_3}.
     \]
@@ -915,6 +929,34 @@ distributivity contexts (proofs are straightforward by induction):
 %     and \thmref{thm:sub-ty-refl} (reflexivity) in the inductive cases.
 % \end{proof}
 
+\begin{figure}
+\footnotesize
+\begin{mathpar}
+    \fbox{\vldinenvdflt{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \varbound{\vany}{\tylb}{\tyub} \in \AEnv. \and
+        \tyvld{\AEnv'}{\substvars(\vany)} \and
+        \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
+        \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
+    { \vldinenvdflt{\substvars} }
+    
+    \\
+    \fbox{\vldinenv{\AEnv}{\CSet}{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \ctrsub{\ty}{\va} \in \CSet.\ \ 
+        \subtydflt{\ty}{\substvars(\va)} \and 
+        \forall \ctrsub{\va}{\ty'} \in \CSet.\ \  
+        \subtydflt{\substvars(\va)}{\ty'} }
+    { \vldinenv{\AEnv}{\CSet}{\substvars} }
+\end{mathpar}
+\caption{Validity of substitution with respect to environment and constrains}%
+\label{fig:substuvars-validity}
+\end{figure}
+
 \begin{theorem}{Soundness of subtyping of types with respect to subsitution.}%
 \label{thm:subty-sound-subst}
     $\forall \AEnv, \ty, \ty' \text{ s.t. } \tyvlddflt{\ty, \ty'}.\ 
@@ -963,80 +1005,89 @@ distributivity contexts (proofs are straightforward by induction):
 \end{proof}
 
 
-\subsection{Properties of Join and Meet}%
+\subsection{Intersection}%
 \label{subsec:props-join-meet-proof}
 %% ======================================================================
 
-\begin{theorem}{Soundness of join.}%
-\label{thm:join-sound}
-    \tyjoindflt{\ty}{\ty'} computes a join of $\ty, \ty'$, namely:
-    $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
-    and \tyvlddflt{\ty, \ty'}.
-    \begin{enumerate}
-        \item \tyjoindflt{\ty}{\ty'} is a valid upper bound
-            of \ty and $\ty'$, i.e., 
-            \[
-                \tyvlddflt{\tyjoindflt{\ty}{\ty'}}
-                \quad\text{and}\quad
-                \subtydflt{\ty}{(\tyjoindflt{\ty}{\ty'})}
-                \quad\text{and}\quad
-                \subtydflt{\ty'}{(\tyjoindflt{\ty}{\ty'})};
-            \]
-        \item \tyjoindflt{\ty}{\ty'} is the least upper bound
-            of \ty and $\ty'$, i.e.,
-            $\forall \tyub$ s.t. \tyvlddflt{\tyub},
-            \subtydflt{\ty}{\tyub} and \subtydflt{\ty'}{\tyub}.
-            \[
-                \subtydflt{(\tyjoindflt{\ty}{\ty'})}{\tyub}.
-            \]
-    \end{enumerate}
-\end{theorem}
-\begin{proof}
-    Straightforward by the definition of $\sqcup_{\AEnv}$,
-    using \thmref{thm:sub-ty-refl} (reflexivity), 
-    \RST{UnionLeft}, and \RST{UnionRight}.
-\end{proof}
+% \begin{theorem}{Soundness of join.}%
+% \label{thm:join-sound}
+%     \tyjoindflt{\ty}{\ty'} computes a join of $\ty, \ty'$, namely:
+%     $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
+%     and \tyvlddflt{\ty, \ty'}.
+%     \begin{enumerate}
+%         \item \tyjoindflt{\ty}{\ty'} is a valid upper bound
+%             of \ty and $\ty'$, i.e., 
+%             \[
+%                 \tyvlddflt{\tyjoindflt{\ty}{\ty'}}
+%                 \quad\text{and}\quad
+%                 \subtydflt{\ty}{(\tyjoindflt{\ty}{\ty'})}
+%                 \quad\text{and}\quad
+%                 \subtydflt{\ty'}{(\tyjoindflt{\ty}{\ty'})};
+%             \]
+%         \item \tyjoindflt{\ty}{\ty'} is the least upper bound
+%             of \ty and $\ty'$, i.e.,
+%             $\forall \tyub$ s.t. \tyvlddflt{\tyub},
+%             \subtydflt{\ty}{\tyub} and \subtydflt{\ty'}{\tyub}.
+%             \[
+%                 \subtydflt{(\tyjoindflt{\ty}{\ty'})}{\tyub}.
+%             \]
+%     \end{enumerate}
+% \end{theorem}
+% \begin{proof}
+%     Straightforward by the definition of $\sqcup_{\AEnv}$,
+%     using \thmref{thm:sub-ty-refl} (reflexivity), 
+%     \RST{UnionLeft}, and \RST{UnionRight}.
+% \end{proof}
 
-\begin{lemma}{Symmetry of join.}
-    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
-    \[
-        \subtydflt{(\tyjoindflt{\ty}{\ty'})}{(\tyjoindflt{\ty'}{\ty})}
-        \quad\text{and}\quad
-        \subtydflt{(\tyjoindflt{\ty'}{\ty})}{(\tyjoindflt{\ty}{\ty'})}.
-    \]
-\end{lemma}
-\begin{proof}
-    Straightforward by the definition of $\sqcup_{\AEnv}$,
-    using \thmref{thm:sub-ty-refl} (reflexivity), 
-    \RST{UnionLeft}, and \RST{UnionRight}.
-\end{proof}
+% \begin{lemma}{Symmetry of join.}
+%     $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+%     \[
+%         \subtydflt{(\tyjoindflt{\ty}{\ty'})}{(\tyjoindflt{\ty'}{\ty})}
+%         \quad\text{and}\quad
+%         \subtydflt{(\tyjoindflt{\ty'}{\ty})}{(\tyjoindflt{\ty}{\ty'})}.
+%     \]
+% \end{lemma}
+% \begin{proof}
+%     Straightforward by the definition of $\sqcup_{\AEnv}$,
+%     using \thmref{thm:sub-ty-refl} (reflexivity), 
+%     \RST{UnionLeft}, and \RST{UnionRight}.
+% \end{proof}
 
-\begin{theorem}{Soundness of meet.}%
+\begin{theorem}{Soundness of intersection.}%
 \label{thm:meet-sound}
-    \tymeetdflt{\ty}{\ty'} defines a meet of $\ty, \ty'$, namely:
+    \tymeetdflt{\ty}{\ty'} defines an intersection of $\ty, \ty'$, namely:
     $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
     and \tyvlddflt{\ty, \ty'}.
-    \begin{enumerate}
-        \item \tymeetdflt{\ty}{\ty'} is a valid lower bound
-            of \ty and $\ty'$, i.e., 
-            \[
-                \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
-                \quad\text{and}\quad
-                \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
-                \quad\text{and}\quad
-                \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
-            \]
-        \item \tymeetdflt{\ty}{\ty'} is the least upper bound
-            of \ty and $\ty'$, i.e.,
-            $\forall \tylb$ s.t. \tyvlddflt{\tylb},
-            \subtydflt{\tylb}{\ty} and \subtydflt{\tylb}{\ty'}.
-            \[
-                \subtydflt{\tylb}{(\tymeetdflt{\ty}{\ty'})}.
-            \]
-    \end{enumerate}
+    \tymeetdflt{\ty}{\ty'} is a valid lower bound
+    of \ty and $\ty'$, i.e., 
+    \[
+        \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
+        \quad\text{and}\quad
+        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
+        \quad\text{and}\quad
+        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
+    \]
+    % \begin{enumerate}
+    %     \item \tymeetdflt{\ty}{\ty'} is a valid lower bound
+    %         of \ty and $\ty'$, i.e., 
+    %         \[
+    %             \tyvlddflt{\tymeetdflt{\ty}{\ty'}}
+    %             \quad\text{and}\quad
+    %             \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty}
+    %             \quad\text{and}\quad
+    %             \subtydflt{(\tymeetdflt{\ty}{\ty'})}{\ty'}.
+    %         \]
+    %     \item \tymeetdflt{\ty}{\ty'} is the least upper bound
+    %         of \ty and $\ty'$, i.e.,
+    %         $\forall \tylb$ s.t. \tyvlddflt{\tylb},
+    %         \subtydflt{\tylb}{\ty} and \subtydflt{\tylb}{\ty'}.
+    %         \[
+    %             \subtydflt{\tylb}{(\tymeetdflt{\ty}{\ty'})}.
+    %         \]
+    % \end{enumerate}
 \end{theorem}
 \begin{proof}
-    \TODO{either prove the second part or rename meet}
+    %\TODO{either prove the second part or rename meet}
     Straightforward by strong induction on
     $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
     %and induction on the derivation of \subty.
@@ -1057,34 +1108,42 @@ distributivity contexts (proofs are straightforward by induction):
     
     The remaining cases for tuples and invariant constructors
     use the induction hypotheses and constructors \RST{Tuple} and \RST{Inv},
-    respectively, as well as \thmref{thm:join-sound} (soundness of join)
+    respectively, as well as \RST{UnionLeft}
+    %\thmref{thm:join-sound} (soundness of join)
     in the invariant case.
 
     The catch-all case $\tymeetdflt{\ty}{\ty'} = \tybot$
     follows from \RST{Bot}.
 \end{proof}
 
-\begin{lemma}{Symmetry of meet.}
-    $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
-    \[
-        \subtydflt{(\tymeetdflt{\ty}{\ty'})}{(\tymeetdflt{\ty'}{\ty})}
-        \quad\text{and}\quad
-        \subtydflt{(\tymeetdflt{\ty'}{\ty})}{(\tymeetdflt{\ty}{\ty'})}.
-    \]
-\end{lemma}
-\begin{proof}
-    Straightforward by strong induction on
-    $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$,
-    using the definition of $\sqcap_{\AEnv}$,
-    \thmref{thm:sub-ty-refl} (reflexivity),
-    and \RST{} constructors.
-\end{proof}
+% \begin{lemma}{Symmetry of meet.}
+%     $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
+%     \[
+%         \subtydflt{(\tymeetdflt{\ty}{\ty'})}{(\tymeetdflt{\ty'}{\ty})}
+%         \quad\text{and}\quad
+%         \subtydflt{(\tymeetdflt{\ty'}{\ty})}{(\tymeetdflt{\ty}{\ty'})}.
+%     \]
+% \end{lemma}
+% \begin{proof}
+%     Straightforward by strong induction on
+%     $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$,
+%     using the definition of $\sqcap_{\AEnv}$,
+%     \thmref{thm:sub-ty-refl} (reflexivity),
+%     and \RST{} constructors.
+% \end{proof}
 
-
-
-\subsection{Properties of Constrained Subtyping of Types}%
+\subsection{Constrained Subtyping}%
 \label{subsec:props-subtyctr-proof}
 %% ======================================================================
+
+This section presents the following key properties:
+\begin{itemize}
+    \item \subtydflt{\ty}{\ty'} and \subtyctrdflt{\ty}{\ty'} coincide on
+        unification-free types (\lemref{lem:subtyctr-subty});
+    \item soundness of \subtyctrdflt{\ty}{\ty'}
+        (\thmref{thm:subtyctr-sound});
+    \item soundness of \solvectrdflt (\thmref{thm:solvectr-sound}).
+\end{itemize}
 
 \begin{lemma}{Constrained subtyping coincides with subtyping on
     unification-free types.}%
@@ -1109,7 +1168,7 @@ distributivity contexts (proofs are straightforward by induction):
 
     In the first case, the rules \RSC{UBot}, \RSC{UVarLeft}, \RSC{UVarRight},
     and \RSC{UVar-UnionRight} could not have been used to build the derivation
-    because they refer a unification variable \va from \UEnvD,
+    because they refer to a unification variable \va from \UEnvD,
     and both \ty and $\ty'$ are valid in \AEnv alone.
     All other rules of constrained subtyping have matching subtyping rules.
 
@@ -1202,7 +1261,7 @@ distributivity contexts (proofs are straightforward by induction):
             The most interesting case is when $n \geq 1, m \geq 1$.
             Let $\msqcap_{i=1}^n \tyub_1^i$ be denoted with $\tyub_1$
             and $\msqcap_{j=1}^m \tyub_2^j$ with $\tyub_2$.
-            By~\thmref{thm:meet-sound} (soundness of meet), we have
+            By~\thmref{thm:meet-sound} (soundness of intersection), we have
             \subtydflt{\tyub_1}{\tyub_1^i} and \subtydflt{\tyub_2}{\tyub_2^j}
             for all $i, j$. Therefore, we can take 
             $\substvars_1 = \subst{\substvars}{\substel{\va_1}{\tyub_1}}$ and
@@ -1214,15 +1273,15 @@ distributivity contexts (proofs are straightforward by induction):
             \subtydflt{\plug{\substvars_2(\dctx)}{\tyub_2}}{\ty'_2} (H$_2$).
             By assumption on \substvars, we have
             \subtydflt{\substvars(\va)}{\tyunion{\tyub_1}{\tyub_2}}.
-            Therefore, \subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}
-                {\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}.
+            Therefore, \[\subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}
+                {\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}.\]
             Since $\va_1, \va_2$ were fresh, we know
             $\substvars(\dctx) = \substvars_1(\dctx) = \substvars_2(\dctx)$.
-            Therefore, by \RST{UnionLeft} applied to H$_1$, H$_2$,
-            \subtydflt{\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}
-                {\tyunion{\ty'_1}{\ty'_2}}.
+            Therefore, by \RST{UnionLeft} applied to H$_1$, H$_2$, we have
+            \[\subtydflt{\plug{\substvars(\dctx)}{\tyunion{\tyub_1}{\tyub_2}}}
+                {\tyunion{\ty'_1}{\ty'_2}}.\]
             Finally, the subcase $n \geq 1, m \geq 1$ concludes by transitivity:
-            \subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}{\tyunion{\ty'_1}{\ty'_2}}.
+            \[\subtydflt{\plug{\substvars(\dctx)}{\substvars(\va)}}{\tyunion{\ty'_1}{\ty'_2}}.\]
     \end{itemize}
 \end{proof}
 

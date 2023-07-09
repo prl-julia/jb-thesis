@@ -1,4 +1,53 @@
-\section{Proofs}
+\section{Properties of Subtyping}
+%% ======================================================================
+
+This section defines and proves multiple properties about subtyping,
+most importantly:
+\begin{itemize}
+    \item decidability of subtyping (\thmref{thm:subtysig-terminates});
+    \item transitivity of unification-free subtyping (\thmref{thm:sub-ty-trans});
+    \item soundness of constrained subtyping (\thmref{thm:subtyctr-sound}) 
+        and constraints resolution (\thmref{thm:solvectr-sound}).
+\end{itemize}
+
+A detailed discussion of the decidability is given in \secref{subsec:dec-proof}.
+At a high-level, the subtyping algorithm terminates because:
+\begin{enumerate}
+    \item for each recursive call of unification-free subtyping, 
+        constrained subtyping, and signature subtyping, the arguments are
+        cumulatively smaller with respect to the measure function
+        (\figref{fig:ty-measure});
+    \item constraints resolution terminates because consistency checks terminate
+        and \UEnv argument decreases with each recursive call.
+\end{enumerate}
+
+% \paragraph*{Overview of proofs.}
+% Subtyping is checked only for valid types/signatures.
+% The validity check ensures the absence of recursive constraints on type
+% variables as well as consistency of variable bounds.
+% For subtyping of types, we assume \tyvlddflt{\ty} and \tyvlddflt{\ty'}.
+% For subtyping of type signatures, we assume
+% \tyvlddflt{\tysig} and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}.
+
+% \textbf{Termination.} The measure of a type includes the measure of its bounds.
+% In all subtyping judgments, every recursive call is made with a smaller measure.
+% For constraints resolution, every recursive call is made with a smaller \UEnv.
+
+% \textbf{Notes.}
+% Exists of unions is equivalent to the union of exists (in Julia subtyping),
+% so treating parts of the union on the right independently is correct
+% in subtyping of signatures.
+
+% Getting the upper bound of a universal variable might be needed at either the
+% signature or the type level, that's why the rules have some duplicates.
+% The key is to get rid of all top-level existentials.
+
+% Because the same semantic type can be represented with multiple syntactic types,
+% e.g. with an explicit existential vs restricted existential, it may be necessary
+% to open restricted existentials as top-level variables, but it is not always
+% necessary. That's why the rule for signature subtyping of invariant
+% constructor in a distibutivity context doesn't require all type arguments to be
+% specified as variables.
 
 \subsection{Decidability of Subtyping}\label{subsec:dec-proof}
 %% ======================================================================
@@ -422,6 +471,34 @@ distributivity contexts (proofs are straightforward by induction):
 \subsection{Properties of Subtyping of Types}%
 \label{subsec:props-subty-proof}
 %% ======================================================================
+
+\begin{figure}
+\footnotesize
+\begin{mathpar}
+    \fbox{\vldinenvdflt{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \varbound{\vany}{\tylb}{\tyub} \in \AEnv. \and
+        \tyvld{\AEnv'}{\substvars(\vany)} \and
+        \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
+        \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
+    { \vldinenvdflt{\substvars} }
+    
+    \\
+    \fbox{\vldinenv{\AEnv}{\CSet}{\substvars}}
+    \\
+
+    \inferrule*[]
+    { \forall \ctrsub{\ty}{\va} \in \CSet.\ \ 
+        \subtydflt{\ty}{\substvars(\va)} \and 
+        \forall \ctrsub{\va}{\ty'} \in \CSet.\ \  
+        \subtydflt{\substvars(\va)}{\ty'} }
+    { \vldinenv{\AEnv}{\CSet}{\substvars} }
+\end{mathpar}
+\caption{Validity of substitution with respect to environment and constrains}%
+\label{fig:substuvars-validity}
+\end{figure}
 
 %We will use an implicit assumption that all types are valid
 %in the given context.

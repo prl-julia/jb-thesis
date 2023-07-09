@@ -227,13 +227,22 @@ Universal variables are variables introduced on the left.
 In \secref{sec:julia-sub:lambda-julia}, universal and unification variables
 were called left/forall and right/exist, respectively.
 
-In the next few paragraphs, I first give an overview of the subtyping
+In the next section, I give an overview of the subtyping
 algorithm for the type language in~\figref{fig:ty-grammar},
-and then discuss its exact definition and decidability.
-Detailed proofs are provided in the following sections.
+with the exact definition and decidability discussed separately.
+\textbf{The subtyping algorithm} is given by subtyping rules in
+Figures~\ref{fig:subtyping-base}, \ref{fig:subtyping-constrained}, and
+\ref{fig:subtyping-tysigs},
+along with the constraints resolution algorithm in \figref{fig:ctr-solve}.
+The rules are not syntax-directed, i.e., there may be multiple rules
+applicable to a pair of types or type signatures; however, the rules
+are \emph{analytic}~\cite{bib:martin-lof:analytic-synthetic:1994}:
+there is a finite number of applicable rules, and the premises of each rule
+are comprised of the subcomponents of its conclusion.
+%Detailed proofs are provided in the following sections.
 %Although the overview points to figures with exact definitions,
 I suggest that the reader skips figures with subtyping rules
-while reading the overview for the first time.
+when reading the overview for the first time.
 
 % we use \vx, \vy, etc. to denote universal variables
 % and \va, \vb, etc. to denote unification variables.
@@ -451,7 +460,7 @@ Next, I present the exact definitions of:
     \item unification-free subtyping of types \subtydflt{\ty}{\ty'};
     \item constrained subtyping of types \subtyctrdflt{\ty}{\ty'};
     \item constraints resolution \solvectrdflt;
-    \item subtyping of type signatures \subtysigdflt{\tysig}{\tysig'}.
+    \item signature subtyping \subtysigdflt{\tysig}{\tysig'}.
 \end{itemize}
 
 For simplicity of the presentation, I assume the following variable names 
@@ -762,15 +771,23 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
 \end{mathpar}
 \end{minipage}}
 \caption{Constrained subtyping of types.
-    Note: %\dctx stands for \dctxty;
-    every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
-    one where all occurrences of $\symsubctr$ are replaced with 
-    $\symsubctrL$, and another with $\symsubctrR$.
-    Thus, the figure defines two mutually recursive relations,
-    \subtyctrLdflt{\ty}{\ty'} and \subtyctrRdflt{\ty}{\ty'}.
+    % Note: %\dctx stands for \dctxty;
+    % every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
+    % one where all occurrences of $\symsubctr$ are replaced with 
+    % $\symsubctrL$, and another with $\symsubctrR$.
+    % Thus, the figure defines two mutually recursive relations,
+    % \subtyctrLdflt{\ty}{\ty'} and \subtyctrRdflt{\ty}{\ty'}.
     %$\symsubctr$ stands for either $\symsubctrL$ or $\symsubctrR$,
     %and within one rule, all occurrences of $\symsubctr$ denote the same relation
 }\label{fig:subtyping-constrained}
+\begin{tablenotes}[para]
+    Every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
+    one where all occurrences of $\symsubctr$ are replaced with 
+    $\symsubctrL$, and another where all occurrences of $\symsubctr$ are
+    replaced with $\symsubctrR$.
+    Thus, the figure defines two mutually recursive relations,
+    \subtyctrLdflt{\ty}{\ty'} and \subtyctrRdflt{\ty}{\ty'}.
+\end{tablenotes}
 \end{figure}
 %% old definition of UVar-UnionRight: unclear how to prove its soundness
 % \colorbox{light-gray}{$
@@ -794,6 +811,236 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
 %     {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
 % $}
 
+Constrained subtyping of types is given in \figref{fig:subtyping-constrained}.
+The figure defines two mutually recursive relations,
+\[
+    \subtyctrLdflt{\ty}{\ty'} \quad\text{and}\quad \subtyctrRdflt{\ty}{\ty'},
+\]
+where the former is used when unification variables appear on the left,
+and the latter is used when unification variables appear on the right.
+For brevity, similar rules of the two relations are abbreviated with
+a single rule
+\[
+    \subtyctrdflt{\ty}{\ty'}.
+\]
+
+Most of the rules of constrained subtyping match the rules of unification-free
+subtyping, with the only difference being the propagation of constraints
+from recursive calls. For instance, compare subtyping of tuples:
+\begin{mathpar}
+\small
+\inferrule[]
+    { \subtydflt{\ty_1}{\ty'_1} \and \subtydflt{\ty_2}{\ty'_2} }
+    { \subtydflt{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}} }
+
+\inferrule[]
+    { \subtyctrdfltenv{\ty_1}{\ty'_1}{\CSet_1} \and 
+        \subtyctrdfltenv{\ty_2}{\ty'_2}{\CSet_2} }
+    { \subtyctrdfltenv{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}}
+        {\CSet_1 \cup \CSet_2} }
+\end{mathpar}
+In fact, when types do not contain unification variables,
+constrained and unification-free subtyping coincide
+(\lemref{lem:subtyctr-subty}).
+
+The only case where \subtyctrLdflt{\ty}{\ty'} needs to call
+\subtyctrRdflt{\ty}{\ty'} and vice versa is subtyping of invariant
+constructors/restricted existential types (\RSC{Inv}):
+here, the right-to-left check \subtyctrdflt{\tylb'}{\tylb} moves unification
+variables to the opposite side.
+
+All the rules unique to constrained subtyping are highlighted in gray:
+\RSC{UBot}, \RSC{UVarLeft}, \RSC{UVarRight}, \RSC{UVar-UnionRight}.
+These are the rules that \emph{generate} new constraints on unification
+variables rather than simply propagate them.
+The most interesting rule is \RSC{UVar-UnionRight}: it addresses the case
+where the unification variable could be instantiated with a union.
+Consider the following example:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+    \inferrule[]
+    {
+        \inferrule[]
+        { }
+        { \subtyctrL{\EmptyEnv}{\va}
+            {\typair{\va}{\tyany}}
+            {\tyunion{\typair{\tyint}{\tyany}}{\typair{\tyflt}{\tyany}}}
+            {?} }
+        \and
+        \inferrule[]
+        { 
+            \inferrule[]
+            { \ldots }
+            { \subtyctrR{\EmptyEnv}{\va}
+                {\typair{\tyint}{\tyany}}
+                {\typair{\va}{\tyany}}
+                { \ctrsngl{\tyint}{\va} } } 
+            \and
+            \ldots
+        }
+        { \subtyctrR{\EmptyEnv}{\va}
+            {\tyunion{\typair{\tyint}{\tyany}}{\typair{\tyflt}{\tyany}}}
+            {\typair{\va}{\tyany}}
+            { \ctrset{\ctrsub{\tyint}{\va}, \ctrsub{\tyflt}{\va}} } } 
+    }
+    { \subtyctrR{\EmptyEnv}{\va}
+        {\tyinv\nref{\tyunion{\typair{\tyint}{\tyany}}
+            {\typair{\tyflt}{\tyany}}}}
+        {\tyinv\nref{\typair{\va}{\tyany}}}
+        {?} }
+\\
+\end{mathpar}
+\end{minipage}}
+Without \RSC{UVar-UnionRight}, the best way to proceed with
+\[
+    \subtyctrL{\EmptyEnv}{\va}
+            {\typair{\va}{\tyany}}
+            {\tyunion{\typair{\tyint}{\tyany}}{\typair{\tyflt}{\tyany}}}
+            {?}
+\]
+(besides \RSC{UBot}, which requires \ctrsngl{\va}{\tybot})
+would be to use \RSC{UnionRight} and pick either \typair{\tyint}{\tyany}
+or \typair{\tyflt}{\tyany} on the right. This would result in constraining \va 
+with either \ctrsngl{\va}{\tyint} or \ctrsngl{\va}{\tyflt}.
+Taken together with \ctrset{\ctrsub{\tyint}{\va}, \ctrsub{\tyflt}{\va}},
+either of these constraints would render the resulting set of constraints
+unsatisfiable.
+However, subtyping
+\[
+    \subtyctrR{\EmptyEnv}{\va}
+        {\tyinv\nref{\tyunion{\typair{\tyint}{\tyany}}
+            {\typair{\tyflt}{\tyany}}}}
+        {\tyinv\nref{\typair{\va}{\tyany}}}
+        {?}
+\]
+clearly holds if \va is instantiated with
+\tyunion{\tyint}{\tyflt}.
+Thus, when \va occurs on the left covariantly, in a position where 
+unification-free subtyping could appeal to \RST{UnionLeft},
+the rule \RSC{UVar-UnionRight} allows for a more permissive, union upper bound.
+Consider the application of \RSC{UVar-UnionRight} to the right-to-left check
+in the example:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+    \inferrule[]
+    {
+        \inferrule[]
+        { \ldots }
+        { \subtyctrL{\EmptyEnv}{\va, \va_1}
+            {\typair{\va_1}{\tyany}}
+            {\typair{\tyint}{\tyany}}
+            {\ctrsngl{\va_1}{\tyint}} }
+        \and
+        \inferrule[]
+        { \ldots }
+        { \subtyctrL{\EmptyEnv}{\va, \va_2}
+            {\typair{\va_2}{\tyany}}
+            {\typair{\tyflt}{\tyany}}
+            {\ctrsngl{\va_2}{\tyflt}} }
+    }
+    { \subtyctrL{\EmptyEnv}{\va}
+        {\typair{\va}{\tyany}}
+        {\tyunion{\typair{\tyint}{\tyany}}{\typair{\tyflt}{\tyany}}}
+        {\ctrsngl{\va}{\tyunion\tyint\tyflt} } }
+\\
+\end{mathpar}
+\end{minipage}}
+Now, the resulting constraint set
+\ctrset{\ctrsub{\va}{\tyunion\tyint\tyflt}, 
+\ctrsub{\tyint}{\va}, \ctrsub{\tyflt}{\va}}
+is satisfiable.
+Note that the rule \RSC{UVar-UnionRight} needs to be careful when 
+the constraint set $\CSet_i$ produced by the premise
+\[\subtyctrL{\AEnv}{\UEnvD,\va_i}{\plug\dctx{\va_i}}{\ty'_i}{\CSet_i}\]
+contains multiple upper-bound constraints on $\va_i$, because all those
+constraints need to hold at the same time.
+For instance, consider the following example,
+where $\ty_a \symsub \ty'_a$ and $\ty_a$ is incomparable with $\ty_b$:
+\[
+    \subtyctrL{\EmptyEnv}{\va}
+        {\typair{\va}{\va}}
+        {\tyunion{(\tyunion{\typair{\ty_a}{\ty_a}}{\typair{\ty'_a}{\ty_b}})}
+            {\typair{\ty_b}{\tyany}}}
+        { ? }
+\]
+There are multiple ways to instantiate \va, e.g. with \tybot,
+but the most permissive constraint set can be obtained by first
+applying \RSC{UVar-UnionRight} to the left occurrence of \va:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+    \inferrule[]
+    {
+        \inferrule[]
+        { \ldots }
+        { \subtyctrL{\EmptyEnv}{\va, \va_1}
+            {\typair{\va_1}{\va}}
+            {\tyunion{\typair{\ty_a}{\ty_a}}{\typair{\ty'_a}{\ty_b}}}
+            { ? } }
+        \and
+        \inferrule[]
+        { \ldots }
+        { \subtyctrL{\EmptyEnv}{\va, \va_2}
+            {\typair{\va_2}{\va}}
+            {\typair{\ty_b}{\tyany}}
+            {\ctrsngl{\va_2}{\ty_b}} }
+    }
+    { \subtyctrL{\EmptyEnv}{\va}
+        {\typair{\va}{\va}}
+        {\tyunion{(\tyunion{\typair{\ty_a}{\ty_a}}{\typair{\ty'_a}{\ty_b}})}
+            {\typair{\ty_b}{\tyany}}}
+        { ? } }
+\\
+\end{mathpar}
+\end{minipage}}
+Next, let us focus on the left premise and apply the same rule to \va:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    { \ldots }
+    { \subtyctrL{\EmptyEnv}{\va, \va_1, \va_3}
+        {\typair{\va_1}{\va_3}}
+        {\typair{\ty_a}{\ty_a}}
+        {\ctrset{\ctrsub{\va_1}{\ty_a}, \ctrsub{\va_3}{\ty_a}}} }
+    \and
+    \inferrule[]
+    { \ldots }
+    { \subtyctrL{\EmptyEnv}{\va, \va_1, \va_4}
+        {\typair{\va_1}{\va_4}}
+        {\typair{\ty'_a}{\ty_b}}
+        {\ctrset{\ctrsub{\va_1}{\ty'_a}, \ctrsub{\va_4}{\ty_b}}} }
+}
+{ \subtyctrL{\EmptyEnv}{\va, \va_1}
+    {\typair{\va_1}{\va}}
+    {\tyunion{\typair{\ty_a}{\ty_a}}{\typair{\ty'_a}{\ty_b}}}
+    {\ctrset{\ctrsub{\va_1}{\ty_a}, \ctrsub{\va_1}{\ty'_a}, \ctrsub{\va}{\tyunion{\ty_a}{\ty_b}}}} }
+\\
+\end{mathpar}
+\end{minipage}}
+There are two constraints on $\va_1$, both of which have to be satisfied.
+Thus, \RSC{UVar-UnionRight} merges them into one type using the intersection
+function \tymeet{\EmptyEnv}{\ty_a}{\ty'_a}, defined in \figref{fig:ty-join-meet}.
+The intersection returns a type that is a subtype of both $\ty_a$ and $\ty'_a$:
+in this case, the smaller type $\ty_a$.
+Thus, the original subtyping judgment succeeds:
+\[
+    \subtyctrL{\EmptyEnv}{\va}
+        {\typair{\va}{\va}}
+        {\tyunion{(\tyunion{\typair{\ty_a}{\ty_a}}{\typair{\ty'_a}{\ty_b}})}
+            {\typair{\ty_b}{\tyany}}}
+        { \ctrset{\ctrsub{\va}{\tyunion{\ty_a}{\ty_b}}, \ctrsub{\va}{\tyunion{\ty_a}{\ty_b}}} }
+\]
+The two occurrences of the same constraint are due to the two separate
+applications of \RSC{UVar-UnionRight}, $\va_1/\va_2$ and $\va_3/\va_4$.
 
 % \hline
 % \multicolumn{6}{c}{\tyjoindflt{\ty}{\ty'}} \\ 
@@ -827,7 +1074,7 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
         \typair{(\tymeetdflt{\ty_1}{\ty'_1})}{(\tymeetdflt{\ty_2}{\ty'_2})} &  \\
     \tyinv\iname{\ldots,\rexvarbound{\tylb_i}{\tyub_i},\ldots} 
         &\sqcap_{\AEnv}& \tyinv\iname{\ldots,\rexvarbound{\tylb'_i}{\tyub'_i},\ldots} &=& 
-        \tyinv\iname{\ldots,\rexvarbound{(\tyjoindflt{\tylb_i}{\tylb'_i})}
+        \tyinv\iname{\ldots,\rexvarbound{(\tyunion{\tylb_i}{\tylb'_i})}
             {(\tymeetdflt{\tyub_i}{\tyub'_i})},\ldots} &  \\
     & & & & \multicolumn{2}{l}{\text{where } \forall i.\ 
         \subtydflt{(\tyjoindflt{\tylb_i}{\tylb'_i})}
@@ -836,16 +1083,23 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
 \end{array}
 \]
 \end{minipage}}
-\caption{Join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$) of types.
-Both definitions should be read top to bottom, i.e. earlier cases have
-precedence over later cases.
-Some cases (e.g. where \ty or $\ty'$ are \tybot or \tyany, 
-and where both are the same type variable)
+% \caption{Join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$) of types.
+% Both definitions should be read top to bottom, i.e. earlier cases have
+% precedence over later cases.
+% Some cases (e.g. where \ty or $\ty'$ are \tybot or \tyany, 
+% and where both are the same type variable)
+% are omitted because they are covered by \subtydflt{\ty}{\ty'} and 
+% \subtydflt{\ty'}{\ty}.}\label{fig:ty-join-meet}
+\caption{Intersection ($\sqcap_{\AEnv}$) of types}\label{fig:ty-join-meet}
+\begin{tablenotes}[para]
+Some cases, such as \tybot, \tyany, and the same type variable,
 are omitted because they are covered by \subtydflt{\ty}{\ty'} and 
-\subtydflt{\ty'}{\ty}.}\label{fig:ty-join-meet}
+\subtydflt{\ty'}{\ty}.
+\end{tablenotes}
 \end{figure}
 
-
+\subsection{Signature Subtyping}
+%% *********************************************************
 
 \begin{figure}
 \footnotesize
@@ -907,6 +1161,118 @@ are omitted because they are covered by \subtydflt{\ty}{\ty'} and
 }\label{fig:subtyping-tysigs}
 \end{figure}
 
+The final piece of the subtyping algorithm is subtyping of top-level signatures,
+which is given in \figref{fig:subtyping-tysigs}:
+\[
+    \subtysigdflt{\tysig}{\tysig'}.
+\]
+This step introduces all explicitly bound existential variables to
+environments \AEnv and \UEnv.
+Similarly to subtyping of types, the rules \RSS{Bot}, \RSS{VarLeft},
+\RSS{UnionLeft}, and \RSS{InvLeft} use the distributivity context---in
+the case of type signatures, \dctxsig.
+The rule \RSS{InvLeft} is needed to account for the distributivity of restricted
+existential types, in the same way as explicit existentials distribute
+over tuples. For example:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule*[right=\footnotesize\RSS{ExistRight}]
+{ 
+    \inferrule*[right=\footnotesize\RSS{InvLeft}]
+    { 
+        \inferrule[\footnotesize\RSS{Types}]
+        { \subtyctrR{\varbound{\va}{\tybot}{\tyany}}{\va}
+            {\typair{\tyinv\nref\vx}{\tyint}}
+            {\typair{\tyinv\nref\va}{\tyany}}
+            { \ctrset{\ctrsub{\vx}{\va}, \ctrsub{\va}{\vx}} }
+          \and \ldots }
+        { \subtysig{\varbound{\vx}{\tybot}{\tyany}}
+            {\varbound{\va}{\tybot}{\tyany}}
+            {\typair{\tyinv\nref\vx}{\tyint}}
+            {\typair{\tyinv\nref\va}{\tyany}} }
+    }
+    { \subtysig{\EmptyEnv}{\varbound{\va}{\tybot}{\tyany}}
+        {\typair{\tyinv\nref{\rexvarbound{\tybot}{\tyany}}}{\tyint}}
+        {\typair{\tyinv\nref\va}{\tyany}} }
+}
+{ \subtysig{\EmptyEnv}{\EmptyEnv}
+    {\typair{\tyinv\nref{\rexvarbound{\tybot}{\tyany}}}{\tyint}}
+    { \tyexistnob{\va}{\typair{\tyinv\nref\va}{\tyany}} } }
+\\
+\end{mathpar}
+\end{minipage}}
+Without \RSS{InvLeft}, constrained subtyping
+\[
+    \subtyctrR{\EmptyEnv}{\va}
+    {\typair{\tyinv\nref{\rexvarbound{\tybot}{\tyany}}}{\tyint}}
+    {\typair{\tyinv\nref\va}{\tyany}}
+    { \ctrset{\ctrsub{\tyany}{\va}, \ctrsub{\va}{\tybot}} }
+\]
+would generate unsatisfiable constraints.
+
+Notice the absence of rules for subtyping tuples and invariant constructors:
+once types are reached on both sides, the rule \RSS{Types} delegates further
+checks to constrained subtyping \subtyctrRdflt{\ty}{\ty'},
+followed by constraints resolution \solvectrdflt.
+The algorithm $\solvectrop$, defined in \figref{fig:ctr-solve}, 
+checks for consistency of all the constraints on each
+unification variable, starting with the last introduced one in \UEnv.
+Because variable bounds can refer to earlier-introduced variables,
+generated constraints are checked for consistency with declared constraints
+using constrained subtyping. The resulting constraints are then checked
+recursively for the smaller environment \UEnv.
+% Substitution is defined in the usual manner.
+
+The rule \RSS{UnionLeft} may seem surprising because the two premises
+\subtysigdflt{\plug\dctxsig{\tysig_1}}{\tysig'} and
+\subtysigdflt{\plug\dctxsig{\tysig_2}}{\tysig'} are not required
+to have consistent instantiations of \UEnv.
+For example, in the following derivation,\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    { \subtysig{\EmptyEnv}{\va}{\tyinv\nref\tyint}{\tyinv\nref\va} }
+    { \subtysig{\EmptyEnv}{\va}
+        {\tyinv\nref\tyint}
+        {\tyunion{\tyinv\nref\va}{\tyinv\nvec\va}} }
+    \and
+    \inferrule[]
+    { \subtysig{\EmptyEnv}{\va}{\tyinv\nvec\tystr}{\tyinv\nvec\va} }
+    { \subtysig{\EmptyEnv}{\va}
+        {\tyinv\nvec\tystr}
+        {\tyunion{\tyinv\nref\va}{\tyinv\nvec\va}} }
+}
+{ \subtysig{\EmptyEnv}{\va}
+    {\tyunion{\tyinv\nref\tyint}{\tyinv\nvec\tystr}}
+    {\tyunion{\tyinv\nref\va}{\tyinv\nvec\va}} }  
+\\  
+\end{mathpar}
+\end{minipage}}
+\va gets instantiated with \tyint in the first premise and
+\tystr in the second.
+This is correct because the types
+\tyexistnob{\va}{(\tyunion{\tysig_1}{\tysig_2})} and
+\tyunion{(\tyexistnob{\va}{\tysig_1})}{(\tyexistnob{\va}{\tysig_2})}
+are semantically equivalent, which is also the case in Julia:
+\begin{center}
+\begin{minipage}{8cm}
+\begin{lstlisting}
+julia> Union{Ref{Int}, Vector{String}} <: 
+    Union{Ref{T}, Vector{T}} where T
+true
+
+julia> Union{Ref{T} where T, Vector{T} where T} == 
+    Union{Ref{T}, Vector{T}} where T
+true
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
 \begin{figure}
 \footnotesize
@@ -948,8 +1314,7 @@ are omitted because they are covered by \subtydflt{\ty}{\ty'} and
 \caption{Constraints resolution algorithm \solvectrdflt}\label{fig:ctr-solve}      
 \end{figure}
 
-
-%% Validity
+\subsection{Validity of Types and Type Signatures}
 %% *********************************************************
 
 \begin{figure}
@@ -1084,71 +1449,44 @@ are omitted because they are covered by \subtydflt{\ty}{\ty'} and
 % { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
 % { \tyvlddflt{\typair{\tysig_1}{\tysig_2}} }
 
-\begin{figure}
-\footnotesize
-\begin{mathpar}
-    \fbox{\vldinenvdflt{\substvars}}
-    \\
+The subtyping algorithm should be called with valid types and type signatures,
+as defined in \figref{fig:ty-tysig-validity}.
+In particular:
+\begin{itemize}
+    \item \subtydflt{\ty}{\ty'} requires that \tyvlddflt{\ty, \ty'};
+    \item \subtyctrRdflt{\ty}{\ty'} requires that \tyvlddflt{\ty}
+        and \tyunfvlddflt{\ty'};
+    \item \subtyctrLdflt{\ty}{\ty'} requires that \tyunfvlddflt{\ty}
+        and \tyvlddflt{\ty'};
+    \item \subtysigdflt{\tysig}{\tysig'} requires that \tyvlddflt{\tysig}
+        and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}.
+\end{itemize}
+The validity check ensures that free variables are bound in 
+corresponding environments,
+and that variable bounds are non-recursive and consistent.
+%i.e., the lower bound is a subtype of the upper bound.
 
-    \inferrule*[]
-    { \forall \varbound{\vany}{\tylb}{\tyub} \in \AEnv. \and
-        \tyvld{\AEnv'}{\substvars(\vany)} \and
-        \subty{\AEnv'}{\substvars(\tylb)}{\substvars(\vany)} \and 
-        \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)} }
-    { \vldinenvdflt{\substvars} }
-    
-    \\
-    \fbox{\vldinenv{\AEnv}{\CSet}{\substvars}}
-    \\
+The consistency of declared variable bounds is necessary for transitivity.
+This requirement is a departure from Julia, where types like
+\[ \text{\cjl{Ref\{T\} where Any<:T<:Int}} \]
+are considered valid.
+Although semantically, such types denote empty sets and cannot be instantiated,
+Julia does not consider them to be subtypes of \cjl{Union\{\}}:
+\begin{center}
+\begin{minipage}{10cm}
+\begin{lstlisting}
+julia> (Ref{T} where Any<:T<:Int){Int}
+ERROR: TypeError: in Ref, in T, expected Any<:T<:Int
 
-    \inferrule*[]
-    { \forall \ctrsub{\ty}{\va} \in \CSet.\ \ 
-        \subtydflt{\ty}{\substvars(\va)} \and 
-      \forall \ctrsub{\va}{\ty'} \in \CSet.\ \  
-        \subtydflt{\substvars(\va)}{\ty'} }
-    { \vldinenv{\AEnv}{\CSet}{\substvars} }
-\end{mathpar}
-\caption{Validity of substitution with respect to environment and constrains}%
-\label{fig:substuvars-validity}
-\end{figure}
+julia> (Ref{T} where Any<:T<:Int) <: Union{}
+false
+\end{lstlisting}
+\end{minipage}
+\end{center}
 
-Substitution is defined in the usual manner.
-
-\textbf{The subtyping algorithm} is given by subtyping rules in
-Figures~\ref{fig:subtyping-base,fig:subtyping-constrained,fig:subtyping-tysigs}
-along with the constraints resolution algorithm in \figref{fig:ctr-solve}.
-The rules are not syntax-directed because there may be multiple rules
-applicable to a pair of types or type signatures,
-but they are \emph{analytic}~\cite{bib:martin-lof:analytic-synthetic:1994}:
-there is a finite number of applicable rules, and the premises of each rule
-are comprised of the subcomponents of its conclusion.
-
-\paragraph*{Overview of proofs.}
-Subtyping is checked only for valid types/signatures.
-The validity check ensures the absence of recursive constraints on type
-variables as well as consistency of variable bounds.
-For subtyping of types, we assume \tyvlddflt{\ty} and \tyvlddflt{\ty'}.
-For subtyping of type signatures, we assume
-\tyvlddflt{\tysig} and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}.
-
-\textbf{Termination.} The measure of a type includes the measure of its bounds.
-In all subtyping judgments, every recursive call is made with a smaller measure.
-For constraints resolution, every recursive call is made with a smaller \UEnv.
-
-\textbf{Notes.}
-Exists of unions is equivalent to the union of exists (in Julia subtyping),
-so treating parts of the union on the right independently is correct
-in subtyping of signatures.
-
-Getting the upper bound of a universal variable might be needed at either the
-signature or the type level, that's why the rules have some duplicates.
-The key is to get rid of all top-level existentials.
-
-Because the same semantic type can be represented with multiple syntactic types,
-e.g. with an explicit existential vs restricted existential, it may be necessary
-to open restricted existentials as top-level variables, but it is not always
-necessary. That's why the rule for signature subtyping of invariant
-constructor in a distibutivity context doesn't require all type arguments to be
-specified as variables.
+% t where Ref{Int}<:S<:Ref{T} where T isn't valid.
+% In a purely semantic approach, the piece of the infinite union with T->Int
+% would be non-empty, whereas all other instantiations of T would result in 
+% the empty sets.
 
 \input{chapters/sec-dec-sub-proofs.tex}

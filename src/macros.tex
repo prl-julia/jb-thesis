@@ -90,6 +90,7 @@
 \newcommand{\concat}[2]{\EM{#1\concatop#2}}
 
 \newcommand{\ok}{\EM{\mathrm{ok}}}
+\newcommand{\failure}{\EM{\mathbf{fail}}}
 
 \newcommand{\false}{\EM{\mathtt{false}}}
 \newcommand{\true}{\EM{\mathtt{true}}}
@@ -211,6 +212,7 @@
 
 \newcommand{\nref}{\tyname{Ref}}
 \newcommand{\nvec}{\tyname{Vector}}
+\newcommand{\nabsvec}{\tyname{AbsractVector}}
 \newcommand{\ninvpair}{\tyname{Pair}}
 
 \newcommand{\vx}{\var{X}}
@@ -253,6 +255,14 @@
 \newcommand{\tyjoindflt}[2]{\tyjoin{\AEnv}{#1}{#2}}
 \newcommand{\tymeet}[3]{\EM{#2 \sqcap_{#1} #3}}
 \newcommand{\tymeetdflt}[2]{\tymeet{\AEnv}{#1}{#2}}
+
+\DeclareMathOperator{\dischctrop}{\mathbf{Discharge}}
+\newcommand{\dischctr}[3]{\EM{\dischctrop(#1;#2;#3)}}
+\newcommand{\dischctrdflt}{\dischctr{\AEnv}{\varbound{\vx}{\tylb}{\tyub}}{\CSet}}
+
+\DeclareMathOperator{\covsubstop}{\mathit{cov}_{\mapsto}}
+\newcommand{\covsubst}[3]{\EM{\covsubstop(#1;#2;#3)}}
+\newcommand{\covsubstdflt}[1]{\covsubst{\vany}{\ty_{\vany}}{#1}}
 
 %% Relations
 %% *********************************************************

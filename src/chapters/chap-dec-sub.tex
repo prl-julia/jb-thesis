@@ -770,7 +770,7 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
         {\CSet_l \cup \CSet_u} }
 \end{mathpar}
 \end{minipage}}
-\caption{Constrained subtyping of types.
+\caption{Constrained subtyping of types
     % Note: %\dctx stands for \dctxty;
     % every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
     % one where all occurrences of $\symsubctr$ are replaced with 
@@ -781,6 +781,7 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
     %and within one rule, all occurrences of $\symsubctr$ denote the same relation
 }\label{fig:subtyping-constrained}
 \begin{tablenotes}[para]
+\small
     Every rule with the symbol $\symsubctr$ is a shorthand for two rules, 
     one where all occurrences of $\symsubctr$ are replaced with 
     $\symsubctrL$, and another where all occurrences of $\symsubctr$ are
@@ -1092,8 +1093,9 @@ applications of \RSC{UVar-UnionRight}, $\va_1/\va_2$ and $\va_3/\va_4$.
 % \subtydflt{\ty'}{\ty}.}\label{fig:ty-join-meet}
 \caption{Intersection ($\sqcap_{\AEnv}$) of types}\label{fig:ty-join-meet}
 \begin{tablenotes}[para]
+\small
 Some cases, such as \tybot, \tyany, and the same type variable,
-are omitted because they are covered by \subtydflt{\ty}{\ty'} and 
+are absent because they are covered by the cases \subtydflt{\ty}{\ty'} and 
 \subtydflt{\ty'}{\ty}.
 \end{tablenotes}
 \end{figure}
@@ -1490,3 +1492,5 @@ false
 % the empty sets.
 
 \input{chapters/sec-dec-sub-proofs.tex}
+
+\input{chapters/sec-dec-sub-ext.tex}

@@ -1,0 +1,592 @@
+\section{Extended Subtyping}
+%% ======================================================================
+
+In this section, I discuss two Julia features that were
+omitted from the core language in~\figref{fig:ty-grammar}:
+inheritance (\secref{subsec:dec-sub:inheritance}) and
+the diagonal rule (\secref{subsec:dec-sub:diagonal}).
+
+\subsection{Inheritance}\label{subsec:dec-sub:inheritance}
+%% *********************************************************
+
+\begin{figure}[t] 
+\begin{minipage}{5cm}
+\begin{lstlisting}
+abstract type Real <: Number
+end
+
+struct Rational{
+    T<:Integer
+} <: Real
+    num::T
+    den::T
+end
+\end{lstlisting}
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}{5cm}
+\begin{lstlisting}
+abstract type Ref{T} <: Any
+end
+
+struct RefArray{
+    T, A<:AbstractArray{T}, R
+} <: Ref{T}
+    x::A
+    ...
+end
+\end{lstlisting}  
+\end{minipage}
+\caption{Examples of inheritance in type declarations
+}\label{fig:code:inheritance}
+\end{figure}
+
+The Julia language supports a limited form of single-parent inheritance:
+abstract nominal types can be inherited by both abstract and concrete
+types, but concrete types are final and cannot be inherited.
+Type parameters of parametric nominal types are invariant;
+they can be constrained by non-recursive lower and upper bounds,
+and can be referenced from the supertype declaration.
+For instance, \cjl{Point\{X<:Real\}} can be declared a subtype of
+\cjl{AbstractPoint\{X\}}.
+\figref{fig:code:inheritance} provides a few more examples.
+A type that is being inherited needs to be defined before the inheriting type,
+and mututally recursive type declarations are not supported.
+
+Because of its fairly restricted nature, inheritance in Julia does not
+interfere with the decidability of subtyping, unlike, for example,
+in Java~\cite{bib:tate:taming-wildcards:2011}.
+In particular, the lack of variance annotations, recursive inheritance,
+and recursive constraints prevents properties such as expansive
+inheritance~\cite{bib:kennedy:nom-sub-var-dec:2007}, which are know to cause
+undecidability.
+Thus, in Julia, subtyping of nominal types is straightforward: the subtyping
+algorithm simply walks the finite inheritance hierarchy, substituting
+type arguments of parametric types.
+In the specification of Julia
+subtyping~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018},
+this step is encoded with one extra rule \RLJ{App\_Super},
+which is given in~\figref{fig:jlsubex-inheritance}.
+In the context of the decidability proof from \secref{subsec:dec-proof},
+the measure of nominal types needs to be modified to include the 
+measure of the declared supertype.
+
+Without changes, the framework of restricted existential types presented
+in \secref{sec:dec-sub:defs} is suitable for \emph{partial} handling of
+inheritance in Julia. For example, consider the following derivation,
+where \tyinv\nvec\vx is a declared subtype of \tyinv\nabsvec\vx:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inherits{\tyinv\nvec\vx}{\tyinv\nabsvec\vx} \and
+    \inferrule[]
+    { 
+        \subtydflt{\tybot}{\tybot} \and
+        \subtydflt{\tyint}{\tyany} \and
+    }
+    { \subtydflt
+        {\tyinv\nabsvec{\rexvarbound{\tybot}{\tyint}}}
+        {\tyinv\nabsvec{\rexvarbound{\tybot}{\tyany}}} 
+    }
+}
+{ \subtydflt
+    {\tyinv\nvec{\rexvarbound{\tybot}{\tyint}}}
+    {\tyinv\nabsvec{\rexvarbound{\tybot}{\tyany}}} 
+}
+\\
+\end{mathpar}
+\end{minipage}}
+Similar to \RLJ{App\_Inv}, subtyping is checked by substituting
+\vx with \rexvarbound{\tybot}{\tyint} in the supertype declaration
+\tyinv\nabsvec\vx.
+However, type parameters do not have to be immediate arguments of the 
+supertype declaration. For example, the following type declaration is
+allowed:
+\begin{center}
+\begin{minipage}{7cm}
+\begin{lstlisting}
+struct ZooVec{X} <: AbstractVector{Zoo{X}}
+...
+end
+\end{lstlisting}  
+\end{minipage}
+\end{center}
+In this case, simply substituting \vx with a restricted existential variable
+would be \textbf{incorrect}:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inherits{\tyinv{\tyname{ZooVec}}\vx}
+        {\tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\vx}}} 
+    \and
+    \AEnv \vdash 
+       \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyint}}}
+       \ ???
+}
+{ \AEnv \vdash 
+    \tyinv{\tyname{ZooVec}}{\rexvarbound{\tybot}{\tyint}}
+    \nless:
+    \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyany}}} 
+}
+\\
+\end{mathpar}
+\end{minipage}}
+Recall that \tyinv{\tyname{ZooVec}}{\rexvarbound{\tybot}{\tyint}}
+denotes an existential type, namely:
+\[
+    \tyexist{\vy}{\tybot}{\tyint}{\tyinv{\tyname{ZooVec}}\vy}.
+\]
+Therefore, the proper supertype of this type is
+\[
+    \tyexist{\vy}{\tybot}{\tyint}
+        {\tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\vy}}},
+\]
+which is different from 
+\[
+    \tyinv\nabsvec{\tyexist{\vy}{\tybot}{\tyint}{\tyinv{\tyname{Zoo}}\vy}}
+\]
+denoted by \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyint}}}.
+
+\begin{figure}[t!]
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\\
+\fbox{\ljsub{E}{t}{t}{E}}
+\\
+\inferrule[App\_Inv]
+{ E_0 = \mathit{add}(E, \text{Barrier}) \\ 
+    \forall\, 0 < i \leq n. \  
+    E_{i-1} \vdash \t_i <: \t'_i \vdash E'_i \ \wedge\  
+    E'_i \vdash \t'_i <: \t_i \vdash E_i \\
+}
+{ E \vdash \cstrt{name}{\t_1, \ldots, \t_n} <: 
+    \cstrt{name}{\t'_1, \ldots, \t'_n} \vdash \mathit{del}(\text{Barrier}, E_n)}
+
+\inferrule[App\_Super]
+{ 
+    \cstrt{name}{\T_1, \ldots, \T_n} <: \t'' \ \in\ tds \\
+    E \vdash \t''[\t_1/\T_1, \ldots, \t_n/\T_n] <: \t' \vdash E'
+}
+{ E \vdash \cstrt{name}{\t_1, \ldots, \t_n} <: 
+    \t' \vdash E'}
+\end{mathpar}
+\end{minipage}}
+\caption{Julia subtyping: nominal types}\label{fig:jlsubex-inheritance}
+\begin{tablenotes}[para]
+\small
+\centering
+An excerpt from \cite{bib:zappa-nardelli:julia-sub:oopsla:2018}, extends
+\figref{fig:jlsubex}.
+\end{tablenotes}
+\end{figure}
+
+The simplest solution to this problem would be to disallow instantiating
+type variables such as \vx in \tyname{ZooVec} (that is, variables that
+occur in the supertype but not as immediate arguments)
+with restricted existentials.
+Thus, \tyinv{\tyname{ZooVec}}\tyint and
+\tyexist{\vx}{\tybot}{\tyint}{\tyinv{\tyname{ZooVec}}\vx} would be allowed,
+whereas \tyinv{\tyname{ZooVec}}{\rexvarbound{\tybot}{\tyint}} would not.
+
+\begin{figure}
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+    \fbox{\subtydflt{\ty}{\ty}}
+    \\
+
+    \inferrule[\RST{InvLeft}]
+    { \vx \text{ fresh} \\
+      \subty{\AEnv, \varbound{\vx}{\tylb}{\tyub}}
+        {\tyinv\iname{\ldots,\vx,\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+    { \subtydflt
+        {\tyinv\iname{\ldots,\rexvarbound{\tylb}{\tyub},\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+
+    \inferrule[\RST{InvSuper}]
+    { \inherits{\tyinv\iname{\vy_1,\ldots,\vy_n}}{\ty''}
+      \\
+      \subtydflt
+        {\subst{\ty''}{\substel{\vy_1}{\ty_1},\ldots,\substel{\vy_1}{\ty_n}}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} } 
+    { \subtydflt
+        {\tyinv\iname{\ty_1,\ldots,\ty_n}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+    \\
+    \fbox{\subtyctrdflt{\ty}{\ty}} 
+    \\
+
+    \inferrule[\RSC{InvLeft-UL}]
+    { \vx \text{ fresh} \\
+      \subtyctrL{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\UEnvD}
+        {\tyinv\iname{\ldots,\vx,\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}}
+        {\CSet} }
+    { \subtyctrLdflt
+        {\tyinv\iname{\ldots,\rexvarbound{\tylb}{\tyub},\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+
+    \inferrule[\RSC{InvLeft-UR}]
+    { \vx \text{ fresh} \\
+      \subtyctrR{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\UEnvD}
+        {\tyinv\iname{\ldots,\vx,\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}}
+        {\CSet}  \\
+      \CSet' = \dischctrdflt }
+    { \subtyctrRdfltenv
+        {\tyinv\iname{\ldots,\rexvarbound{\tylb}{\tyub},\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}}
+        {\CSet'} }
+
+    \inferrule[\RSC{InvSuper}]
+    { \inherits{\tyinv\iname{\vy_1,\ldots,\vy_n}}{\ty''}
+      \\
+      \subtyctrdflt
+        {\tyinv{\iname''}{\subst{\ty''_1}{\substel{\vy_1}{\ty_1},\ldots},\ldots}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+    { \subtyctrdflt
+        {\tyinv\iname{\ty_1,\ldots,\ty_n}}
+        {\tyinv{\iname'}{\rexvar'_1,\ldots,\rexvar'_m}} }
+\end{mathpar}
+\end{minipage}}
+\caption{Additional subtyping rules to support inheritance
+    %Note: \dctx stands for \dctxty.
+}\label{fig:subtyping-inheritance}
+\begin{tablenotes}[para]
+\small
+This figure extends unification-free subtyping (\figref{fig:subtyping-base})
+and constrained subtyping (\figref{fig:subtyping-constrained}).
+Signature subtyping (\figref{fig:subtyping-tysigs}) remains unchanged.
+$\dischctrop$ is defined in \figref{fig:ctr-discharge}.
+\end{tablenotes}
+\end{figure}
+
+A more general solution would be to open all restricted existential types
+before walking up the inheritance hierarchy, similar
+to~\cite{bib:tate:mixed-site:2013}. Thus, the example above would
+proceed as follows:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    { 
+        \inherits{\tyinv{\tyname{ZooVec}}\vx}
+            {\tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\vx}}}
+        \\
+        \AEnv, \varbound{\vy}{\tybot}{\tyint} \vdash
+            \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\vy}}
+            \nless:
+            \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyany}}} 
+    }
+    { \vy \text{ fresh} \and
+      \AEnv, \varbound{\vy}{\tybot}{\tyint} \vdash
+        \tyinv{\tyname{ZooVec}}{\vy}    
+        \nless:
+        \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyany}}} }
+}
+{ \AEnv \vdash 
+    \tyinv{\tyname{ZooVec}}{\rexvarbound{\tybot}{\tyint}}
+    \nless:
+    \tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\rexvarbound{\tybot}{\tyany}}} 
+}
+\\
+\end{mathpar}
+\end{minipage}}
+Additional subtyping rules that support this approach to handling inheritance
+are given in \figref{fig:subtyping-inheritance}.
+The rules \RST{InvSuper} and \RSC{InvSuper} are similar to \RLJ{App\_Super}:
+they walk the inheritance hierarchy, substituting type arguments;
+importantly, these rules can be applied only when all the arguments of the
+left-hand side invariant constructor are tight,
+i.e., $\ty_i$ rather than $\rexvar_i$.
+The rule \RST{InvLeft} of unification-free subtyping is similar to
+\RSS{InvLeft}: it simply opens a restricted existential type variable.
+The remaining rules of constrained subtyping are more interesting:
+\begin{itemize}
+    \item \RSC{InvLeft-UL} handles the case when unification variables are on
+        the left. Although the bounds \tylb and \tyub may contain unification
+        variables, the fresh variable \vx is treated as universal and added
+        to \AEnv. Since \vx does not occur in the right-hand side type, 
+        unification variables from its bounds cannot ``leak'' to the right.
+    \item \RSC{InvLeft-UR} handles the case when unification variables are on
+        the right. The fresh variable \vx can occur in generated constraints,
+        so it needs to be discharged before the constraints are propagated.
+        The discharge algorithm is given in \figref{fig:ctr-discharge}.
+        Intuitively, since \vx is introduced after unification variables,
+        constraints need to be satisfied for all possible valid instantiations
+        of \vx. To reflect this, covariant occurrences of \vx in lower-bound
+        (upper-bound) constraints are replaced with the upper bound
+        (lower bound) of \vx. If \vx occurs invariantly, it has to be
+        tightly bound (\subtydflt{\tyub}{\tylb}), or else discharge 
+        and subtyping fail.
+\end{itemize}
+
+\begin{figure}
+\footnotesize
+\centering
+\begin{minipage}{.7\linewidth}
+\begin{algorithm}[H]
+    \SetKwProg{DischargeCtrs}{Discharge}{}{}
+
+    \DischargeCtrs{$(\AEnv;\varbound{\vx}{\tylb}{\tyub};\CSet)$}{
+        \uIf{$\subtydflt{\tyub}{\tylb}$}{
+            \KwRet{$\subst{\CSet}{\substel{\vx}{\tylb}}$} 
+        }
+        \Else{
+            $\CSet_{\tyub} \gets 
+                \ctrset{\ctrsub{\covsubst{\vx}{\tyub}{\tylb'}}{\va} \,|\, \ctrsub{\tylb'}{\va} \in \CSet} $ \;
+            $\CSet_{\tylb} \gets 
+                \ctrset{\ctrsub{\va}{\covsubst{\vx}{\tylb}{\tyub'}} \,|\, \ctrsub{\va}{\tyub'} \in \CSet} $ \;
+            \KwRet{$\CSet_{\tyub} \cup \CSet_{\tylb}$}
+        }
+    }
+    %$\substvars \gets \emptysubst$
+\end{algorithm}  
+\end{minipage}
+\[
+\begin{array}{lcl}
+    \hline
+    \multicolumn{3}{c}{\covsubstdflt{\ty}} \\ 
+    \hline 
+    \covsubstdflt{\tyany} &=& \tyany\\
+    \covsubstdflt{\tybot} &=& \tybot\\
+    \covsubstdflt{\vany} &=& \ty_{\vany}\\
+    \covsubstdflt{\vany'} &=& \vany'\\
+    \covsubstdflt{\typair{\ty_1}{\ty_2}} &=& 
+        \typair{\covsubstdflt{\ty_1}}{\covsubstdflt{\ty_2}}\\
+    \covsubstdflt{\tyinv\iname{\ldots}} &=&
+        \text{if } \occdflt{\tyinv\iname{\ldots}}
+        \text{ then } \failure
+        \text{ else } \tyinv\iname{\ldots}\\
+    \covsubstdflt{\tyunion{\ty_1}{\ty_2}} &=& 
+        \tyunion{\covsubstdflt{\ty_1}}{\covsubstdflt{\ty_2}}\\
+\end{array}
+\]
+\caption{Variable discharge algorithm \dischctrdflt}\label{fig:ctr-discharge}      
+\end{figure}
+
+The following example illustrates \RSC{InvLeft-UL}:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    {
+        \inferrule[]
+        {  
+            \subtyctrR{\AEnv, \varbound{\vx}{\va}{\tyint}}{\va}
+                {\tyint}{\va}
+                {\ctrsngl{\tyint}{\va}}  
+        }
+        { 
+            \subtyctrR{\AEnv, \varbound{\vx}{\va}{\tyint}}{\va}
+                {\tyint}{\vx}
+                {\ctrsngl{\tyint}{\va}}  
+        }
+        \and
+        \subtyctrL{\AEnv, \varbound{\vx}{\va}{\tyint}}{\va}
+            {\vx}{\tyany}{\EmptyCSet} 
+    }
+    {
+        \subtyctrL{\AEnv, \varbound{\vx}{\va}{\tyint}}{\va}
+            {\tyinv\nref\vx}
+            {\tyinv\nref{\rexvarbound{\tyint}{\tyany}}}
+            {\ctrsngl{\tyint}{\va}}  
+    }
+}
+{   
+    \subtyctrL{\AEnv}{\va}{\tyinv\nref{\rexvarbound{\va}{\tyint}}}
+        {\tyinv\nref{\rexvarbound{\tyint}{\tyany}}}
+        {\ctrsngl{\tyint}{\va}}
+}
+\\
+\end{mathpar}
+\end{minipage}}
+
+The following example illustrates \RSC{InvLeft-UR} where
+the variable discharge succeeds:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    {
+        \subtyctrL{\AEnv, \varbound{\vx}{\tyint}{\tyany}}{\va}
+            {\tybot}{\vx}{\EmptyCSet} 
+        \and
+        \subtyctrR{\AEnv, \varbound{\vx}{\tyint}{\tyany}}{\va}
+            {\vx}{\va}
+            {\ctrsngl{\vx}{\va}}  
+    }
+    {
+        \subtyctrR{\AEnv, \varbound{\vx}{\tyint}{\tyany}}{\va}
+            {\tyinv\nref\vx}
+            {\tyinv\nref{\rexvarbound{\tybot}{\va}}}
+            {\ctrsngl{\vx}{\va}}  
+    }
+    \\\\
+    \dischctr{\AEnv}{\varbound{\vx}{\tyint}{\tyany}}{\ctrsngl{\vx}{\va}} =
+        \ctrsngl{\tyany}{\va}
+}
+{   
+    \subtyctrR{\AEnv}{\va}{\tyinv\nref{\rexvarbound{\tyint}{\tyany}}}
+        {\tyinv\nref{\rexvarbound{\tybot}{\va}}}
+        {\ctrsngl{\tyany}{\va}}
+}
+\\
+\end{mathpar}
+\end{minipage}}
+
+The following example illustrates \RSC{InvLeft-UR} where
+the variable discharge fails:\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
+\begin{mathpar}
+\small
+\inferrule[]
+{ 
+    \inferrule[]
+    {
+        \subtyctrR{\AEnv, \varbound{\vx}{\tyint}{\tyany}}{\va}
+            {\tyinv\nabsvec{\tyinv{\tyname{Zoo}}{\vx}}}
+            {\tyinv\nabsvec\va}
+            {\ctrset{\ctrsub{\tyinv{\tyname{Zoo}}{\vx}}{\va}, 
+                \ctrsub{\va}{\tyinv{\tyname{Zoo}}{\vx}}}}
+    }
+    {
+        \subtyctrR{\AEnv, \varbound{\vx}{\tyint}{\tyany}}{\va}
+            {\tyinv{\tyname{ZooVec}}{\vx}}
+            {\tyinv\nabsvec\va}
+            {\ctrset{\ctrsub{\tyinv{\tyname{Zoo}}{\vx}}{\va}, 
+                \ctrsub{\va}{\tyinv{\tyname{Zoo}}{\vx}}}}
+    }
+    \\\\
+    \dischctr{\AEnv}{\varbound{\vx}{\tyint}{\tyany}}
+        {\ctrset{\ctrsub{\tyinv{\tyname{Zoo}}{\vx}}{\va}, 
+            \ctrsub{\va}{\tyinv{\tyname{Zoo}}{\vx}}}} = \failure
+}
+{   
+    \AEnv \Alt \va \ \vdash\ \tyinv{\tyname{ZooVec}}{\rexvarbound{\tyint}{\tyany}}
+        \nlessdot\!\!\bullet \tyinv\nabsvec\va
+}
+\\
+\end{mathpar}
+\end{minipage}}
+
+The syntax of type declarations and extended validity rules
+are given in \figref{fig:validity-inheritance}.
+Note that the supertype cannot be a restricted existential type:
+\tyinv{\aname}{\ty_1,\ldots,\ty_m} is an invariant constructor with
+tight type arguments.
+The validity of types is checked with respect to an implicit datatype table.
+In a type declaration, type parameters $\vx_i$ may reference previous
+parameters: this is handled by checking the validity of type parameters
+in \tyvld{\TyTable}{\tydecl} using \tyvld{}{\AEnv} from
+\figref{fig:ty-tysig-validity}.
+
+\begin{figure}
+\footnotesize
+\[
+\begin{array}{rcll}
+    \iname
+    &::=& & \textit{Invariant constructor name} \\
+    &\Alt& \cname & \text{concrete} \\
+    &\Alt& \aname & \text{abstract} \\
+\end{array}
+\]
+\[
+\begin{array}{rcll}
+    \TyTable &::=& \varnothing \Alt \TyTable,\tydecl 
+        & \textit{Datatype table} \\
+    \tydecl 
+        &::=&
+        \inherits{\tyinv{\iname}{\varbound{\vx_1}{\tylb_1}{\tyub_1},
+            \,\ldots,\,\varbound{\vx_n}{\tylb_n}{\tyub_n}}
+        }{\ubdecl}
+        & \textit{Type declaration} \\
+    \ubdecl
+        &::=& \tyany 
+        \Alt \tyinv{\aname}{\ty_1,\ldots,\ty_m}
+        & \textit{Supertype} \\ 
+\end{array}
+\]
+\begin{mathpar}
+    \fbox{\tyvld{}{\TyTable}}
+    \\
+
+    \inferrule*[]
+    { }
+    { \tyvld{}{\varnothing} }
+
+    \inferrule*[]
+    { \tyvld{}{\TyTable} \and \tyvld{\TyTable}{\tydecl} }
+    { \tyvld{}{\TyTable,\tydecl } }
+    \\
+
+    \fbox{\tyvld{\TyTable}{\tydecl}}
+    \\
+
+    \inferrule*[]
+    { \tyvld{}{\varbound{\vx_1}{\tylb_1}{\tyub_1},\,\ldots}
+      \and 
+      \ubdecl=\tyinv\aname{\ldots} \implies \aname \text{ is defined in } \TyTable
+      \and
+      \tyvld{\varbound{\vx_1}{\tylb_1}{\tyub_1},\,\ldots}{\ubdecl}   
+    }
+    { \tyvld{\TyTable}{\inherits{\tyinv{\iname}{
+            \varbound{\vx_1}{\tylb_1}{\tyub_1},\,\ldots}
+        }{\ubdecl}} }
+    \\
+
+    \fbox{\tyvlddflt{\ty}}
+    \\
+
+    \inferrule*[]
+    {   
+        \tyvlddflt{\tylb} \and \tyvlddflt{\tyub} \and
+        \vx \text{ fresh} \and
+        \tyvld{\AEnv, \varbound{\vx}{\tylb}{\tyub}}
+            {\tyinv\iname{\ldots,\vx,\ldots}} 
+    }
+    { 
+      \tyvlddflt{\tyinv\iname{\ldots,\rexvarbound{\tylb}{\tyub},\ldots}}
+    }
+
+    \inferrule*[]
+    { 
+        \inherits{\tyinv{\iname}{\varbound{\vx_1}{\tylb_1}{\tyub_1},\,\ldots}
+        }{\ubdecl} 
+        \and
+        \tyvlddflt{\subst{\ubdecl}{\substel{\vx_1}{\ty_1},\,\ldots}}
+    }
+    { 
+        \tyvlddflt{\tyinv\iname{\ty_1,\,\ldots,}} 
+    }
+\end{mathpar}
+\caption{Validity of type declarations and types in the presence of inheritance
+(extends \figref{fig:ty-grammar} and \figref{fig:ty-tysig-validity})
+}\label{fig:validity-inheritance}
+\end{figure}
+
+
+\subsection{Diagonal Rule}\label{subsec:dec-sub:diagonal}
+%% *********************************************************
+
+

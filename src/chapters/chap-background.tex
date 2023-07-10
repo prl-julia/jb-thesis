@@ -23,13 +23,16 @@ multiple dynamic dispatch.
 -(m::Missing, n::Number) = missing
 -(A::AbstractArray{T,N}) where {T,N} = broadcast_preserving_zero_d(-, A)
 \end{julia}
-\caption{Several method definitions of generic function~\cjl{(-)} in~Julia.
+\caption{Several method definitions of generic function~\cjl{(-)} in~Julia
+}\label{fig:code:subtraction}
+\begin{tablenotes}[para]
+\small
 Methods in lines 1--2 call library functions.
 Method in line 3 calls a built-in function.
 Method in line 4 returns a singleton value \cjl{missing} of the \cjl{Missing} type.
 Method in line 5 calls a higher-order function that applies \cjl{(-)} to the
-elements of the argument array \cjl{A}.}%
-\label{fig:code:subtraction}
+elements of the argument array \cjl{A}.
+\end{tablenotes}
 \end{figure}
 
 \tdef{Multiple dynamic dispatch}~\cite{bib:bobrow:common-loops:1986,%
@@ -160,14 +163,16 @@ end
 % RefValue{T}() where {T} = new()
 % RefValue{T}(x) where {T} = new(x)    
 \end{minipage}
-\caption{Examples of type declarations:
-  concrete (left) and abstract (right).
+\caption{Examples of type declarations: concrete (left) and abstract (right)
+}\label{fig:code:user-def-types}
+\begin{tablenotes}[para]
+\small
   \cjl{Int128} is a primitive, 128-bit type.
   \cjl{Rational} is an immutable parametric composite type.
   \cjl{BitSet} is a mutable composite type.
   \cjl{Signed} is an abstract type.
   \cjl{AbstractSet} is an abstract parametric type.
-}\label{fig:code:user-def-types}
+\end{tablenotes}
 \end{figure}
 
 The distinction between \emph{concrete} and \emph{abstract} types

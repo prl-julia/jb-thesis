@@ -500,6 +500,8 @@ In a type declaration, type parameters $\vx_i$ may reference previous
 parameters: this is handled by checking the validity of type parameters
 in \tyvld{\TyTable}{\tydecl} using \tyvld{}{\AEnv} from
 \figref{fig:ty-tysig-validity}.
+Similarly to declared bounds of existential variables, bounds of type parameters
+need to be consistent.
 
 \begin{figure}
 \footnotesize
@@ -589,4 +591,207 @@ in \tyvld{\TyTable}{\tydecl} using \tyvld{}{\AEnv} from
 \subsection{Diagonal Rule}\label{subsec:dec-sub:diagonal}
 %% *********************************************************
 
+As discussed in \secref{sec:julia-sub:overview},
+Julia provides special support for a generic programming pattern
+where method arguments are expected to be of the same concrete type.
+For example, in the existential type \cjl{Tuple\{T,T\} where T},
+type variable \cjl{T} can be instantiated only with concrete types.
+This is called the \textbf{diagonal rule}. The rule applies only to
+top-level existential types.
 
+In this work, the diagonal rule is modeled explicitly, using a new kind of
+type variables---\textbf{concrete variable}. The kind annotation
+\[\varkind ::= \kindany \Alt \kindval\] means: 
+\begin{itemize}
+    \item kind \kindany denotes a regular variable that can be instantiated with any type;
+    \item kind \kindval denotes a \textbf{concrete} variable that can be instantiated 
+        only with a concrete type.
+\end{itemize}
+In type signatures, existential types specify the kind of the bound variable
+explicitly:
+\[
+    \tysig ::= \ldots \Alt
+        \tyexist{\vany{:}\varkind}{\tylb}{\tyub}{\tysig}
+\]
+All earlier-presented definitions and reasoning apply
+to \kindany-kinded vars without modifications.
+
+Because concrete variables have to be instantiated with concrete types,
+the only allowed declared lower bound is \tybot. To achieve tight bounds,
+a concrete type can be chosen for the upper bound.
+Thus, the validity is extended as follows:
+\begin{mathpar}
+\inferrule*[]
+    { \tyvlddflt{\tyub} \and
+        \tyvld{\AEnv, \varbound{\varval{\vany}}{\tybot}{\tyub}}{\tysig} }
+    { \tyvlddflt{\tyexist{\varval{\vany}}{\tybot}{\tyub}{\tysig}} }
+\end{mathpar}
+
+\figref{fig:concrete} defines concreteness \tyvaldflt{\ty}:
+type \ty is concrete if it is
+a concrete invariant constructor with tight arguments,
+a tuple of concrete types,
+or a union of equivalent concrete types.
+The concreteness judgment is used by the subtyping algorithm.
+
+\begin{figure}[t]
+\footnotesize
+\begin{mathpar}
+    \fbox{\tyvaldflt{\ty}}
+    \\
+
+    \inferrule*[]
+    { \varbound{\varval{\vany}}{\tylb}{\tyub} \in \AEnv }
+    { \tyvaldflt{\vany} }
+
+    \inferrule*[]
+    { }
+    { \tyvaldflt{\tyinv\cname{\ty_1,\ldots,\ty_n}} }
+
+    \inferrule*[]
+    { \tyvaldflt{\ty_1} \and \tyvaldflt{\ty_2} }
+    { \tyvaldflt{\typair{\ty_1}{\ty_2}} }
+
+    \inferrule*[]
+    { 
+        \tyvaldflt{\ty_1} \and \tyvaldflt{\ty_2} \and 
+        \subtydflt{\ty_1}{\ty_2} \and \subtydflt{\ty_2}{\ty_1}
+    }
+    { \tyvaldflt{\tyunion{\ty_1}{\ty_2}} }
+\end{mathpar}
+\caption{Type concreteness}\label{fig:concrete}
+\end{figure}
+
+The subtyping algorithm requires minimal modifications, 
+as defined in \figref{fig:subty-concrete}.
+All previously defined rules are applicable to both kinds of variables.
+The two new rules cover the tight-bound case for a concrete variable: as the only 
+valid instantiation of the variable is \tyub, it can be used
+instead of \tybot to check subtyping with the concrete variable on the right.
+The same reasoning explains the new cases for intersection $\sqcap_\AEnv$.
+Constraints for concrete unification variables are generated in the same way
+as for regular variables. The key difference is in the constraints resolution
+algorithm: the smallest type satisfying the constraints, 
+$\ty_{\va} = \mcup_i \tylb_i$,
+needs to be concrete\footnote{
+    It is possible that there are no lower-bound constraints $\tylb_i$,
+    in which case instantiating \va with \tybot would technically be incorrect.
+    However, the absence of generated lower bounds means that any instantiation
+    within the declared bounds would satisfy the constraints, so it can 
+    be picked arbitrarily; in this case,
+    the only necessary condition is that
+    $\lnot (\subtydflt{\substvars(\tyub)}{\tybot})$.
+} in order for constraints resolution to succeed.
+
+\begin{figure}[t]
+\footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
+\begin{mathpar}
+    \fbox{\subtydflt{\ty}{\ty}}
+    \qquad\qquad
+    \fbox{\subtyctrdflt{\ty}{\ty}}
+    \\
+
+    \inferrule[\RST{VarRight-ConcreteTight}]
+    { \varbound{\varval{\vany}}{\tybot}{\tyub} \in \AEnv \\
+        \tyvaldflt{\tyub} \\\\
+        \subtydflt\ty{\tyub} }
+    { \subtydflt{\ty}{\vany} }
+
+    \inferrule[\RSC{VarRight-ConcreteTight}]
+    { \varbound{\varval{\vany}}{\tybot}{\tyub} \in \AEnv \\
+        \tyvaldflt{\tyub} \\\\
+        \subtyctrdflt\ty{\tyub} }
+    { \subtyctrdflt{\ty}{\vany} }
+\\
+\end{mathpar}
+\[
+\begin{array}{ccccll}
+    \hline
+    \multicolumn{6}{c}{\tymeetdflt{\ty}{\ty'}} \\ 
+    \hline 
+    \vany &\sqcap_{\AEnv}& \ty' &=& 
+        \tymeetdflt{\tyub}{\ty'} & 
+        \text{ where } \varbound{\varval{\vany}}{\tybot}{\tyub} \in \AEnv 
+        \text{ and } \tyvaldflt{\tyub} \\
+    \ty &\sqcap_{\AEnv}& \vany &=& 
+        \tymeetdflt{\ty}{\tyub} & 
+        \text{ where } \varbound{\varval{\vany}}{\tybot}{\tyub} \in \AEnv 
+        \text{ and } \tyvaldflt{\tyub} \\
+    \\
+\end{array}
+\]
+\end{minipage}}
+\begin{minipage}{6.5cm}
+\begin{algorithm}[H]
+    \SetKwProg{SolveCtrs}{Solve}{}{}
+
+    \SolveCtrs{$(\AEnv;\,\UEnv,\varbound{\va{:}\!\kindany\!}{\tylb}{\tyub};\,\CSet)$}{
+        $\CSet_{\va} \gets 
+            \ctrset{\ctrsub{\tylb'}{\va} \in \CSet} 
+            \cup 
+            \ctrset{\ctrsub{\va}{\tyub'} \in \CSet} $ \;
+        $\CSet' \gets \CSet \setminus \CSet_{\va}$ \;
+        $\UEnvD \gets \dom{\UEnv}$\;
+        \ForEach{$\ctrsub{\tylb_i}{\va}, \ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
+            \subtydflt{\tylb_i}{\tyub_j}
+        }
+        \ForEach{$\ctrsub{\tylb_i}{\va} \in \CSet_{\va}$}{%
+            \subtyctrRdfltenv{\tylb_i}{\tyub}{\CSet_{\tylb_i}}
+        }
+        \ForEach{$\ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
+            \subtyctrLdfltenv{\tylb}{\tyub_j}{\CSet_{\tyub_j}}
+        }
+        $\substvars \gets \solvectr{\AEnv}{\UEnv}{
+            \CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}
+        }$\;
+        $\ty_{\va} \gets \substvars(\tylb) \mcup_i \tylb_i$\;
+        \BlankLine
+        \KwRet{$\subst\substvars{\substel{\va}{\ty_{\va}}}$}
+    }
+    %$\substvars \gets \emptysubst$
+\end{algorithm}  
+\end{minipage}
+\hspace{0.2cm}
+\begin{minipage}{6.5cm}
+\begin{algorithm}[H]
+    \SetKwProg{SolveCtrs}{Solve}{}{}
+
+    \SolveCtrs{$(\AEnv;\,\UEnv,\varbound{\va{:}\!\kindval\!}{\tybot}{\tyub};\,\CSet)$}{
+        $\CSet_{\va} \gets 
+            \ctrset{\ctrsub{\tylb'}{\va} \in \CSet} 
+            \cup 
+            \ctrset{\ctrsub{\va}{\tyub'} \in \CSet} $ \;
+        $\CSet' \gets \CSet \setminus \CSet_{\va}$ \;
+        $\UEnvD \gets \dom{\UEnv}$\;
+        \ForEach{$\ctrsub{\tylb_i}{\va}, \ctrsub{\va}{\tyub_j} \in \CSet_{\va}$}{%
+            \subtydflt{\tylb_i}{\tyub_j}
+        }
+        \ForEach{$\ctrsub{\tylb_i}{\va} \in \CSet_{\va}$}{%
+            \subtyctrRdfltenv{\tylb_i}{\tyub}{\CSet_{\tylb_i}}
+        }
+        \BlankLine\BlankLine
+        \BlankLine\BlankLine
+        $\substvars \gets \solvectr{\AEnv}{\UEnv}{
+            \CSet' \mcup_i \CSet_{\tylb_i} \mcup_j \CSet_{\tyub_j}
+        }$\;
+        $\ty_{\va} \gets \mcup_i \tylb_i$\;
+        \BlankLine
+        $\tyvaldflt{\ty_{\va}}$\;
+        \BlankLine
+        \KwRet{$\subst\substvars{\substel{\va}{\ty_{\va}}}$}
+    }
+    %$\substvars \gets \emptysubst$
+\end{algorithm}  
+\end{minipage}
+\caption{Subtyping with concrete variables}\label{fig:subty-concrete}
+\begin{tablenotes}[para]
+\small
+    Extends \figref{fig:subtyping-constrained} and \figref{fig:ty-join-meet},
+    and replaces \figref{fig:ctr-solve}.
+    Constraints resolution algorithm for regular variables is exactly the same
+    as the algorithm in \figref{fig:ctr-solve}; it is provided here for
+    convenience of comparison.
+\end{tablenotes}
+\end{figure}

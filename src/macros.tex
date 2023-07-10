@@ -125,6 +125,8 @@
 %% singleton constraint set
 \newcommand{\ctrsngl}[2]{\ctrset{\ctrsub{#1}{#2}}}
 
+\newcommand{\varval}[1]{\EM{#1{:}\!\kindval\!}}
+
 % %% side condition
 % \newcommand{\sidecond}[1]{\EM{\scriptstyle #1}}
 
@@ -172,6 +174,10 @@
 %\newcommand{\EmptyCSet}{\ctrset{}}          %% empty set of constraints
 
 \newcommand{\substvars}{\EM{\rho}}         %% substitution for constraints
+
+\newcommand{\varkind}{\EM{\kappa}\xspace}
+\newcommand{\kindany}{\EM{\circ}} % regular type variable 
+\newcommand{\kindval}{\EM{\star}} % concrete variable
 
 %% Symbols
 %% *********************************************************
@@ -281,6 +287,11 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Inheritance
 
 \newcommand{\inherits}[2]{\EM{#1 \text{ inherits } #2}}
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Concreteness
+
+\newcommand{\tyval}[2]{\EM{#1\,\vdash\!\!\kindval\,#2}}
+\newcommand{\tyvaldflt}[1]{\tyval{\AEnv}{#1}}
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Subtyping
 

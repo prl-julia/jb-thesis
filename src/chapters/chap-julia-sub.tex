@@ -213,7 +213,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 \makebox[\textwidth][c]{
 \begin{minipage}{\ruleswidth}
 \[
-  t\ ::=\ \anytyp 
+ \t\ ::=\ \anytyp 
     \Alt \uniontyp{\t_1, \ldots, \t_n}
     \Alt \tupletyp{\t_1, \ldots, \t_n}
     \Alt \cstrt{name}{\t_1, \ldots, \t_n}
@@ -502,9 +502,9 @@ enforcing the correct ordering of type variable quantifications
 requires extra care.  Consider the judgment:
 \[ \vectyp{\wheret{\vectyp{\T}}{\T}} \nless: 
   \wheret{\vectyp{\vectyp{\S}}}{\S}. \]
-The type on the left denotes the set of all the vectors of
+The type on the left denotes the set of all vectors of
 vectors of elements of some type; the type on the right
-requires a common type for all the inner
+requires a common type for all inner
 vectors.  For instance, the value
 \cjl{[ [1,2],["a","b"] ]} belongs to the first, but
 not the second, type.
@@ -832,21 +832,21 @@ it was called an exist/right variable.
 Consider the following subtype query 
 \[
   \begin{array}{ll}
-    \jlname{Tuple}\{\vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}, &
+    \jlname{Tuple}\{\vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}, &
       t'\,\}\\
     \multicolumn{2}{c}{<:} \\
     \jlname{Tuple}\{\vectyp{t_1^{\T}}, & t_2^{\T}\} 
       \ \textbf{\texttt{where}}\ l{<:}\T{<:}u,
   \end{array}
 \]
-where \S occurs in $t'^S$ and \T occurs in both $t_1^{\T}$ and $t_2^{\T}$.
+where \S occurs in $t'^\S$ and \T occurs in both $t_1^{\T}$ and $t_2^{\T}$.
 Let us walk through possible steps of a subtyping algorithm \algo.
 \begin{enumerate}
   \item Because the right-hand side type is an existential,
     \T is a unification variable; \algo can remember the variable and proceed
     to subtyping of
     \[ 
-      \tupletyp{\vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}, t'}
+      \tupletyp{\vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}, t'}
         \ <:\ 
         \tupletyp{\vectyp{t_1^{\T}}, t_2^{\T}}. 
     \]
@@ -854,7 +854,7 @@ Let us walk through possible steps of a subtyping algorithm \algo.
     Tuples are covariant, so \algo needs to check that their corresponding 
     components are subtypes, i.e.,
     \[ 
-      \vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
+      \vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
       \ \ \text{and}\ \ t' <: t_2^{\T}.
     \]
     Since the unification variable \T appears in both $t_1^{\T}$ and $t_2^{\T}$,
@@ -862,14 +862,14 @@ Let us walk through possible steps of a subtyping algorithm \algo.
     \begin{enumerate}
       \item The first tuple components are both invariant constructors,
         \[ 
-          \vectyp{\wheret{\t'^S}{l'{<:}\S{<:}u'}} 
+          \vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}} 
           \ <:\  
           \vectyp{t_1^{\T}}, 
         \]
         so \algo needs to check that their type arguments are equivalent.
         Let \algo use subtyping for the equivalence check and focus
         on the second, right-to-left check:
-        \[ t_1^{\T}\ <:\ \wheret{\t'^S}{l'{<:}\S{<:}u'}. \]
+        \[ t_1^{\T}\ <:\ \wheret{\t'^\S}{l'{<:}\S{<:}u'}. \]
         \begin{enumerate}
           \item The right-hand side type is an existential, so \S is a unification
             variable; \algo can remember the variable and proceed to 
@@ -877,12 +877,12 @@ Let us walk through possible steps of a subtyping algorithm \algo.
           \item Let us assume that \algo successfully processes this subtyping
             query. Note that \emph{both sides of the query contain
             unification variables}, for \T occurs in $t_1^{\T}$
-            and \S occurs in $\t'^S$.
+            and \S occurs in $\t'^\S$.
             Thus, the unification variables \S and \T might
             be \emph{constraining each other}.
           \item\label{item:sub-stuck} \algo needs to resolve the unification variable \S, that is,
             check that constraints that were necessary to satisfy 
-            \[ t_1^{\T} <: \t'^S \]
+            \[ t_1^{\T} <: \t'^\S \]
             are consistent with each other as well as the declared bounds
             $l'$ and $u'$.
             However, \S might be constrained by the unification variable \T,

@@ -31,7 +31,7 @@ Methods in lines 1--2 call library functions.
 Method in line 3 calls a built-in function.
 Method in line 4 returns a singleton value \cjl{missing} of the \cjl{Missing} type.
 Method in line 5 calls a higher-order function that applies \cjl{(-)} to the
-elements of the argument array \cjl{A}.
+elements of the array argument \cjl{A}.
 \end{tablenotes}
 \end{figure}
 
@@ -65,7 +65,7 @@ subtypes of the declared method signature types.
 %% ======================================================================
 
 The expressive power of Julia's multiple dispatch stems from 
-the non-trivial \tdef{language of type annotations}, as
+its unique \tdef{language of type annotations}, as
 demonstrated in~\figref{fig:code:subtraction}.
 Briefly, the type language supports:
 \begin{itemize}
@@ -79,7 +79,9 @@ Briefly, the type language supports:
         booleans, for which
         \href{https://docs.julialang.org/en/v1/base/base/\#Base.isbits}{\cjl{isbits}}
         function returns \cjl{true}.
-        Thus, \cjl{AbstractArray\{Int64,1\}} is a valid nominal type.}
+        Thus, \cjl{AbstractArray\{Int64,1\}} is a valid nominal type.
+        For value arguments, the invariance check succeeds if they
+        are bitwise equal.}
         in line~5;
   \item set-theoretic union types, e.g. 
     \cjl{Union\{Int16, ..., UInt128\}} in line~3;
@@ -91,10 +93,9 @@ Briefly, the type language supports:
     \cjl{t[t'/T]} for all valid instantiations \cjl{t'} of the type
     variable~\cjl{T}.
 \end{itemize}
-\citet{bib:zappa-nardelli:julia-sub:oopsla:2018} provide a detailed
-account of Julia types and their subtype relation, and we give a brief
-overview of subtyping in \secref{sec:julia-sub:overview}.\TODO{fix this if adding
-subtyping definition}
+% A more detailed account of Julia types and subtyping is given
+% in \chapref{sec:julia-sub:overview}, with \chapref{sec:julia-sub:lambda-julia} 
+% providing a specification of subtyping.
 
 % One of the key properties related to Julia types is the distinction between
 % \emph{concrete} and \emph{abstract} types. A concrete type is a type that
@@ -113,10 +114,10 @@ Nominal types are induced by user-defined datatype declarations and constitute
 a single-parent inheritance hierarchy.
 Unlike mainstream object-oriented languages such as \CSharp and Java,
 Julia does not support data inheritance: only \emph{abstract} types,
-which \emph{cannot} be instantiated with values, can be inherited,
+which cannot be instantiated with values, can be inherited,
 i.e. used as declared supertypes of other nominal types.
-Datatypes that \emph{can} be instantiated with values are referred to as
-\emph{concrete}. Concrete nominal types include primitive types,
+Datatypes that can be instantiated with values are referred to as
+\emph{concrete}. Concrete nominal types include primitive types
 such as \cjl{Int128}, and composite \cjl{struct} types (either mutable or
 immutable).
 \figref{fig:code:user-def-types} provides several examples of user-defined
@@ -125,7 +126,8 @@ Parametric types (both abstract and concrete)
 can declare non-recursive lower and upper bounds on type variables;
 for example, type \cjl{Rational\{T\}} requires \cjl{T} to be a subtype of
 abstract \cjl{Integer}.
-Supertypes in type definitions are declared to the right of~\cjl{<:}.
+Supertypes in type declarations are declared to the right of~\cjl{<:}
+and cannot refer to the type being declared.
 For example, \cjl{Int128} is a subtype of \cjl{Signed}, and \cjl{Signed} is a
 subtype of \cjl{Integer}. If the supertype declaration is omitted, like in
 \cjl{AbstractSet\{T\}}, the supertype defaults to \cjl{Any}.
@@ -177,19 +179,18 @@ end
 
 The distinction between \emph{concrete} and \emph{abstract} types
 is important to Julia's runtime.
-\emph{Concrete} types are the run-time types of values and can be
+\emph{Concrete} types are run-time types of values, which can be
 obtained with the \cjl{typeof} operator. Because concrete types are final, 
 i.e. cannot be inherited, the compiler knows their size and memory layout
 and can thus optimize code efficiently.
-In Julia, concrete types include concrete nominal types as well as
-tuples of concrete types.
-\emph{Abstract} types are widely used as type annotations in method definitions.
-They can also be used to store heterogeneous data, e.g. in \cjl{Vector\{Any\}},
-as type arguments of parametric constructors 
-or field type annotations in datatype declarations.
+In Julia, concrete types include concrete nominal types and their tuples.
+\emph{Abstract} types, on the other hand,
+are widely used as type annotations in method definitions.
+They also account for heterogeneous data when used as field type annotations
+or type arguments of parametric constructors, e.g. in \cjl{Vector\{Any\}}.
 Values of abstract types are stored as references and are not conducive
 to optimizations.
-Besides abstract nominal types, abstract types in Julia include union types
+Besides abstract nominal types, abstract types include union types
 such as \cjl{Union\{Int16,}$\ldots$\cjl{, UInt128\}}, and union-all types
 such as \cjl{Vector\{T\} where T} (a shorthand for this type 
 is simply \cjl{Vector}). Note, however, that every particular instantiation of
@@ -200,41 +201,118 @@ concrete nor abstract: it has no values and is a subtype of all types.
 
 It is worth noting that the Julia language does not have a structural function type,
 which would typically be written as \cjl{T} $\rightarrow$ \cjl{S}. As mentioned above,
-all function calls are dynamically dispatched to a method of the generic
-function, and there is no way to directly call or
-pass a particular method as an argument.
+all function calls are dynamically dispatched to a method of that generic
+function, and there is no way to directly call a particular method or
+pass it as an argument.
 However, generic functions are first-class values and can be used as
 method arguments: for example, \cjl{(-)} is passed to a function call in line~5
 of~\figref{fig:code:subtraction}.
 Every generic function~\cjl{f} has the concrete type \cjl{typeof(f)},
 which is a subtype of the type of all functions \cjl{Function}.
 
-\TODO{Types are values, DataType, UnionAll.}
+In Julia, types are also values: they can be stored in variables, 
+passed as function arguments, and introspected.
+Depending on the kind of a type, the \cjl{typeof} operator returns
+one of four values:
+\cjl{DataType} for fully instantiated nominal types and tuples,
+\cjl{Union} for finite union types,
+\cjl{UnionAll} for union-all (\cjl{where}) types,
+and \cjl{Core.TypeofBottom} for the bottom type \cjl{Union\{\}}.
+There is also a special abstract parametric type \cjl{Type\{T\}}
+such that type \cjl{t} is considered an instance\footnote{\cjl{v isa t}
+checks if value \cjl{v} is an instance of type \cjl{t}} of \cjl{Type\{t\}}:
+as exemplified by \figref{fig:code:dispatch-on-type},
+\cjl{Type\{T\}} facilitates multiple dispatch on type values.
 
+\begin{figure}[t]
+\centering
+\begin{minipage}{8cm}
+\begin{julia}
+myzero(::Type{Int})               = 0
+myzero(::Type{Float64})           = 0.0
+myzero(::Type{Vector{T}}) where T = Vector{T}()
+
+myzero(Int)           # returns 0
+myzero(Vector{Bool})  # returns Bool[]
+\end{julia}
+\end{minipage}
+\caption{Function~\cjl{myzero}, which dispatches on type values
+using \cjl{Type\{T\}}}\label{fig:code:dispatch-on-type}
+\end{figure}
 
 \section{Multiple Dispatch}\label{sec:background:dispatch}
 %% ======================================================================
 
-While argument type annotations are the key to defining multiple distinct
-methods, the user can choose to omit some or all annotations in a method.
+Argument type annotations are the key to defining multiple distinct
+methods, but the user can choose to omit some or all annotations in a method.
 For example, in the first \cjl{sub5} definition below, the omitted type
-of~\cjl{x} defaults to \cjl{Any}, a supertype of all types.
-Therefore, whenever \cjl{sub5} is called with anything except string,
-the first method definition will be used. If there is an implementation
-of \cjl{(-)} for the type of \cjl{x} and \cjl{Int64} (the type of \cjl{5}),
-the \cjl{sub5} call will succeed. \TODO{finish: add info on concatenation,
-and that new methods are generated for the specific type}
-
+of~\cjl{x} defaults to \cjl{Any}, a supertype of all types:
 %\begin{wrapfigure}{R}{4cm}
 %\vspace{-6mm}
 \begin{codeenvd}
 \begin{julia}
-sub5(x) = x - 5
+sub5(x) = x - 5             # same as sub5(x::Any) = x - 5
 sub5(x::String) = x * "-5"
 \end{julia}
 \end{codeenvd}
 %\vspace{-6mm}
 %\end{wrapfigure}
+If \cjl{sub5} is called with a string, the call will dispatch to the method 
+definition in line 2 and always succeed. 
+If \cjl{sub5} is called with anything else,
+the call will dispatch to the method definition in line 1. 
+In the latter case, the execution will succeed
+as long as there is an implementation of \cjl{(-)} for the type of \cjl{x}
+and \cjl{Int64}, which is the type of \cjl{5}.
+For example, \cjl{sub5(10.0)} evaluates to \cjl{5.0},
+whereas \cjl{sub5([])} fails:
+%\begin{wrapfigure}{R}{4cm}
+%\vspace{-6mm}
+\begin{codeenvd}
+\begin{julia}
+julia> sub5([])
+ERROR: MethodError: no method matching -(::Vector{Any}, ::Int64)
+\end{julia}
+\end{codeenvd}
+%\vspace{-6mm}
+%\end{wrapfigure}
+To achieve good performance, Julia generates method instances
+specialized to concrete argument types the function was called
+with~\cite{bib:pelenitsyn:type-stability:oopsla:2021}.
+Thus, next time a function is called with the same argument types,
+method dispatch will have more definitions to choose from.
+\figref{fig:code:specializations} shows an example REPL session for \cjl{sub5}.
+
+\begin{figure}[t]
+\centering
+\begin{minipage}{10cm}
+\begin{julia}
+julia> sub5(x) = x - 5
+julia> sub5(x::String) = x * "-5"
+
+julia> methods(sub5)
+# 2 methods for generic function "sub5":
+[1] sub5(x::String) in Main at REPL[2]:1
+[2] sub5(x) in Main at REPL[1]:1
+
+julia> methods(sub5)[2].specializations
+svec()
+
+julia> sub5(10.0)
+5.0
+
+julia> methods(sub5)[2].specializations
+svec(MethodInstance for sub5(::Float64), nothing, ...)
+\end{julia}
+\end{minipage}
+\caption{A REPL session demonstrating method specialization
+}\label{fig:code:specializations}
+\begin{tablenotes}[para]
+\small
+Function \cjl{methods} lists all methods of a generic function.
+Field \cjl{specializations} stores compiled method specializations.
+\end{tablenotes}
+\end{figure}
 
 Method resolution for a dispatched function call \cjl{f(a1, a2, ...)}
 relies on tuple subtyping~\cite{bib:leavens:tuple-dispatch:1998}
@@ -253,6 +331,8 @@ is represented by the signature \cjl{Tuple\{BigInt\}}, line~4 by
 %Thus, for the purpose of dispatch resolution, arguments of a function call
 %are represented with a single concrete type \gty,
 %and every method type signature is represented as a type \ty.
+Because tuple subtyping gives all elements equal consideration,
+multiple dispatch in Julia is \emph{symmetric}.
 
 Dispatch resolution, if successful, returns the \emph{most specific applicable
 method} for the given arguments.
@@ -262,7 +342,8 @@ type~\gty, the process can be described as follows:
   \item Find all applicable methods, i.e., all method signatures \ty of the
     function~\cjl{f} that are supertypes of the argument type $\gty <: \ty$.
     If no methods are applicable, a method-not-found error is raised.
-  \item Among the applicable methods $\{\ty_1, \ldots, \ty_n\}$,
+  \item\label{item:dispatch:specific} Among 
+    the applicable methods $\{\ty_1, \ldots, \ty_n\}$,
     pick the method with the most specific type signature,
     i.e., $\ty_k$ such that $\forall i\in1..n, \ty_k <: \ty_i$.
     %(method type signature is a subtype of all other applicable method
@@ -272,14 +353,13 @@ type~\gty, the process can be described as follows:
     Julia has additional specificity rules to resolve ambiguities in some cases,
     but those are not relevant to this work.}
 \end{enumerate}
-Notably, Julia's dispatch mechanism is \emph{symmetric}:
-during dispatch resolution, all arguments are given
-equal consideration as a part of subtyping on tuples.
+Thus, subtyping is an integral part of Julia's \emph{dynamic semantics},
+and due to step \ref{item:dispatch:specific}, it is used with
+arbitrarily complex types.
 
-While there are ways to optimize dispatch resolution to limit the number of
-subtyping checks, the key takeaway is that %from this section 
-in Julia, \emph{subtyping} is checked \emph{at run time} as a part of
-resolving multiple dynamic dispatch.
+%While there are ways to optimize dispatch resolution to limit the number of
+%subtyping checks, 
+
 %Furthermore, the following section will show that because of invariant
 %constructors and union-all types, even subtyping with a concrete type on the left
 %(i.e., $\gty <: \ty$) can require an arbitrary subtyping check $\ty_1 <: \ty_2$.

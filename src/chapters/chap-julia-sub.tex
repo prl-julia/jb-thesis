@@ -178,10 +178,10 @@ only in~\cite{bib:bezanson:julia:2015}, with the actual implementation of
 subtyping ($\sim$3000 lines of heavily optimized C~code as of May 2023)
 being the only reference point.
 
-In this section, I present a fragment of the specification of Julia subtyping
-from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
+In this section, I present a fragment of the specification of
+Julia 0.6.2 subtyping from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 In that work, my collaborators and I defined, implemented, and empirically
-validated a subtype relation,
+validated a subtype relation for Julia's type language,
 thus providing the first complete\footnote{The only omitted feature is the
 \cjl{Vararg\{T,N\}} construct, which can be used as the last
 parameter of a tuple to denote N trailing arguments of type \cjl{T}.}

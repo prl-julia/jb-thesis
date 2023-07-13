@@ -18,7 +18,7 @@ and show that the impact of the restriction on the existing code is limited.
 \TODO{more info/update}
 
 
-\section{Types and Subtyping in Julia}
+\section{Subtyping in Julia}
 %% ======================================================================
 
 To encourage a high level of code reuse and extensibility,
@@ -49,9 +49,10 @@ Namely, for every function call, subtyping is checked between
 the argument types and method type signatures,
 as well as between method type signatures.
 While most run-time value types are nominal, %e.g. \cjl{Vector\{Int64\}},
-the language of type annotations is inspired by semantic subtyping,
+the language of type annotations is more complex and expressive. 
+In particular, inspired by semantic subtyping
 where types are interpreted as sets,
-and supports unions that distribute over covariant tuples.
+Julia supports covariant tuples that distribute over unions.
 For example, according to the semantic approach, the type 
 \cjl{Tuple\{String, Union\{Int64, UInt64\}\}} represents a set of binary
 tuples where the first component is either a signed or unsigned integer,
@@ -60,7 +61,8 @@ and the second component is a string. Therefore, both
 of the above type, and that type is equivalent to the union of the two
 tuples, \cjl{Union\{Tuple\{String, Int64\}, Tuple\{String, UInt64\}\}}.
 In addition to finite unions, Julia supports existential types, referred to as
-union-all types or iterated unions. For example, \cjl{Vector\{T\} where T}
+union-all types or iterated unions in the language. 
+For example, \cjl{Vector\{T\} where T}
 represents an infinite union of vectors \cjl{Vector\{t\}} for all valid
 instantiations \cjl{t} of the type variable \cjl{T}.
 A~more detailed account of Julia types and subtyping
@@ -70,7 +72,8 @@ is provided in~\chapref{chap:background}.
 
 Despite intentional simplifications in the type language,
 e.g. the lack of recursive bounds on type variables,
-subtyping in Julia is \emph{undecidable}. %due to %the support for
+subtyping in Julia is \emph{undecidable}~\cite{TODO}.
+%due to %the support for
 %impredicative bounded existential types.
 %Simply disallowing such types would not be practical,
 %as Julia users rely on them to describe heterogeneous data.
@@ -81,20 +84,20 @@ Although relying on undecidable subtyping is not unprecedented
 for a statically typed language, e.g. Scala~\cite{bib:hu:dot-undec:2020},
 %with an expressive type system such as
 the price of undecidability
-is higher in Julia, where it
-can manifest at almost any point during the program execution.
+is higher in Julia, since it
+can manifest at almost any point during the program \emph{execution}.
 %as subtyping over a complex language of run-time types and type annotations
 %is an integral part of Julia's dynamic semantics.
 Namely, the run-time system relies on undecidable subtyping
 to resolve function calls,
-process new method definitions,
+process new method definitions~\cite{bib:belyakova:world-age:oopsla:2020},
 manipulate data (e.g. when adding an element to a container),
-as well as during JIT compilation.
+as well as during JIT compilation~\cite{bib:pelenitsyn:type-stability:oopsla:2021}.
 In practice, the undecidability
 leads to a run-time crash with a \cjl{StackOverflowError}.
 Such an issue can be particularly hard to debug,
-because neither the problematic subtyping query nor its origins are available
-to the user.
+because the error is uninformative: neither the problematic subtyping query
+nor stack trace is reported.
 
 A number of issues related to subtyping have been reported
 on the Julia bug tracker. For example,
@@ -138,17 +141,57 @@ bug &
 \small
 Axes represent labels the issues are marked with: for example, the cell
 24/51 in the row \emph{<any label>} and column \emph{GC} corresponds to all
-issues labeled with \emph{GC}, whereas 1/15 in the row \emph{bug} and column 
-\emph{GC} corresponds to \emph{GC} issues that are also labeled with \emph{bug}.
+issues labeled with {``GC''}, whereas 1/15 in the row \emph{bug} and column 
+\emph{GC} corresponds to {``GC''} issues that are also labeled with {``bug''}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-\section{Evolving Julia Towards Decidable Subtyping}
+\section{Thesis and Contributions}
 %% ======================================================================
 
-In this thesis, I show that
-the Julia language can be evolved to provide for decidable subtyping while
-requiring minimal effort for migrating existing code.
+Due to Julia's ubiquitous use of subtyping at run time,
+the undecidability of subtyping is consequential.
+Unfortunately, as I discuss in \chapref{sec:julia-sub:undec},
+a compatible decidable subtype relation for the entirety of Julia types
+is unlikely to exist.
+However, my thesis is that
+\begin{quotation}\emph{
+  the Julia language can be evolved to provide for decidable subtyping while
+  requiring minimal effort for migrating existing code.
+}\end{quotation}
 
-\TODO{more stuff}
+Because the type language and its associated subtype relation 
+impact the set of valid Julia programs and their dynamic semantics,
+replacing subtyping can have profound effects on programmer experience 
+as well the ability to migrate existing code.
+Thus, not any decidable subtyping would be a viable candidate for
+Julia's evolution.
+
+In this dissertation, I show that there is
+a restriction on Julia's type language that allows for decidable subtyping
+and supports 99.99\% of statically identifiable type annotations
+in registered Julia packages.
+Namely, the restriction limits existential types inside invariant constructors
+to existential types expressible with use-site variance,
+similar to Java wildcards~\cite{bib:torgersen:wildcards:2004}.
+
+The dissertation provides an overview of Julia
+(Chapters \ref{chap:background} and \ref{sec:julia-sub:overview})
+and makes the following contributions:
+\begin{itemize}
+  \item \textbf{Specification of Julia
+    subtyping}~\citep*{bib:zappa-nardelli:julia-sub:oopsla:2018}
+    (\chapref{sec:julia-sub:lambda-julia}).
+    The specification covers most of Julia, with the only exception being
+    variable-length tuples.
+  \item \textbf{Decidable subtyping} for a restricted language of Julia 
+    types~[a collaboration with Ross Tate] (\chapref{chap:dec-sub}).
+    The restriction retains most of Julia types, limiting only existential types
+    inside invariant constructors.
+  \item \textbf{Evaluation of migration effort} required to switch to 
+    the restricted type language (\chapref{chap:eval}). 
+    In the corpus of all 9K registered Julia packages, 99.99\% of source code 
+    type annotations satisfy the restriction.
+\end{itemize}
+\TODO{mention my other work that's related}

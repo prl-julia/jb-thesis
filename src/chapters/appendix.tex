@@ -257,8 +257,109 @@
 \end{proof}
 
 
-
-
 \section{Evaluation}\label{sec:app:eval}
 %% ======================================================================
 
+\begin{figure}
+%\begin{minipage}{14cm}
+\begin{lstlisting}
+Error: Couldn't process expression
+  e =
+   :($(Expr(:$, :d))->begin
+             #= none:54 =#
+             Base.axes($(Expr(:$, :arraysym)), $(Expr(:$, :d)))
+         end)
+  err =
+   ArgumentError: Not a function definition: :($(Expr(:$, :d))->begin
+             #= none:54 =#
+             Base.axes($(Expr(:$, :arraysym)), $(Expr(:$, :d)))
+         end)
+\end{lstlisting}
+%\end{minipage}
+\caption{Parsing errors}\label{fig:evaluation-parse-errors}
+\end{figure}
+
+\begin{figure}
+%\begin{minipage}{14cm}
+\begin{lstlisting}
+Error: Couldn't process type annotation
+    tastr = "Tuple{Union{Document, Node}} where \$(esc.(P)...)"
+    err = AssertionError: Unsupported lb-var-ub format
+  
+Error: Unsupported Expr type annotation
+  ty = :(typeof.((year, month, day, yearmonth, monthday, yearmonthday, dayofweek))...)
+  
+Error: Couldn't process type annotation
+  tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
+  err = AssertionError: Unsupported lb-var-ub format
+  
+Error: Couldn't process type annotation
+  tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
+  err = AssertionError: Unsupported lb-var-ub format
+
+Error: Couldn't process type annotation
+  tastr = "Tuple{Union{map((T->beginn                    #= none:302 =#n                    AbstractGeometry{T}n                end), multipointtypes)...}}"
+  err = Base.Meta.ParseError("missing comma or ) in argument list")
+\end{lstlisting}
+%\end{minipage}
+\caption{Type annotation processing errors}\label{fig:evaluation-process-errors}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{10cm}
+\begin{lstlisting}
+# false positive (semantically), package ForneyLab.jl
+# src/algorithms/posterior_factorization.jl
+Tuple{
+    Vararg{
+        Union{
+            T, Set{T}, Vector{T}
+        } where T <: Variable
+    }, Any}
+
+# false positive (semantically), package Tries.jl
+# src/Tries.jl
+Tuple{
+    Vararg{
+        Pair{NTuple{N, K}, T} where N
+    }
+} where T where K
+
+# false positive (semantically), package Tries.jl
+# src/Tries.jl
+Tuple{
+    Vararg{
+        Pair{NTuple{N, K}, <:Any} where N
+    }
+} where K
+
+# false positive (semantically), package Muon.jl
+# src/alignedmapping.jl
+Dict{
+    K,
+    Union{
+        AbstractArray{<:Number}, 
+        AbstractArray{Union{Missing, T}} where T <: Number, 
+        DataFrame
+    }
+}
+
+# true positive, package Alicorn.jl
+# test/Utils/UtilsTests.jl 
+Array{
+    Tuple{T, Array{T, N} where N, Bool} where T
+}
+
+# true positive, package UnitfulEquivalences.jl
+# src/UnitfulEquivalences.jl
+Tuple{
+    Type{
+        Union{
+            Quantity{T, D, U}, 
+            Level{L, S, Quantity{T, D, U}} where {L, S}
+        } where {T, U}
+    }} where D
+\end{lstlisting}
+\end{minipage}
+\caption{Type annotations flagged by the analysis}\label{fig:evaluation-unsup-ty-anns}
+\end{figure}

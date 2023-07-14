@@ -1,72 +1,307 @@
-\chapter{Evaluation}\label{chap:eval}
+\chapter{Evaluation of Migration Effort}\label{chap:eval}
 
-\paragraph{Packages.}
-Used \url{https://github.com/julbinb/JuliaPkgsList.jl} to get a list of
-Julia packages.
-The info is taken from a JSON file at
-\url{https://juliahub.com/app/packages/info}.
-(JuliaHub is listed as a service for searching all registered packages
-here: \url{https://julialang.org/packages/}).
+How would the proposed restriction of Julia's type language
+impact existing Julia programs and programmers?
+Julia programmers have a history of writing complex
+types~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018} and might be relying on
+the expressive power of existential types inside of invariant constructors.
+%non-trivial variable introduction inside of invariant constructors.
+To examine this concern and estimate how much user code
+would be impacted, we performed a corpus analysis of all 9K packages
+from the official Julia registry.
+Namely, we extracted type annotations from the source code of the packages
+and checked how many of those annotations satisfy the restriction
+described in \secref{sec:subtyping-decidable}.
 
-There were 9355 entries listed as of 2022-05-28.
-The tool extracts package name and latest version.
-Some entries in the JSON file were not proper registered packages,
-e.g. it contained the Julia repo itself, which is not a registered package.
-Some repositories are no longer open and cannot be accessed.
-Some repos did not have a version (31).
+Out of more than 2M successfully extracted type annotations, only two
+method type signatures
+do not have an equivalent type that is expressible under the restriction;
+4 more annotations have an expressible semantic equivalent, but the equivalence
+is not currently derivable in Julia.
+These results are encouraging and suggest that the restricted type language
+allows for a desirable trade-off between expressiveness and decidability.
 
-9315 packages were successfully downloaded using
-\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}.
+\paragraph{Corpus}
+% We evaluate our proposed subtyping restriction by seeing what impact it might
+% have on Julia packages. Package authors use many type annotations and rely on
+% said annotations to specialize implementations for specific values. As a result,
+% we want to see how badly our change might affect existing definitions.
+Our package corpus is the entire official Julia registry, which
+is the default source of packages used by Julia programs; it contains
+the majority of all public Julia packages.
+The list of packages from the registry was obtained using JuliaHub\footnote{
+\url{https://juliahub.com/app/packages/info}, processed by
+\url{https://github.com/julbinb/JuliaPkgsList.jl}} tool. 
+There were 9355 entries listed on JuliaHub as of 2023-05-20. %our tool
+%extracts the package name and latest registered version of each. 
+We successfully downloaded\footnote{using
+\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}} tool
+9315 packages: some JuliaHub entries were not valid registered packages,
+e.g. the entry for Julia itself, some were no longer publicly available
+or could not be processed for other reasons.
+%or could not be automatically for  and were inaccessible or did not have a
+%version. In total, we extracted and downloaded 9315 packages using another
+%tool\footnote{\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}}.
+The resulting corpus consists of 172,024 files with 19,476,938 lines of code.
+%as determined by \code{cloc}.
 
-\paragraph{Analysis.}
-Static analysis of type annotations in the downloaded packages.
-Here is cloc info:
+%to fin
+%Used to get a list of
+%Julia packages.
+%The info is taken from a JSON file at
+%\url{https://juliahub.com/app/packages/info}.
+%(JuliaHub is listed as a service for searching all registered packages
+%here: \url{https://julialang.org/packages/}).
 
-\begin{verbatim}
--------------------------------------------------------------------
-Language         files          blank        comment           code
--------------------------------------------------------------------
-Julia            172024        3830817        1937753       19476938
-\end{verbatim}
+%There were 9355 entries listed as of 2022-05-28.
+%The tool extracts package name and latest version.
+%Some entries in the JSON file were not proper registered packages,
+%e.g. it contained the Julia repo itself, which is not a registered package.
+%Some repositories are no longer open and cannot be accessed.
+%Some repos did not have a version (31).
 
-All Julia files (i.e. files with .jl extension) were parsed using
-the Julia parser.
+%9315 packages were successfully downloaded usin
+%\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}.
 
-206 packages had files that could not be parsed.
+\subsection{Methodology} 
+Our analysis, written in Julia, extracts type annotations from all \code{.jl}
+files in the corpus and reports annotations that cannot be trivially rewritten 
+into equivalent ones admitted by the restricted type language.
+To extract type annotations, we rely on the Julia parser and 
+the MacroTools.jl\footnote{\url{https://github.com/FluxML/MacroTools.jl}} package.
+%We performed several analyses on this corpus to examine how it uses  types. In
+%aggregate, the corpus consists of 172,024 files with 19,476,938 lines of code
+%as determined by \verb|cloc|. To provide a more granular analysis we then performed
+%Julia-level analysis to extract the types used in each package.
 
-After parsing, type annotations were extracted using MacroTools.jl:
+% Our type extraction process uses the Julia parser to convert each .jl file into an
+% AST representation, then analyze that using the MacroTools.jl package. 
+
+We identify and extract the following kinds of type annotations:
 \begin{itemize}
-    \item method signatures, e.g. \cjl{f(x::T, v::Vector\{T\}) where T}
-      is transformed into \cjl{Tuple\{T, Vector\{T\}\} where T}
-    \item if there is a return type anotation, it is counted as a separate type
-    \item with the exception of method type signatures, all \cjl{t} from
-        \cjl{::t}, which includes field type annotations, run-time type assertions,
-        and local variable type annotations
+    \item method type signatures: for example, 
+    \cjl{f(x::T, v::Vector\{T\}) where T} becomes
+    \cjl{Tuple\{T, Vector\{T\}\} where T};
+    \item return type annotations: for example, \cjl{Bool} from \cjl{f() :: Bool};
+    \item all uses of explicit type assertions \cjl{::t} outside method
+      signatures: these include field
+      type annotations, run-time type assertions, and local variable
+      type annotations.
 \end{itemize}
 
-Some type annotations could not be properly processed, e.g. because of macros
-\begin{verbatim}
-Error: Couldn't process type annotation
-  tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
-  err = AssertionError: Unsupported lb-var-ub format
-
-Error: Couldn't process type annotation
-  tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
-  err = AssertionError: Unsupported lb-var-ub format
-\end{verbatim}
-Total of 1629 packages had at least one error like that.
-
-Total 2136609 type annotations were found. Out of those:
+The following kinds of existential types inside invariant constructors
+\emph{not} admitted by the restriction (that is, not satisfying the \ty grammar)
+have a trivially equivalent restricted representation (according to Julia
+subtyping) and as such, are not flagged by the analysis:
 \begin{itemize}
-    \item 1573 couldn't be processed at all (e.g. as described above): usually
-        because a type variable binding couldn't be parsed
-    \item 22396 were partially processed, e.g. if one element of a tuple was
-        a \$-thingy, it was ignored when type variable occurrence was analyzed
+  \item The variable occurs once covariantly, for example,
+    \cjl{Tuple\{T\} where T<:u}: this type is equivalent to \cjl{Tuple\{u\}},
+    which is a valid \ty.
+  \item The variable occurs only once in an invariant position, but the occurrence
+    is separated from the binding by covariant constructors, for example,
+    \cjl{Tuple\{Vector\{T\}\} where T} or
+    \cjl{Union\{Vector\{T\}, Missing\} where T}: these types are equivalent
+    to the types \cjl{Tuple\{Vector\{T\} where T\}} and
+    \cjl{Union\{Vector\{T\} where T, Missing\}}, respectively,
+    which are valid restricted types \ty.
+\end{itemize}
+In Julia, the first kind of benign unsupported types is already automatically 
+rewritten into the equivalent existential-free form: for example,
+\cjl{Vector\{Tuple\{T\} where T<:Number\}} is evaluated
+to \cjl{Vector\{Tuple\{Number\}\}} in the REPL.
+% \begin{center}
+% \begin{minipage}{8cm}
+% \begin{lstlisting}
+% julia> Vector{Tuple{T} where T<:Number}
+% Vector{Tuple{Number}}
+% \end{lstlisting}
+% \end{minipage}
+% \end{center}
+
+\subsection{Results}
+The majority of the source code was processed without failures.
+206 packages had at least one file that could not be parsed by Julia.
+%\figref{fig:evaluation-parse-errors} gives an example of a parsing error
+%encountered.
+In successfully parsed files, we identified 2,316,609 type annotations.
+Out of these annotations:
+\begin{itemize}
+  \item 1,573 could not be processed at all, usually because a type variable
+    binding contained a macro or quoted expression;
+    several examples of that are given
+    in \figref{fig:evaluation-process-errors};
+    % which our analysis couldn't be parsed % BC can we put numbers on this?
+  \item 22,396 were partially processed: this happens when all type variable
+    bindings can be analyzed, but a part of the type cannot be processed due to
+    a macro or quoted expression; in this case, the analysis can miss 
+    some occurrences of type variables.
+  %For example, partial processing occurs when an unquote is used to
+  %splice an AST into a generated type, in which
+  %case we do not attempt binding analysis into that unquoted expression.
+\end{itemize}
+In total, 1629 packages had at least one %macro-related type 
+parsing or processing error.
+
+% Furthemore,
+% some type annotations could not be properly processed, e.g. because of macros
+% \begin{verbatim}
+% Error: Couldn't process type annotation
+%   tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
+%   err = AssertionError: Unsupported lb-var-ub format
+
+% Error: Couldn't process type annotation
+%   tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
+%   err = AssertionError: Unsupported lb-var-ub format
+% \end{verbatim}
+
+% Overall, we identified 2,316,609 type annotations. Out of these annotations:
+% \begin{itemize}
+%     \item 1,573 couldn't be processed at all, usually because a type variable binding couldn't be parsed % BC can we put numbers on this?
+%     \item 22,396 were partially processed. For example, partial processing occurs when an unquote is used to splice an AST into a generated type, in which
+%     case we do not attempt binding analysis into that unquoted expression.
+% \end{itemize}
+% Types that syntactically do not fit the restriction but are trivially
+% equivalent (involve tuples) were considered good by the analysis.
+% Of the examined annotations 2,135,030 (99.999\% of the fully-or-partially
+% analyzable 2,135,036 annotations) were mechanically verifiable as satisfying
+% our proposed restriction. 6 annotations were automatically identified as potentially
+% being impacted by our restriction.
+
+Of the 2,135,036 fully-or-partially analyzable type annotations,
+2,135,030 (i.e. 99.999\%) were identified as satisfying the proposed restriction,
+and 6 annotations were flagged as potentially being impacted---they are listed
+in \figref{fig:evaluation-unsup-ty-anns}.
+
+Three of these six annotations %identified as contravening our restriction were
+were, semantically, false positives related to \cjl{Vararg}. 
+In Julia, variadic arguments are represented as
+\cjl{Vararg}-in-\cjl{Tuple} types: for example, \cjl{Tuple\{Vararg\{Int\}\}}
+stands for a tuple of arbitrarily many integers. 
+According to Julia subtyping, \cjl{Vararg} is covariant in its argument,
+whereas our analysis reported it as if it were invariant. 
+
+Furthermore, one of the remaining three type annotations can be rewritten
+into a semantically equivalent
+type that does satisfy our restriction. The flagged type in 
+question\footnote{In the example,
+type \cjl{AbstractArray} is denoted by \cjl{AbsArray} for brevity.}, 
+\[\text{\cjl{Dict\{K,Union\{AbsArray\{<:Number\}, AbsArray\{Union\{Missing, T\}\} where T <:
+Number, DataFrame\}\}}},\]
+describes dictionaries of arbitrary key type whose
+elements are either arrays of numbers, arrays of elements that are either of
+homogeneous numeric type or missing, or a generic data frame. This type can be
+rewritten as a satisfying our restriction type
+\[\text{\cjl{Dict\{K,
+Union\{AbsArray\{<:Number\}, AbsArray\{Missing << Union\{Missing, Number\}\}, DataFrame\}\}}},\] 
+but the equivalence of the two types is not currently derivable in Julia.
+
+%% TODO
+%% Ross Tate
+%% I'd recommend making a table of the packages and some associated metrics;
+%it'll give an impression of thoroughness, and some reviewers might like to know
+%about some specific packages (you can put it in an appendix if you don't have
+%space). I believe I also found an important error to fix: "the type in
+%question" you mention appear to only be *semantically* equivalent to the
+%replacement you suggest for it—in particular, for the type system to determine
+%the two types are equivalent, it seems to need to be able to express and reason
+%about the type X&~Missing (where ~ is "not"). I think this is fine, and I
+%expect reviewers would find the observation interesting. It would also be
+%interesting to know if replacing it with your suggested weakening works in the
+%code at hand (and same goes for the other examples—it sounds like it works for
+%the second, but the phrasing is unclear). (By the way, in one of your examples
+%you have Array{T,N}, with no discussion of what the second parameter is for.
+%You might want to talk briefly about how you handle these index parameters.) 
+
+Thus, only two remaining types truly cannot be expressed under
+the proposed restriction. In both cases, a type variable bound by an existential
+type inside invariant constructor occurs more than once in the type:
+\begin{itemize}
+  \item \cjl{Array\{Tuple\{T, Array\{T, N\} where N, Bool\} where
+  T\}\}}, which requires that the array
+  contains tuples where the type of the first element invariantly matches the second element's element typing.
+  Under our restriction, this type could be replaced with the more permissive 
+  type\\ \cjl{Array\{Tuple\{<:Any, Array\{<:Any, <:Any\}, Bool\}\}} and
+  would require runtime checks to enforce the original equality.
+  \item
+  \cjl{Tuple\{Type\{Union\{Quantity\{T,D,U\},Level\{L,S,Quantity\{T,D,U\}\}
+  where\{L,S\}\} where\{T,U\}\}\} where D}\\
+  which is used by the \code{UnitfulEquivalences.jl} package to define a method that extracts the dimension \cjl{D} of the
+  quantity (or log-quantity, in the \cjl{Level}-of-\cjl{Quantity} case) that has units attached. Contextually,
+  this can be %equivalently 
+  rewritten as the restriction-abiding
+  \cjl{Tuple\{Type\{Union\{Quantity\{<:Any, D, <:Any\}, Level\{<:Any, <:Any, Quantity\{<:Any, D, <:Any\}\}\}\}\} where D}
+  without %any semantic differences
+  impacting the semantics of the method.
 \end{itemize}
 
-2135030 satisfy the restriction, 6 were reported as not satisfying.
 
-2135030 + 6 + 1573 (errors) = 2136609, checks out.
+% \paragraph{Packages.}
+% Used \url{https://github.com/julbinb/JuliaPkgsList.jl} to get a list of
+% Julia packages.
+% The info is taken from a JSON file at
+% \url{https://juliahub.com/app/packages/info}.
+% (JuliaHub is listed as a service for searching all registered packages
+% here: \url{https://julialang.org/packages/}).
 
-Types that syntactically do not fit the restriction but are trivially
-equivalent (involve tuples) were considered good by the analysis.
+% There were 9355 entries listed as of 2022-05-28.
+% The tool extracts package name and latest version.
+% Some entries in the JSON file were not proper registered packages,
+% e.g. it contained the Julia repo itself, which is not a registered package.
+% Some repositories are no longer open and cannot be accessed.
+% Some repos did not have a version (31).
+
+% 9315 packages were successfully downloaded using
+% \url{https://github.com/julbinb/JuliaPkgDownloader.jl/}.
+
+% \paragraph{Analysis.}
+% Static analysis of type annotations in the downloaded packages.
+% Here is cloc info:
+
+% \begin{verbatim}
+% -------------------------------------------------------------------
+% Language         files          blank        comment           code
+% -------------------------------------------------------------------
+% Julia            172024        3830817        1937753       19476938
+% \end{verbatim}
+
+% All Julia files (i.e. files with .jl extension) were parsed using
+% the Julia parser.
+
+% 206 packages had files that could not be parsed.
+
+% After parsing, type annotations were extracted using MacroTools.jl:
+% \begin{itemize}
+%     \item method signatures, e.g. \cjl{f(x::T, v::Vector\{T\}) where T}
+%       is transformed into \cjl{Tuple\{T, Vector\{T\}\} where T}
+%     \item if there is a return type anotation, it is counted as a separate type
+%     \item with the exception of method type signatures, all \cjl{t} from
+%         \cjl{::t}, which includes field type annotations, run-time type assertions,
+%         and local variable type annotations
+% \end{itemize}
+
+% Some type annotations could not be properly processed, e.g. because of macros
+% \begin{verbatim}
+% Error: Couldn't process type annotation
+%   tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
+%   err = AssertionError: Unsupported lb-var-ub format
+
+% Error: Couldn't process type annotation
+%   tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
+%   err = AssertionError: Unsupported lb-var-ub format
+% \end{verbatim}
+% Total of 1629 packages had at least one error like that.
+
+% Total 2136609 type annotations were found. Out of those:
+% \begin{itemize}
+%     \item 1573 couldn't be processed at all (e.g. as described above): usually
+%         because a type variable binding couldn't be parsed
+%     \item 22396 were partially processed, e.g. if one element of a tuple was
+%         a \$-thingy, it was ignored when type variable occurrence was analyzed
+% \end{itemize}
+
+% 2135030 satisfy the restriction, 6 were reported as not satisfying.
+
+% 2135030 + 6 + 1573 (errors) = 2136609, checks out.
+
+% Types that syntactically do not fit the restriction but are trivially
+% equivalent (involve tuples) were considered good by the analysis.

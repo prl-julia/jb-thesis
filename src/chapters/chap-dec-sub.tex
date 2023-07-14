@@ -1,23 +1,31 @@
 \chapter{Decidable Subtyping of Existential Types}%
 \label{chap:dec-sub}
 
-This chapter presents a decidable subtype relation for the core language
+This chapter presents a decidable subtype relation for a core language
 of Julia types that includes covariant tuples, invariant type constructors,
 unions, existential types, and distributivity.
-As discussed in \secref{sec:julia-sub:undec}, it is the interaction of
+As discussed in \chapref{sec:julia-sub:undec}, it is the interaction of
 impredicative existential types, invariant constructors, and unions that makes
 Julia subtyping so challenging to decide, which is why I focus
-on this sublanguage first.
+on this sublanguage first, in \chapref{sec:dec-sub:defs}.
+In \chapref{sec:dec-sub:ext}, I extend the core language with nominal subtyping
+and the diagonal rule.
 
-The decidability of subtyping for the core language is achieved by
+The decidability of subtyping, %for the core language 
+discussed in detail in \chapref{sec:dec-sub:proofs}, is achieved by
 restricting existential types allowed to appear inside invariant 
 constructors. In particular, the restriction limits such inner existentials 
-to the ones expressible with Java wildcards.
-This reduces the space of types representing heterogeneous data,
-but top-level existential types, which are used to represent parametric method
-definitions, remain intact.
-
-\TODO{Evaluation and extensions for diagonals and nominals later}
+to the ones expressible with Java wildcards~\cite{bib:torgersen:wildcards:2004}.
+As a result, \emph{variable-introducing} existential types inside invariant
+constructors can be \emph{eliminated} in accordance with 
+the strategy \ref{item:remove-uni-vars}
+on page~\pageref{item:remove-uni-vars} (\chapref{sec:julia-sub:undec}).
+The proposed restriction reduces the space of types representing heterogeneous
+data, but retains top-level existential types, which are used to represent
+parametric method definitions.
+As I show in \chapref{chap:eval}, very few type annotations in a corpus of
+registered Julia packages use full-fledged existential types that are not
+representable under the restriction.
 
 % In this chapter, I present a decidable subtype relation for the following 
 % sublanguage of Julia types:
@@ -30,13 +38,13 @@ definitions, remain intact.
 %     \item restricted bounded existential types for invariant constructors.
 % \end{itemize}
 
-As outlined in~\secref{sec:julia-sub:undec}
-(strategy \ref{item:remove-uni-vars} on page~\pageref{item:remove-uni-vars}),
-the key to obtaining a decidable subtype relation for Julia is to
-\emph{eliminate variable-introducing existential types inside invariant
-constructors}. Notably, such existentials do not need to be eliminated
-entirely. Instead, they can be \textbf{restricted} to the type grammar
-of \emph{Java wildcards}~\cite{bib:torgersen:wildcards:2004}.
+% As outlined in~\chapref{sec:julia-sub:undec}
+% (strategy \ref{item:remove-uni-vars} on page~\pageref{item:remove-uni-vars}),
+% the key to obtaining a decidable subtype relation for Julia is to
+% \emph{eliminate variable-introducing existential types inside invariant
+% constructors}. Notably, such existentials do not need to be eliminated
+% entirely. Instead, they can be \emph{restricted} to the type grammar
+% of {Java wildcards}~\cite{bib:torgersen:wildcards:2004}.
 
 In Java, the wildcards mechanism provides \emph{use-site
 variance}~\cite{bib:thorup:unif-genericity:1999}, a restricted form
@@ -53,7 +61,7 @@ which corresponds to the following Julia type:
 \[ \text{\cjl{Vector\{Vector\{T\} where T\}}}. \]
 
 Note that with wildcards, every occurrence of \code{``?''} introduces a 
-fresh existential variable that \emph{cannot be referred to by name},
+fresh existential variable that \emph{cannot be referenced by name},
 and as such, has the following properties:
 \begin{enumerate}
     \item occurs in the type exactly once---as an argument of a type
@@ -62,9 +70,9 @@ and as such, has the following properties:
     \item cannot have recursive constraints.
 \end{enumerate}
 For example, the type \code{List<Pair<?, ?>{>}} represents a heterogeneous
-list of pairs \code{List<$\exists$X.$\exists$Y.Pair<X,Y>{>}},
-but there is no way of restricting both elements of the pair to the same type
-like with full-fledged existential types: 
+list of pairs \code{List<$\exists$X.$\exists$Y.Pair<X,Y>{>}}.
+However, there is no way of restricting both elements of the pair 
+to the same type, which is possible with full-fledged existential types: 
 \code{List<$\exists$X.Pair<X,X>{>}}.
 
 Due to this ``namelessness'' property,
@@ -95,14 +103,20 @@ For instance, types \cjl{Vector}, \cjl{Vector\{<:Number\}}, and \cjl{Vector\{>:I
 represent \cjl{Vector\{T\} where T}, \cjl{Vector\{T\} where T<:Number},
 and \cjl{Vector\{T\} where T>:Int}, respectively.
 
-The next section provides a complete definition of decidable subtyping
-for the core language of Julia types, with the above described restriction
-on existential types inside invariant constructors.
-In the remaining sections of this chapter, I prove several properties
-of subtyping, in particular,
-decidability of subtyping (\thmref{thm:subtysig-terminates})
-and
-soundness of constraints resolution (\thmref{thm:solvectr-sound}).
+This chapter is organized as follows:
+\begin{itemize}
+    \item \secref{sec:dec-sub:defs} provides a complete definition
+        of decidable subtyping for the core language of Julia types, 
+        with the above described restriction
+        on existential types inside invariant constructors.
+    \item \secref{sec:dec-sub:proofs} examines several properties
+        of subtyping, in particular, decidability of subtyping
+        (\thmref{thm:subtysig-terminates}) and
+        soundness of constraints resolution (\thmref{thm:solvectr-sound}).
+    \item \secref{sec:dec-sub:ext} extends the core language with 
+        nominal subtyping and the diagonal rule.
+\end{itemize}
+
 
 \section{Definition of Subtyping}%
 \label{sec:dec-sub:defs}
@@ -166,7 +180,7 @@ $\times$, $\cup$, and $\exists$ used instead of
 \cjl{Any}, \cjl{Union\{\}}, \cjl{Tuple}, \cjl{Union}, and \cjl{where},
 respectively. \iname (a shorthand for \tyinv\iname{}) and 
 \tyinv\iname{\ldots} represent
-non-parametric and invariant parametric datatypes, where datatype
+non-parametric and invariant parametric types, where datatype
 declarations are implicit and do not impose restrictions on type parameters.
 
 The type language distinguishes between more expressive
@@ -184,13 +198,13 @@ and less expressive \textbf{types} \ty:
 Semantically, an existential $\tyexist{\vany}{\tylb}{\tyub}{\tysig}$ 
 represents a union of $\subst{\tysig}{\substel{\vany}{\ty}}$ for all valid
 \emph{type} instantiations $\tylb <: \ty <: \tyub$ of the type variable \vany.
-In the spirit of Java wildcards, a \textbf{restricted existential type} 
+In the spirit of Java wildcards, a \emph{restricted existential type} 
 \tyinv\iname{\rexvarbound{\tylb_1}{\tyub_1},\ldots} %\footnote{%
 %in \figref{fig:ty-grammar}, it is written
 %as \tyinv\iname\rexvars, with \rexvar being \rexvarbound\tylb\tyub.}
 represents
-\tyexist{\vx}{\tylb_1}{\tyub_1}{\exists\ldots\tyinv\iname{\vx_1,\ldots}}.
-\tyinv\iname{\ty_1,\ldots} is a shorthand for the tightly-bound existential
+\tyexist{\vx}{\tylb_1}{\tyub_1}{\exists\ldots\tyinv\iname{\vx_1,\ldots}},
+and \tyinv\iname{\ty_1,\ldots} is a shorthand for the tightly-bound existential
 \tyinv\iname{\rexvarbound{\ty_1}{\ty_1},\ldots}.
 Note that the same semantic type can have multiple syntactic representations.
 For example, the following pairs of types are equivalent:
@@ -220,7 +234,7 @@ To visually aid the perception of inference rules that define subtyping,
 I use two styles of type variables: $\vx, \vy, \ldots$ (referred to as
 universal variables) and $\va, \vb, \ldots$ (referred to as unification
 variables), with \vany used when the distinction is irrelevant.
-\textbf{Unification} variables, discussed extensively
+{Unification} variables, discussed extensively
 in \secref{sec:julia-sub:undec}, are variables introduced by existential
 types on the right-hand side of a subtyping judgment.
 Universal variables are variables introduced on the left.
@@ -270,7 +284,7 @@ and go through union types. The following derivation provides an example:
     { 
         \inferrule*[right=\footnotesize\RSS{ExistRight}]
         { 
-            \inferrule[\footnotesize\RSS{Types}]
+            \inferrule*[right=\footnotesize\RSS{Types}]
             { \text{<discussed below>} }
             { \subtysig{\vx{\symsub}\tyint}{\va}  
                 {\typair{\tystr}{\tyinv\nref\vx}}
@@ -307,7 +321,7 @@ such that $\substvars(\ty) \symsub \substvars(\ty')$.
 This is done in two steps (\RSS{Types}):
 \begin{enumerate}
     \item constrained subtyping \subtyctrR{\AEnv}{\dom{\UEnv}}{\ty}{\ty'}{\CSet}
-      generates constraints \CSet;
+      generates a constraint set \CSet;
     \item \solvectrdflt resolves the constraints.
 \end{enumerate}
 
@@ -315,7 +329,7 @@ When constrained subtyping (\figref{fig:subtyping-constrained}) takes over,
 \[ \subtyctrRdflt{\ty}{\ty'}\ \text{ where }\ \UEnvD = \dom{\UEnv}, \]
 the algorithm checks subtyping, possibly generating constraints 
 \ctrsub{\tylb}{\va} and \ctrsub{\va}{\tyub} on
-unification variables \va from \UEnvD, which may appear in $\ty'$.
+unification variables \va from \UEnvD that may appear in $\ty'$.
 This step ignores the declared unification variable bounds,
 as emphasized by the environment \UEnvD as opposed to \UEnv.
 Initially, all unification variables are located on the right,
@@ -326,7 +340,7 @@ being located on the left.
 Thus, constrained subtyping maintains the invariant that unification
 variables always appear on at most one side of the subtyping judgment.
 Because of this, generated constraints \tylb, \tyub are guaranteed to be 
-\textbf{free from unification variables}.
+\emph{free from unification variables}.
 Thus, the running example above continues as follows,
 generating the constraint set {\ctrset{\ctrsub{\vx}{\va}, \ctrsub{\va}{\vx}}}.
 \makebox[\textwidth][c]{
@@ -377,10 +391,10 @@ with the smallest type---a union of all (declared and generated) lower bounds.
 The consistency of constraints is checked with:
 \begin{itemize}
     \item constrained subtyping \subtyctrLdflt{\tylb}{\ty} or
-        \subtyctrRdflt{\ty}{\tyub}, to check that generated constraints \ty
-        are consistent with declared bounds \tylb and \tyub;
+        \subtyctrRdflt{\ty}{\tyub}, to check that generated unification-free
+        constraints \ty are consistent with declared bounds \tylb and \tyub;
         constrained subtyping is necessary because unification variable
-        bounds may refer to other unification variables;
+        bounds may reference other unification variables;
     \item unification-free subtyping of types \subtydflt{\tylb}{\tyub}
         (\figref{fig:subtyping-base}),
         to check that generated constraints are consistent with each other.
@@ -457,13 +471,17 @@ left/forall variables in \figref{fig:jlsubex}, \secref{sec:julia-sub:lambda-juli
 
 Next, I present the exact definitions of:
 \begin{itemize}
-    \item unification-free subtyping of types \subtydflt{\ty}{\ty'};
-    \item constrained subtyping of types \subtyctrdflt{\ty}{\ty'};
-    \item constraints resolution \solvectrdflt;
-    \item signature subtyping \subtysigdflt{\tysig}{\tysig'}.
+    \item unification-free subtyping of types \subtydflt{\ty}{\ty'}
+        (\secref{subsec:dec-sub:subty});
+    \item constrained subtyping of types \subtyctrdflt{\ty}{\ty'}
+        (\secref{subsec:dec-sub:subtyctr});
+    \item constraints resolution \solvectrdflt 
+        (\secref{subsec:dec-sub:subtysig});
+    \item signature subtyping \subtysigdflt{\tysig}{\tysig'}
+        (\secref{subsec:dec-sub:subtysig}).
 \end{itemize}
 
-For simplicity of the presentation, I assume the following variable names 
+For simplicity of presentation, I assume the following variable names 
 convention based on Barendregt's convention:
 
 \begin{definition}[Variable names convention]\label{def:var-names}
@@ -507,7 +525,8 @@ convention based on Barendregt's convention:
 %% Subtyping
 %% *********************************************************
 
-\subsection{Unification-Free Subtyping of Types}
+\subsection{Unification-Free Subtyping of Types}%
+\label{subsec:dec-sub:subty}
 %% *********************************************************
 
 \begin{figure}
@@ -605,7 +624,7 @@ convention based on Barendregt's convention:
 Unification-free subtyping of types is given in \figref{fig:subtyping-base}.
 
 Following the semantic subtyping approach,
-union types distribute over covariant tuples (\RST{UnionLeft}), 
+covariant tuples distribute over union types (\RST{UnionLeft}), 
 and tuples containing the bottom type are subtypes of all types (\RST{Bot}).
 Both of these rules are expressed with the distributivity context \dctx
 defined in \figref{fig:subty-aux}, which allows unions and \tybot to be
@@ -649,7 +668,8 @@ does not.
 Subtyping of distributivity contexts \subtydflt{\dctx}{\dctx'} is 
 useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
 
-\subsection{Constrained Subtyping of Types}
+\subsection{Constrained Subtyping of Types}%
+\label{subsec:dec-sub:subtyctr}
 %% *********************************************************
 
 \begin{figure}
@@ -826,7 +846,7 @@ a single rule
 \]
 
 Most of the rules of constrained subtyping match the rules of unification-free
-subtyping, with the only difference being the propagation of constraints
+subtyping, with the only difference being propagation of constraints
 from recursive calls. For instance, compare subtyping of tuples:
 \begin{mathpar}
 \small
@@ -921,6 +941,10 @@ clearly holds if \va is instantiated with
 Thus, when \va occurs on the left covariantly, in a position where 
 unification-free subtyping could appeal to \RST{UnionLeft},
 the rule \RSC{UVar-UnionRight} allows for a more permissive, union upper bound.
+Intuitively, when the right-hand side is a union, the rule proceeds as 
+if the unification variable \va stands for the union \tyunion{\va_1}{\va_2}
+such that, distributively, \plug\dctx{\va_1} and \plug\dctx{\va_2}
+are subtypes of $\ty'_1$ and $\ty'_2,$ respectively.
 Consider the application of \RSC{UVar-UnionRight} to the right-to-left check
 in the example:\\
 \makebox[\textwidth][c]{
@@ -1030,7 +1054,7 @@ Next, let us focus on the left premise and apply the same rule to \va:\\
 There are two constraints on $\va_1$, both of which have to be satisfied.
 Thus, \RSC{UVar-UnionRight} merges them into one type using the intersection
 function \tymeet{\EmptyEnv}{\ty_a}{\ty'_a}, defined in \figref{fig:ty-join-meet}.
-The intersection returns a type that is a subtype of both $\ty_a$ and $\ty'_a$:
+Intersection produces a type that is a subtype of both $\ty_a$ and $\ty'_a$:
 in this case, the smaller type $\ty_a$.
 Thus, the original subtyping judgment succeeds:
 \[
@@ -1100,7 +1124,8 @@ are absent because they are covered by the cases \subtydflt{\ty}{\ty'} and
 \end{tablenotes}
 \end{figure}
 
-\subsection{Signature Subtyping}
+\subsection{Signature Subtyping}%
+\label{subsec:dec-sub:subtysig}
 %% *********************************************************
 
 \begin{figure}
@@ -1174,8 +1199,7 @@ Similarly to subtyping of types, the rules \RSS{Bot}, \RSS{VarLeft},
 \RSS{UnionLeft}, and \RSS{InvLeft} use the distributivity context---in
 the case of type signatures, \dctxsig.
 The rule \RSS{InvLeft} is needed to account for the distributivity of restricted
-existential types, in the same way as explicit existentials distribute
-over tuples. For example:\\
+existential types, similarly to explicit existentials. For example:\\
 \makebox[\textwidth][c]{
 \begin{minipage}{\ruleswidth}
 \begin{mathpar}
@@ -1184,7 +1208,7 @@ over tuples. For example:\\
 { 
     \inferrule*[right=\footnotesize\RSS{InvLeft}]
     { 
-        \inferrule[\footnotesize\RSS{Types}]
+        \inferrule*[right=\footnotesize\RSS{Types}]
         { \subtyctrR{\varbound{\va}{\tybot}{\tyany}}{\va}
             {\typair{\tyinv\nref\vx}{\tyint}}
             {\typair{\tyinv\nref\va}{\tyany}}
@@ -1225,9 +1249,39 @@ Because variable bounds can refer to earlier-introduced variables,
 generated constraints are checked for consistency with declared constraints
 using constrained subtyping. The resulting constraints are then checked
 recursively for the smaller environment \UEnv.
-% Substitution is defined in the usual manner.
 
-The rule \RSS{UnionLeft} may seem surprising because the two premises
+% Substitution is defined in the usual manner.
+Note that the constraints resolution algorithm does not need to compute
+\substvars to check the consistency of constraints: the substitution 
+is computed so that multiple dispatch can instantiate type variables
+in parametric method definitions. However, despite \solvectrdflt
+computing the smallest valid substitution, there can be multiple valid
+derivations of constrained subtyping that produce different
+%, possibly incomparable, 
+sets of constraints.
+For example,
+\[
+    \subtyctrR{\EmptyEnv}{\va}
+        {\tyunion{\tyinv\nref\tyint}{\tyinv\nref\tystr}}
+        {\tyunion{\tyany}{\tyinv\nref\va}}{\ldots}
+\]
+can be satisfied with $\substel\va\tybot$, $\substel\va\tyint$,
+$\substel\va\tystr$, or any other instantiation of \va for that matter.
+Therefore, the dispatch mechanism would need to decide which derivation to pick.
+And while in this example, $\substel\va\tybot$ is the smallest valid
+instantiation of \va, the smallest one does not always exist.
+For example,
+\[
+    \subtyctrR{\EmptyEnv}{\va,\vb}
+        {\tyunion{\tyinv\nref\tyint}{\tyinv\nref\tystr}}
+        {\tyunion{\tyinv\nref\va}{\tyinv\nref\vb}}{\ldots}
+\]
+can be satisfied with either
+\subst{}{\substel{\va}{\tyint}, \substel{\vb}{\tystr\!}\!} or
+\subst{}{\substel{\va}{\tystr}, \substel{\vb}{\tyint\!}\!}.
+
+Examining signature subtyping,
+the rule \RSS{UnionLeft} may seem surprising because the two premises
 \subtysigdflt{\plug\dctxsig{\tysig_1}}{\tysig'} and
 \subtysigdflt{\plug\dctxsig{\tysig_2}}{\tysig'} are not required
 to have consistent instantiations of \UEnv.
@@ -1316,7 +1370,9 @@ true
 \caption{Constraints resolution algorithm \solvectrdflt}\label{fig:ctr-solve}      
 \end{figure}
 
-\subsection{Validity of Types and Type Signatures}
+
+\subsection{Validity of Types and Type Signatures}%
+\label{subsec:dec-sub:valid}
 %% *********************************************************
 
 \begin{figure}
@@ -1451,7 +1507,8 @@ true
 % { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
 % { \tyvlddflt{\typair{\tysig_1}{\tysig_2}} }
 
-The subtyping algorithm should be called with valid types and type signatures,
+To provide transitivity and prevent the subtyping algorithm from
+getting stuck, it should be called with valid types and type signatures,
 as defined in \figref{fig:ty-tysig-validity}.
 In particular:
 \begin{itemize}
@@ -1461,7 +1518,8 @@ In particular:
     \item \subtyctrLdflt{\ty}{\ty'} requires that \tyunfvlddflt{\ty}
         and \tyvlddflt{\ty'};
     \item \subtysigdflt{\tysig}{\tysig'} requires that \tyvlddflt{\tysig}
-        and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}.
+        and \tyvld{\concat{\AEnv}{\UEnv}}{\tysig'}, where \concat{\AEnv}{\UEnv}
+        concatenates two environments.
 \end{itemize}
 The validity check ensures that free variables are bound in 
 corresponding environments,

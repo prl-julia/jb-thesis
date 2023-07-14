@@ -1,12 +1,12 @@
-\section{Extended Subtyping}
+\section{Extended Subtyping}\label{sec:dec-sub:ext}
 %% ======================================================================
 
 In this section, I discuss two Julia features that were
 omitted from the core language in~\figref{fig:ty-grammar}:
-inheritance (\secref{subsec:dec-sub:inheritance}) and
+nominal subtyping (\secref{subsec:dec-sub:inheritance}) and
 the diagonal rule (\secref{subsec:dec-sub:diagonal}).
 
-\subsection{Inheritance}\label{subsec:dec-sub:inheritance}
+\subsection{Nominal subtyping}\label{subsec:dec-sub:inheritance}
 %% *********************************************************
 
 \begin{figure}[t] 
@@ -58,7 +58,7 @@ interfere with the decidability of subtyping, unlike, for example,
 in Java~\cite{bib:tate:taming-wildcards:2011}.
 In particular, the lack of variance annotations, recursive inheritance,
 and recursive constraints prevents properties such as expansive
-inheritance~\cite{bib:kennedy:nom-sub-var-dec:2007}, which are know to cause
+inheritance~\cite{bib:kennedy:nom-sub-var-dec:2007}, which are known to cause
 undecidability.
 Thus, in Julia, subtyping of nominal types is straightforward: the subtyping
 algorithm simply walks the finite inheritance hierarchy, substituting
@@ -69,7 +69,9 @@ this step is encoded with one extra rule \RLJ{App\_Super},
 which is given in~\figref{fig:jlsubex-inheritance}.
 In the context of the decidability proof from \secref{subsec:dec-proof},
 the measure of nominal types needs to be modified to include the 
-measure of the declared supertype.
+measure of the declared supertype, akin to
+how~\citet{bib:greenman:f-bound-material-shape:2014}
+proved decidability of subtyping for Java with Material-Shape Separation.
 
 Without changes, the framework of restricted existential types presented
 in \secref{sec:dec-sub:defs} is suitable for \emph{partial} handling of
@@ -99,7 +101,7 @@ where \tyinv\nvec\vx is a declared subtype of \tyinv\nabsvec\vx:\\
 \\
 \end{mathpar}
 \end{minipage}}
-Similar to \RLJ{App\_Inv}, subtyping is checked by substituting
+Similarly to \RLJ{App\_Inv}, subtyping is checked by substituting
 \vx with \rexvarbound{\tybot}{\tyint} in the supertype declaration
 \tyinv\nabsvec\vx.
 However, type parameters do not have to be immediate arguments of the 
@@ -596,23 +598,27 @@ Julia provides special support for a generic programming pattern
 where method arguments are expected to be of the same concrete type.
 For example, in the existential type \cjl{Tuple\{T,T\} where T},
 type variable \cjl{T} can be instantiated only with concrete types.
-This is called the \textbf{diagonal rule}. The rule applies only to
-top-level existential types.
+This is called the \textbf{diagonal rule}. 
+%The rule applies only to top-level existential types.
+% JB: this is no longer true!
 
 In this work, the diagonal rule is modeled explicitly, using a new kind of
-type variables---\textbf{concrete variable}. The kind annotation
-\[\varkind ::= \kindany \Alt \kindval\] means: 
-\begin{itemize}
-    \item kind \kindany denotes a regular variable that can be instantiated with any type;
-    \item kind \kindval denotes a \textbf{concrete} variable that can be instantiated 
-        only with a concrete type.
-\end{itemize}
+type variables---\textbf{concrete variable}. 
 In type signatures, existential types specify the kind of the bound variable
 explicitly:
 \[
     \tysig ::= \ldots \Alt
         \tyexist{\vany{:}\varkind}{\tylb}{\tyub}{\tysig}
 \]
+The kind annotation,
+\[\varkind ::= \kindany \Alt \kindval,\]
+allows for two options: 
+\begin{itemize}
+    \item kind \kindany denotes a regular variable that can be instantiated with any type;
+    \item kind \kindval denotes a {concrete} variable that can be instantiated 
+        only with a concrete type.
+\end{itemize}
+
 All earlier-presented definitions and reasoning apply
 to \kindany-kinded vars without modifications.
 
@@ -629,13 +635,17 @@ Thus, the validity is extended as follows:
 
 \figref{fig:concrete} defines concreteness \tyvaldflt{\ty}:
 type \ty is concrete if it is
+a concrete variable,
 a concrete invariant constructor with tight arguments,
 a tuple of concrete types,
-or a union of equivalent concrete types.
+a union of equivalent concrete types,
+or a union of a concrete and a bottom type.
 The concreteness judgment is used by the subtyping algorithm.
 
 \begin{figure}[t]
 \footnotesize
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}
 \begin{mathpar}
     \fbox{\tyvaldflt{\ty}}
     \\
@@ -658,7 +668,14 @@ The concreteness judgment is used by the subtyping algorithm.
         \subtydflt{\ty_1}{\ty_2} \and \subtydflt{\ty_2}{\ty_1}
     }
     { \tyvaldflt{\tyunion{\ty_1}{\ty_2}} }
+
+    \inferrule*[]
+    { 
+        i \neq j \and \tyvaldflt{\ty_i} \and \subtydflt{\ty_j}{\tybot}
+    }
+    { \tyvaldflt{\tyunion{\ty_1}{\ty_2}} }
 \end{mathpar}
+\end{minipage}}
 \caption{Type concreteness}\label{fig:concrete}
 \end{figure}
 
@@ -680,7 +697,8 @@ needs to be concrete\footnote{
     within the declared bounds would satisfy the constraints, so it can 
     be picked arbitrarily; in this case,
     the only necessary condition is that
-    $\lnot (\subtydflt{\substvars(\tyub)}{\tybot})$.
+    $\lnot (\subtydflt{\substvars(\tyub)}{\tybot})$,
+    as otherwise, no concrete instantiations would be valid.
 } in order for constraints resolution to succeed.
 
 \begin{figure}[t]

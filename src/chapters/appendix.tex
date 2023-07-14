@@ -1,0 +1,264 @@
+\chapter{Appendix}
+
+\section{Properties Subtyping}\label{sec:app:proofs}
+%% ======================================================================
+
+\subsection{Decidable Subtyping}\label{subsec:app:proofs:dec}
+%% *********************************************************
+
+\begin{lemma}{Context weakening in $\msrop$ (\textbf{\lemref{lem:msr-weakening}}).}%
+\label{lem:msr-weakening:app}
+    The measure of a type signature does not change if the environment
+    is extended (in any position) with a variable that occurs neither
+    in the signature nor in the environment, i.e.,
+    $\forall \tysig, \AEnv, \AEnv'. 
+    \forall \varbound{\vany}{\tylb}{\tyub} \text{ s.t. } 
+    \lnot \occdflt{\tysig} \land 
+    \lnot \occdflt{\AEnv} \land \lnot \occdflt{\AEnv'}.$
+    \[\tymsr{\concat{\AEnv}{\AEnv'}}{\tysig} = 
+        \tymsr{\concat{\AEnv,\varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tysig},\]
+    where \concat{\AEnv}{\AEnv''} denotes the concatenation of lists,
+    and $\occop$ is defined in~\figref{fig:var-occ}.
+\end{lemma}
+\begin{proof}
+    By strong induction on $n = \size{\AEnv} + \size{\AEnv'} + \size{\tysig}$.
+
+    Case $n = 0$ is not possible: the minimal size of a type signature is 1.
+
+    Base cases for \tyany and \tybot are straightforward; in the base case
+    for $\vany'$, environment $\concat{\AEnv}{\AEnv'}$ is empty and
+    $\vany \neq \vany'$, 
+    meaning that \[\tymsr{\EmptyEnv}{\vany'} = 1 = 
+    \tymsr{\varbound{\vany}{\tylb}{\tyub}}{\vany'}.\]
+    
+    In the inductive step for $n$, the induction hypothesis (IH) states that
+    $\forall n'<n. \forall \tysig', \AEnv'', \AEnv'''  \text{ s.t. }
+    n' = \size{\AEnv''} + \size{\AEnv'''} + \size{\tysig'}.
+    \forall \varbound{\vany}{\tylb}{\tyub} \text{ s.t. } 
+    \lnot \occdflt{\tysig'} \land 
+    \lnot \occdflt{\AEnv''} \land \lnot \occdflt{\AEnv'''}.$
+    \[\tymsr{\concat{\AEnv''}{\AEnv'''}}{\tysig'} = 
+    \tymsr{\concat{\AEnv'',\varbound{\vany}{\tylb}{\tyub}}{\AEnv'''}}{\tysig'}.\]
+    
+    Case analysis on \tysig. Base cases \tyany and \tybot are straightforward.
+    Cases $\times$, \tyinv\iname{\ldots}, and $\cup$ are also straightforward
+    using the induction hypothesis for components of \tysig.
+    The remaining cases are:
+    \begin{itemize}
+        \item Case $\vany'$. Case analysis on $\AEnv'$.
+            \begin{itemize}
+                \item Case \EmptyEnv. Because $\lnot \occdflt{\vany'},$ we know
+                    $\vany \neq \vany'$. Thus,
+                    $\tymsr{\AEnv, \varbound{\vany}{\tylb'}{\tyub'}}{\vany'} =
+                    \tymsr{\AEnv}{\vany'}$ by definition of $\msrop$.
+                \item Case $\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}$.
+                    By definition,
+                    \[\tymsr{\concat{\AEnv}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\vany'} =
+                    1 + \tymsr{\concat{\AEnv}{\AEnv'}}{\tylb'} + 
+                    \tymsr{\concat{\AEnv}{\AEnv'}}{\tyub'}.\]
+                    Since $\size{\AEnv} + \size{\AEnv'} + \size{\tylb'}\ <\ 
+                    \size{\AEnv} + \size{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}} + \size{\vany'} =
+                    \size{\AEnv} + \size{\AEnv'} + \size{\tylb'} + \size{\tyub'} + 1$,
+                    the IH applies with $\AEnv'' = \AEnv, \AEnv''' = \AEnv', 
+                    \tysig' = \tylb'$, which gives 
+                    $\tymsr{\concat{\AEnv}{\AEnv'}}{\tylb'} = 
+                    \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tylb'}$,
+                    and similarly for $\tyub'$. Thus,
+                    \[ \tymsr{\concat{\AEnv}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\vany'} =
+                    \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\vany'}. \]
+            \end{itemize}
+        \item Case \tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}.
+            By definition,
+            \[
+                \begin{array}{c}
+                    \tymsr{\concat{\AEnv}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}} \\
+                    = \\
+                    1 + \tymsr{\concat{\AEnv}{\AEnv'}}{\tylb'} + \msrop(\ldots\tyub') +
+                    \tymsr{\concat{\AEnv}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\tysig}.
+                \end{array}    
+            \]
+            Similarly to the last subcase of the $\vany'$ case, the IH applies
+            to $\tylb'$ and $\tyub'$.
+            Furthermore, since $\size{\AEnv} + \size{\AEnv'} + 
+            \size{\tylb'} + \size{\tyub'} + \size{\tysig} <
+            \size{\AEnv} + \size{\AEnv'} + 1 + \size{\tylb'} + \size{\tyub'}
+            + \size{\tysig},$
+            the IH applies to \tysig with $\AEnv'' = \AEnv, 
+            \AEnv''' = (\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}), 
+            \tysig' = \tysig$.
+            All pieces combined, 
+            \[\tymsr{\concat{\AEnv}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}} =
+            \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}}.\]
+            % and
+            % \[\tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tyexist{\vany'}{\tylb'}{\tyub'}{\tysig}} =
+            % 1 + \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tylb'} + 
+            % \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tyub'} +
+            % \tymsr{\concat{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\AEnv', \varbound{\vany'}{\tylb'}{\tyub'}}}{\tysig}.\]
+    \end{itemize}
+\end{proof}
+
+\subsection{Unification-Free Subtyping}\label{subsec:app:proofs:subty}
+%% *********************************************************
+
+\begin{lemma}{Subtyping of \tybot implies arbitrary subtyping
+    (\textbf{\lemref{lem:sub-of-bot}}).}\label{lem:sub-of-bot:app}
+    \[
+    \forall \ty, \dctx_{\tybot}, \AEnv.\quad 
+    \subtydflt{\ty}{\plug{\dctx_{\tybot}}\tybot}
+    \quad\implies\quad
+    (\forall \ty', \dctx'.\quad \subtydflt{\plug{\dctx'}{\ty}}{\ty'}).
+    \]
+\end{lemma}
+\begin{proof}
+    By induction on the derivation of 
+    \subtydflt{\ty}{\plug{\dctx_{\tybot}}\tybot}.
+    \begin{itemize}
+        \item Case \RST{Bot}
+            \subtydflt{\plug\dctx\tybot}{\plug{\dctx_{\tybot}}{\tybot}}
+            where $\ty = \plug\dctx\tybot$.
+
+            The case concludes by \RST{Bot}:
+            \subtydflt{\plug{\dctx'}{\plug\dctx\tybot}}{\ty'}. 
+        \item Case \RST{VarLeft}
+            \subtydflt{\plug\dctx\vany}{\plug{\dctx_{\tybot}}{\tybot}}.
+
+            By inversion, \subtydflt{\plug\dctx\tyub}{\plug{\dctx_{\tybot}}{\tybot}}.
+            By IH, \subtydflt{\plug{\dctx'}{\plug\dctx\tyub}}{\ty'}.
+            Thus, the case concludes by \RST{VarLeft}: 
+            \subtydflt{\plug{\dctx'}{\plug\dctx\vany}}{\ty'}.
+        \item Case \RST{Tuple}, subcase where
+            $\dctx_{\tybot} = \typair{\dctx'_{\tybot}}{\ty'_2}$
+            ($\dctx_{\tybot} = \square$ is not possible, and
+            $\dctx_{\tybot} = \typair{\ty_1}{\dctx'_{\tybot}}$
+            is proved analogously),
+            $\ty = \typair{\ty_1}{\ty_2}$:
+            \subtydflt{\typair{\ty_1}{\ty_2}}
+            {\typair{\plug{\dctx'_{\tybot}}{\tybot}}{\ty'_2}}.
+
+            By inversion, \subtydflt{\ty_1}{\plug{\dctx'_{\tybot}}{\tybot}}.
+            By IH, \subtydflt{\plug{\dctx'^h}{\ty_1}}{\ty'} for all $\dctx'^h$,
+            so we can take it to be \plug{\dctx'}{\typair{\square}{\ty_2}}.
+            Thus, the case concludes by IH: 
+            \subtydflt{\plug{\dctx'}{\typair{\ty_1}{\ty_2}}}{\ty'}.
+        \item Case \RST{UnionLeft}
+            \subtydflt{\plug\dctx{\tyunion{\ty_1}{\ty_2}}}{\plug{\dctx_{\tybot}}{\tybot}}
+            where $\ty = \tyunion{\ty_1}{\ty_2}$.
+            By inversion, 
+            \subtydflt{\plug\dctx{\ty_1}}{\plug{\dctx_{\tybot}}{\tybot}} and
+            \subtydflt{\plug\dctx{\ty_2}}{\plug{\dctx_{\tybot}}{\tybot}}.
+            By IH, \subtydflt{\plug{\dctx'}{\plug\dctx{\ty_1}}}{\ty'} and
+            \subtydflt{\plug{\dctx'}{\plug\dctx{\ty_2}}}{\ty'}.
+            Thus, the case concludes by \RST{UnionLeft}: 
+            \subtydflt{\plug{\dctx'}{\plug\dctx{\tyunion{\ty_1}{\ty_2}}}}{\ty'}.
+    \end{itemize}
+    The remaining cases 
+    (\RST{Top}, \RST{VarRefl}, \RST{VarRight}, \RST{Inv}, \RST{UnionRight}) 
+    are not possible.
+\end{proof}
+
+\begin{lemma}{Subtyping of inner union on the right
+    (\textbf{\lemref{lem:sub-inner-union-right}}).}%
+\label{lem:sub-inner-union-right:app}
+    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ s.t. }$\\
+    $\tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
+    \[
+        \begin{array}{ccc}
+        \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}\\
+        \quad\implies\quad\\
+        (\forall \dctx_1, \dctx_2, \text{ s.t. }
+        \tyvlddflt{\dctx_1, \dctx_2} \land
+        \subtydflt{\dctx_1}{\dctx_2}.\quad
+        \subtydflt
+            {\plug{\dctx_1}{\ty}}
+            {\tyunion
+                {\plug{\dctx_2}{\plug{\dctx'}{\ty'_1}}}
+                {\plug{\dctx_2}{\plug{\dctx'}{\ty'_2}}}
+            }).
+        \end{array}
+    \]
+\end{lemma}
+\begin{proof}
+    By induction on the derivation of
+    \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}.
+    \begin{itemize}
+        \item Case \RST{Bot} by \RST{Bot}.
+        \item Case \RST{VarLeft} by inversion, IH, and \RST{VarLeft}.
+        \item Case \RST{Tuple}, subcase where
+            $\dctx' = \typair{\dctx''}{\ty'}$:
+            \subtydflt{\typair{\ty_1}{\ty_2}}
+                {\typair{\plug{\dctx''}{\tyunion{\ty'_1}{\ty'_2}}}{\ty'}}.
+            By inversion,
+            \subtydflt{\ty_1}{\plug{\dctx''}{\tyunion{\ty'_1}{\ty'_2}}} and
+            \subtydflt{\ty_2}{\ty'}. 
+            
+            By IH applied to 
+            \subtydflt{\ty_1}{\plug{\dctx''}{\tyunion{\ty'_1}{\ty'_2}}},
+            \subtydflt{\plug{\dctx^h_1}{\ty_1}}
+                {\tyunion
+                    {\plug{\dctx^h_2}{\plug{\dctx''}{\ty'_1}}}
+                    {\plug{\dctx^h_2}{\plug{\dctx''}{\ty'_2}}}
+                }
+            for all $\dctx^h_1, \dctx^h_2$ s.t. $\subtydflt{\dctx^h_1}{\dctx^h_2}$.
+            Thus, we can take them to be \plug{\dctx_2}{\typair{\square}{\ty_2}} 
+            and \plug{\dctx_2}{\typair{\square}{\ty'}}, 
+            respectively, which concludes the case with
+            \subtydflt{\plug{\dctx_1}{\typair{\ty_1}{\ty_2}}}
+                {\tyunion
+                    {\plug{\dctx_2}{\typair{\plug{\dctx''}{\ty'_1}}{\ty_2}}}
+                    {\plug{\dctx_2}{\typair{\plug{\dctx''}{\ty'_2}}{\ty'}}}
+                }
+        \item Case \RST{UnionLeft} by inversion, IH, and \RST{UnionLeft}.
+        \item Case \RST{UnionRight}, subcase $i = 1$ where $\dctx' = \square$:
+            \subtydflt{\ty}{\tyunion{\ty'_1}{\ty'_2}}.
+            By inversion, \subtydflt\ty{\ty'_1}.
+            By assumption, \subtydflt{\dctx_1}{\dctx_2}, and thus,
+            \subtydflt{\plug{\dctx_1}{\ty}}{\plug{\dctx_2}{\ty'_1}}.
+            The case concludes by \RST{UnionRight} with $i=1$:
+            \subtydflt{\plug{\dctx_1}{\ty}}
+                {\tyunion{\plug{\dctx_2}{\ty'_1}}{\plug{\dctx_2}{\ty'_2}}}.
+    \end{itemize}
+    The remaining cases 
+    (\RST{Top}, \RST{VarRefl}, \RST{VarRight}, \RST{Inv}) 
+    are not possible.
+\end{proof}
+
+\begin{lemma}{Adding inner union on the right (\textbf{\lemref{}}).}%
+\label{lem:add-inner-union-right:app}
+    $\forall \ty, \dctx', \ty', \AEnv, \text{ s.t. }
+    tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'}.$
+    \[
+        \subtydflt{\ty}{\plug{\dctx'}{\ty'}}
+        \quad\implies\quad
+        (\forall \ty''.\ \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'}{\ty''}}}).
+    \]
+\end{lemma}
+\begin{proof}
+    By induction on the derivation of
+    \subtydflt{\ty}{\plug{\dctx'}{\ty'}}.
+    \begin{itemize}
+        \item Case \RST{Top} where $\dctx'=\square$. By assumption
+            \subtydflt{\ty}{\tyany} and \RST{UnionRight} with $i=1$,
+            \subtydflt{\ty}{\tyunion{\tyany}{\ty''}}.
+        \item Case \RST{Bot} by \RST{Bot}.
+        \item Case \RST{VarRefl} where $\dctx'=\square$
+            by assumption and \RST{UnionRight} with $i=1$.
+        \item Case \RST{VarLeft} by inversion, IH, and \RST{VarLeft}.
+        \item Case \RST{VarRight} where $\dctx'=\square$
+            by assumption and \RST{UnionRight} with $i=1$.
+        \item Case \RST{Tuple}. 
+            Subcase $\dctx'$ by assumption and \RST{UnionRight} with $i=1$.
+            The other two subcases by inversion, IH, and \RST{Tuple}.
+        \item Case \RST{Inv} where $\dctx'=\square$
+            by assumption and \RST{UnionRight} with $i=1$.
+        \item Case \RST{UnionLeft} by inversion, IH, and \RST{UnionLeft}.
+        \item Case \RST{UnionRight} where $\dctx'=\square$
+            by assumption and \RST{UnionRight} with $i=1$.
+    \end{itemize}
+\end{proof}
+
+
+
+
+\section{Evaluation}\label{sec:app:eval}
+%% ======================================================================
+

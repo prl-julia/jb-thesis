@@ -1,15 +1,17 @@
 \chapter{Julia Subtyping}%
 \label{chap:julia-sub}
 
-\TODO{Intro, reference lambda-julia}
+In this chapter, I provide a detailed account of Julia subtyping
+(Chapters \ref{sec:julia-sub:overview} and \ref{sec:julia-sub:lambda-julia})
+and discuss its undecidability (\chapref{sec:julia-sub:undec}).
 
-\section{Overview}\label{sec:julia-sub:overview}
+\section{Overview of Subtyping}\label{sec:julia-sub:overview}
 %% ======================================================================
 
 Subtyping in Julia largely follows the combination of
 \tdef{nominal subtyping} for user-defined nominal types and
 \tdef{semantic subtyping} for covariant tuple and union types.
-For example, using types from \figref{fig:code:user-def-types}, we note that
+For example, for datatype declarations from \figref{fig:code:user-def-types}, 
 \cjl{Int128} is a subtype of \cjl{Signed}, and, transitively, of \cjl{Integer};
 \cjl{BitSet} is a subtype of \cjl{AbstractSet\{Int\}}.
 %but not \cjl{AbstractSet\{String\}}.
@@ -29,17 +31,19 @@ regardless of whether the datatype is
 mutable or immutable, meaning that \cjl{Name\{t1, t2, ...\}} is a subtype of 
 \cjl{Name\{t1', t2', ...\}} only if the corresponding type arguments are equivalent,
 i.e., \cjl{t1 <:> t1'}, \cjl{t2 <:> t2', ...}.
-Thus, the immutable invariant datatype \cjl{Rational\{Int\}} is \emph{not}
+Thus, the invariant %immutable invariant datatype
+type \cjl{Rational\{Int\}} is \emph{not}
 a subtype of \cjl{Rational\{Signed\}}.
 %while the covariant tuple \cjl{Tuple\{Int\} <: Tuple\{Signed\}}.
 
 Abstract union-all types \cjl{t where l<:T<:u} are better known
 in the literature as \tdef{bounded existential types}, which also model
-Java wildcards~\cite{bib:torgersen:wildcards:2004}\footnote{In Julia syntax, 
-a Java wildcard type
-\cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}.}.
-In what follows, we will call types \cjl{t where l<:T<:u} existential types;
-if lower (upper) bound on the type variable is omitted, it defaults to the
+Java wildcards\footnote{In Julia syntax, a Java wildcard type
+\cjl{Foo<?>} can be written as \cjl{Foo\{T\} where T}
+or \cjl{Foo\{<:Any\}}.}~\cite{bib:torgersen:wildcards:2004};
+I will call them as such in the remainder of the dissertation.
+%In what follows, I refer to types \cjl{t where l<:T<:u} existential types;
+If lower (upper) bound on the type variable is omitted, it defaults to the
 bottom type \cjl{Union\{\}} (top type \cjl{Any}).
 Intuitively, an existential type denotes a union of \cjl{t[t'/T]} for all
 instantiations of the type variable \cjl{T} such that \cjl{l <: t' <: u}.
@@ -55,7 +59,7 @@ T<:Integer} because \cjl{T} can be instantiated with \cjl{Int},
 and \cjl{Vector\{T\} where T<:Integer} is a subtype of
 \cjl{Vector\{S\} where S} because for all valid instantiations \cjl{t'} of~\cjl{T},
 type variable \cjl{S} can be instantiated with the same type \cjl{t'}.
-Just like unions, existential types distribute over tuples:
+Just like with unions, tuples distribute over existential types:
 for example, types \cjl{Tuple\{Vector\{T\} where T\}}
 and \cjl{Tuple\{Vector\{T\}\} where T} are equivalent.
 
@@ -71,20 +75,19 @@ of the latter---existential---type, because \cjl{S} can be instantiated with
 \cjl{Int}. But it is not a subtype of the former---invariant parametric---type
 \cjl{Vector\{Matrix\{T\} where T\}}, because type arguments \cjl{Matrix\{Int\}}
 and \cjl{Matrix\{T\} where T} are not equivalent.
-\TODO{Explain the following better: Benjamin had questions.}
-Note that because of the impredicativity, type arguments of invariant type
-constructors such as \cjl{Vector} are arbitrarily complex. Thus, even though any
-particular \cjl{Vector\{t\}} is a concrete type, checking subtyping for this
-type requires a subtyping check for an arbitrary \cjl{t}.
+Note how type arguments of invariant type constructors such as \cjl{Vector}
+can be arbitrarily complex: because of that, subtyping between two
+concrete types is no easier than subtyping between arbitrary types.
 
 Existential types serve at least two distinct purposes in the Julia language.
-First, parametric types with existential parameters,
+First, parametric types instantiated with existential type arguments,
 such as \[\text{\cjl{Vector\{Matrix\{T\} where T\}}},\]
 are useful for representing heterogeneous data.
 Second, top-level existential types, such as
 \[\text{\cjl{Tuple\{T, Vector\{T\}\} where T}},\] represent
 type signatures of parametric method definitions.
-It may be surprising that Julia uses existential rather than universal types,
+It may be surprising that for method signatures,
+Julia uses existential rather than universal types,
 but recall that the primary purpose of types is to serve multiple dispatch.
 In Julia, it is impossible to directly invoke a parametric method definition
 and provide it with a type argument. Instead, the method is being dispatched to if
@@ -100,7 +103,7 @@ f(v :: Vector{T}) where T =
 f([5, 7, 5]) # returns Set{Int} with 2 elements: 5, 7
 \end{julia}
 \end{codeenvd}
-Because \cjl{[5, 7, 5]} is a \cjl{Vector\{Int\}} and
+Because \cjl{[5, 7, 5]} is a \cjl{Vector\{Int\}}, and
 \cjl{Tuple\{Vector\{Int\}\}} is a subtype of the existential
 \cjl{Tuple\{Vector\{T\}\} where T},
 as witnessed by the instantiation of \cjl{T} with \cjl{Int},
@@ -159,13 +162,14 @@ only with concrete types.\footnote{A similar rule applies to static resolution
 of method overloading in \CSharp. An example can be found on this page:
 \href{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}{https://fzn.fr/projects/lambdajulia/diagonalcsharp.pdf}}
 Thus, the type signature of \cjl{(==)} above,
-\cjl{Tuple\{T, T\} where T<:Number}, represents a restricted existential type:
+\cjl{Tuple\{T, T\} where T<:Number}, represents a concretely instantiatable
+existential type:
 it is a union of tuples \cjl{Tuple\{t, t\}} where \cjl{t} is a concrete subtype
 of \cjl{Number}. The same rule applies in line~3
 of~\figref{fig:code:subtraction}: built-in integer subtraction \cjl{sub_int} is
 guaranteed to be called only with primitive integers of the same concrete type.
 
-\section{Specification of Julia Subtyping}\label{sec:julia-sub:lambda-julia}
+\section{Specification of Subtyping}\label{sec:julia-sub:lambda-julia}
 %% ======================================================================
 
 For Julia programmers, reasoning about the subtype relation is necessary
@@ -174,12 +178,12 @@ However, the language documentation does not provide a specification
 of subtyping: instead, subtyping is mentioned in multiple sections related to
 type constructors and multiple dispatch.
 Initially, an incomplete (and soon outdated) definition of subtyping existed 
-only in~\cite{bib:bezanson:julia:2015}, with the actual implementation of 
-subtyping ($\sim$3000 lines of heavily optimized C~code as of May 2023)
-being the only reference point.
+only in~\cite{bib:bezanson:julia:2015}, with the only reference point
+being the actual implementation of subtyping ($\sim$3000 lines 
+of heavily optimized C~code as of May 2023).
 
 In this section, I present a fragment of the specification of
-Julia 0.6.2 subtyping from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
+Julia~0.6.2 subtyping from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 In that work, my collaborators and I defined, implemented, and empirically
 validated a subtype relation for Julia's type language,
 thus providing the first complete\footnote{The only omitted feature is the
@@ -190,8 +194,8 @@ Having reconstructed the subtype relation,
 we were able to identify multiple issues such as
 counterexamples to reflexivity and transitivity,
 and suspected the undecidability of subtyping,
-which was later proved by~\TODO{Ben's thesis}.
-Most of the bugs we reported have been fixed by Julia developers.
+which was later proved by~\citet{bib:chung:type-julia-thesis:2023}.
+Most of the bugs we reported have been fixed by Julia maintainers.
 Furthermore, the treatment of union types in the diagonal rule has changed
 based on our proposal.
 %\TODO{perhaps provide more details about bugs and the diagonal rule here}
@@ -204,7 +208,7 @@ for example, existential types are represented with \cjl{where}.
 ``Plain bits'' values, nominal subtyping, 
 subtyping of \cjl{Type\{t\}}, and the diagonal
 rule\footnote{The treatment of union types in the diagonal rule has changed
-since the paper was published, but the paper contains discusses the issue.}
+since the paper was published, but the paper discusses the issue.}
 are omitted, but they can be found
 in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 
@@ -315,7 +319,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 
 In~\figref{fig:jlsubex}, subtyping is defined in the form of a judgment
 \[
-  \ljsub{E}{t}{t'}{E'},
+  \ljsub{E}{\t}{\t'}{E'},
 \]
 which should be read as:
 \emph{in the environment $E$, type $t$ is a subtype of~$t'$,
@@ -500,21 +504,24 @@ determine precisely the scope of each variable.
 \paragraph{From forall/exist to exist/forall.}  In some cases,
 enforcing the correct ordering of type variable quantifications
 requires extra care.  Consider the judgment:
-\[ \vectyp{\wheret{\vectyp{\T}}{\T}} \nless: 
-  \wheret{\vectyp{\vectyp{\S}}}{\S}. \]
-The type on the left denotes the set of all vectors of
-vectors of elements of some type; the type on the right
-requires a common type for all inner
-vectors.  For instance, the value
-\cjl{[ [1,2],["a","b"] ]} belongs to the first, but
-not the second, type.
+\[ \vectyp{\wheret{\mattyp{\T}}{\T}} \nless: 
+  \wheret{\vectyp{\mattyp{\S}}}{\S}. \]
+The type on the left denotes a vector of arbitrary matrices;
+the type on the right denotes the set of vectors of matrices where 
+inner matrices share the same element type.
+%For instance, the value \cjl{[ [1,2],["a","b"] ]} belongs to the first, but
+%not the second, type.
 If the subtyping algorithm simply introduced variables \S and \T into
 the environment, the following judgments would succeed, because
 for all instances of \(T\) there is a matching type for \(S\):
 \[
-  ^R \S_{\uniontyp{}}^{\anytyp}, ^L\!\T_{\uniontyp{}}^{\anytyp} \vdash \T <: \S
-  \qquad\text{ and }\qquad
-  ^R \S_{\uniontyp{}}^{\anytyp}, ^L\!T_{\uniontyp{}}^{\anytyp} \vdash \S <: \T
+\begin{array}{rcl}
+  ^R \S_{\uniontyp{}}^{\anytyp}, ^L\!\T_{\uniontyp{}}^{\anytyp} & \vdash \T <: \S
+    \vdash & ^R \S_{\T}^{\anytyp}, ^L\!\T_{\uniontyp{}}^{\anytyp} \\
+  \\
+  ^R \S_{\T}^{\anytyp}, ^L\!T_{\uniontyp{}}^{\anytyp} & \vdash \S <: \T
+    \vdash & ^R \S_{\T}^{\T}, ^L\!\T_{\uniontyp{}}^{\anytyp}
+\end{array}
 \]
 However, we must instead find an instance of \(\S\) such that 
 the judgment holds forall \T: perhaps surprisingly, the outer invariant
@@ -527,7 +534,7 @@ environment \(E.curr\) is kept ordered, and
 \emph{barrier} tags are pushed into \(E.curr\) whenever the derivation goes through
 an invariant constructor in the rule \RLJ{App\_Inv}.
 
-We say that a variable \(\S\) is \emph{outside} a variable
+A variable \(\S\) is defined to be \emph{outside} a variable
 \(\T\) in an environment \(E\) if \(\S\) precedes \(\T\)
 in \(E.curr\) and they are separated by a barrier tag in~\(E.curr\).  
 
@@ -683,9 +690,11 @@ the lower bound if the variable is on the right.  Variables with exist
 semantics are instead replaced with their easiest-to-satisfy bound,
 and, to keep track of the match, bounds of these variables are updated
 if a successful derivation is found, reflecting their new bound.  By
-symmetry, one would expect the rule~\RLJ{R\_Left} to update
+symmetry with \RLJ{R\_Right}, which updates the lower bound with
+$\uniontyp{l,\t}$, one would expect the rule~\RLJ{R\_Left} to update
 \(\T\) upper bound with \(\t \cap u\). 
-Until our work on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018} started, it
+However, until our work on Julia started, it
+% on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018} started, it
 was believed that, because of invariance, the explicit ordering of the
 checks performed by rule~\RLJ{App\_Inv} would ensure that \(\t <: u\) had
 already been checked by rule~\RLJ{R\_Right}.  Therefore, it
@@ -699,27 +708,30 @@ turned out to be false.  Consider the following example:
     \wheret{\vectyp{\uniontyp{\vectyp{\anytyp}, \vectyp{\T}}}}{\T{<:}\inttyp}.  
   \end{array}
 \]\label{juliabug:rleft}
-\noindent This judgment contradicts the idea that \(\vectyp{\T}\)
+\noindent This successful judgment contradicts the idea that \(\vectyp{\T}\)
 can be a subtype of \(\vectyp{\anytyp}\) only if \(\T\) is
-equivalent to \(\anytyp\), which is not possible here.  However,
-at the time working on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018},
-both Julia and our specification could build a derivation for it: due to
+equivalent to \(\anytyp\), which is not possible here.
+Back in 2018,
+%at the time working on~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018},
+both Julia and the specification presented here 
+could build a derivation for the above judgment: due to
 the existential on the right-hand side, the check that ought to ensure
 \(\t <: u\), that is \(\anytyp <: \inttyp\), is skipped when
 performing the left-to-right subtype check of the invariant
 constructor \(\jlname{Vector}\). 
-In response to this finding, Julia developers introduced a
+In response to this finding, Julia designers introduced a
 \cjl{simple\_meet} function\footnote{Julia codebase already included a complex
-algorithm that computes an approximation of intersection of two types, which
-is used internally to compute dataflow information, but the algorithm is too
-slow (and bug-ridden) to be integrated in the subtyping algorithm.}
+algorithm that computed an approximation of intersection of two types, which
+was used internally to compute dataflow information. However, the algorithm 
+was too slow % (and bug-ridden) 
+to be integrated in the subtyping algorithm.}
 to compute intersection in simple cases.
-As of May 2023, the problematic judgment above does not hold.
+As of May 2023, the problematic judgment above no longer holds.
 
 To account for the exist/forall
-quantification inversion, the \RLJ{R\_Right} does not apply
+quantification inversion, the \RLJ{R\_Right} rule does not apply
 if the type on the left is
-a left variable and the variables are in the exists/forall quantification
+a left variable, and the variables are in the exists/forall quantification
 (the check \(\lnot\mathit{outside}(\T,\S,E)\) is responsible for this).
 %Similar reasoning works for the rule \ottdrulename{R\_left}.
 Matching R-L
@@ -732,22 +744,23 @@ other direction is later verified by the environment consistency check.
 % \TODO{reflexivity in the paper is for all types and plain-bits values;
 % here, I use it only for variables}
 
-\section{Undecidability of Julia Subtyping}\label{sec:julia-sub:undec}
+\section{Undecidability of Subtyping}\label{sec:julia-sub:undec}
 %% ======================================================================
 
 It is not unusual for a statically typed programming language 
 to have undecidable subtyping,
 as witnessed by Java and Scala~\cite{bib:grigore:java-undec:2017,bib:hu:dot-undec:2020}.
-In practice, the undecidability means that the
+In practice, undecidability means that the
 compiler might not terminate on some programs. Although undesirable,
 such property can be acceptable if it manifests rarely and
 allows for an expressive type system.
 
 In a dynamically typed Julia, however, subtyping is used at run time---for
-dispatch resolution. Even on rare occasions, consequences of
-undecidability at run time are of greater concern than at compile time.
+dispatch resolution. %Even on rare occasions, consequences of
+%undecidability at run time are of greater concern than at compile time.
+Thus, undecidability is concerning even on rare occasions.
 That is why the decidability of subtyping was one of the explicit goals
-of the original design of the Julia language~\cite{bib:bezanson:julia:2015}.
+of the original Julia language design~\cite{bib:bezanson:julia:2015}.
 To this end, Julia disallowed several features that were known to cause
 undecidability, such as recursive constraints on type variables and
 circularities in the inheritance hierarchy~\cite{bib:tate:taming-wildcards:2011}.
@@ -767,7 +780,7 @@ circularities in the inheritance hierarchy~\cite{bib:tate:taming-wildcards:2011}
 
 Despite the intentional simplifications in the type language,
 Julia subtyping is in fact \emph{undecidable}.
-As shown in~\TODO{Ben's thesis}, Julia can encode system
+As shown in~\cite{bib:chung:type-julia-thesis:2023}, Julia can encode system
 \FSubN, which is known to be undecidable~\cite{bib:pierce:bound-sub-undec:1992}.
 \figref{fig:FSub-encoding} shows the encoding\footnote{Arrow %of \FSubN types
 type is dropped as irrelevant to the undecidability result.},
@@ -802,28 +815,28 @@ In what follows, I briefly revisit subtyping of invariant constructors
 and existential types, discuss why their interaction is challenging,
 and conclude with possible ways of addressing the challenge.
 I intentionally depart from the subtyping judgment
-$E \vdash t <: t' \vdash E'$
+$E \vdash \t <: \t' \vdash E'$
 presented in the previous section~(\ref{sec:julia-sub:lambda-julia})
-and instead use a simpler $t <: t'$ notation,
+and instead use a simpler $\t <: \t'$ notation,
 as I am exploring the space of possible subtyping algorithms.
 %as I am interested in the existence of some other, decidable subtype relation.
 
-First, recall that parametric datatypes are invariant, meaning that
+First, recall that parametric types are invariant, meaning that
 types such as $\reftyp{t}$ and $\reftyp{t'}$ are subtypes
 only if their type arguments $t$ and $t'$ are equivalent.
 The equivalence of types is expressed via subtyping:
-$t$ and $t'$ are equivalent
-if both $t <: t'$ and $t' <: t$ hold.
+$\t$ and $\t'$ are equivalent
+if both $\t <: \t'$ and $\t' <: \t$ hold.
 To check for equivalence, one can either rely on subtyping directly,
-or use a separate relation $t \approx t'$ such that 
-$t \approx t' \ \implies\ t <: t'\ \land\ t' <: t$.
+or use a separate relation $\t \approx \t'$ such that 
+$\t \approx \t' \ \implies\ \t <: \t'\ \land\ \t' <: \t$.
 
-Next, recall that an existential type $\wheret{t}{l{<:}\T{<:}u}$ is meant to 
-represent a union of types $t[t'/\T]$ for all possible valid instantiations
-$l <: t' <: u$ of the type variable $\T$.
+Next, recall that an existential type $\wheret{\t}{l{<:}\T{<:}u}$ is meant to 
+represent a union of types $\t[\t'/\T]$ for all possible valid instantiations
+$l <:\t' <: u$ of the type variable $\T$.
 Thus, whenever subtyping is checked for some 
-$t_1 <: (\wheret{t}{l{<:}\T{<:}u})$, the subtyping algorithm needs to check that
-there exists a valid instantiation $t'$ of $\T$ such that $t_1 <: t[t'/\T]$.
+$t_1 <: (\wheret{\t}{l{<:}\T{<:}u})$, the subtyping algorithm needs to check that
+there exists a valid instantiation $\t'$ of $\T$ such that $\t_1 <: \t[\t'/\T]$.
 From now on, I will refer to such variable \T (that is, a variable introduced
 by an existential type on the right-hand side of the judgment) as a
 \textbf{unification variable}; in \secref{sec:julia-sub:lambda-julia},
@@ -832,63 +845,63 @@ it was called an exist/right variable.
 Consider the following subtype query 
 \[
   \begin{array}{ll}
-    \jlname{Tuple}\{\vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}, &
+    \jlname{Tuple}\{\vectyp{\wheret{\t'^{\,\S}}{l'{<:}\S{<:}u'}}, &
       t'\,\}\\
     \multicolumn{2}{c}{<:} \\
     \jlname{Tuple}\{\vectyp{t_1^{\T}}, & t_2^{\T}\} 
       \ \textbf{\texttt{where}}\ l{<:}\T{<:}u,
   \end{array}
 \]
-where \S occurs in $t'^\S$ and \T occurs in both $t_1^{\T}$ and $t_2^{\T}$.
+where \S occurs in $\t'^{\,\S}$ and \T occurs in both $\t_1^{\T}$ and $\t_2^{\T}$.
 Let us walk through possible steps of a subtyping algorithm \algo.
 \begin{enumerate}
   \item Because the right-hand side type is an existential,
     \T is a unification variable; \algo can remember the variable and proceed
     to subtyping of
     \[ 
-      \tupletyp{\vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}, t'}
+      \tupletyp{\vectyp{\wheret{\t'^{\,\S}}{l'{<:}\S{<:}u'}}, \t'}
         \ <:\ 
-        \tupletyp{\vectyp{t_1^{\T}}, t_2^{\T}}. 
+        \tupletyp{\vectyp{\t_1^{\T}}, \t_2^{\T}}. 
     \]
   \item Both sides of the subtyping query are now tuples of the matching length.
     Tuples are covariant, so \algo needs to check that their corresponding 
     components are subtypes, i.e.,
     \[ 
-      \vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{t_1^{\T}} 
-      \ \ \text{and}\ \ t' <: t_2^{\T}.
+      \vectyp{\wheret{\t'^{\,\S}}{l'{<:}\S{<:}u'}}\ <:\ \vectyp{\t_1^{\T}} 
+      \ \ \text{and}\ \ \t' <: \t_2^{\T}.
     \]
     Since the unification variable \T appears in both $t_1^{\T}$ and $t_2^{\T}$,
     \emph{both subtyping queries can impose constraints on \T}.
     \begin{enumerate}
       \item The first tuple components are both invariant constructors,
         \[ 
-          \vectyp{\wheret{\t'^\S}{l'{<:}\S{<:}u'}} 
+          \vectyp{\wheret{\t'^{\,\S}}{l'{<:}\S{<:}u'}} 
           \ <:\  
-          \vectyp{t_1^{\T}}, 
+          \vectyp{\t_1^{\T}}, 
         \]
         so \algo needs to check that their type arguments are equivalent.
         Let \algo use subtyping for the equivalence check and focus
         on the second, right-to-left check:
-        \[ t_1^{\T}\ <:\ \wheret{\t'^\S}{l'{<:}\S{<:}u'}. \]
+        \[ \t_1^{\T}\ <:\ \wheret{\t'^{\,\S}}{l'{<:}\S{<:}u'}. \]
         \begin{enumerate}
           \item The right-hand side type is an existential, so \S is a unification
             variable; \algo can remember the variable and proceed to 
-            subtyping of \[ t_1^{\T} <: \t'^S. \]
+            subtyping of \[ \t_1^{\T} <: \t'^{\,\S}. \]
           \item Let us assume that \algo successfully processes this subtyping
             query. Note that \emph{both sides of the query contain
             unification variables}, for \T occurs in $t_1^{\T}$
-            and \S occurs in $\t'^\S$.
+            and \S occurs in $\t'^{\,\S}$.
             Thus, the unification variables \S and \T might
             be \emph{constraining each other}.
           \item\label{item:sub-stuck} \algo needs to resolve the unification variable \S, that is,
             check that constraints that were necessary to satisfy 
-            \[ t_1^{\T} <: \t'^\S \]
+            \[ \t_1^{\T} <: \t'^{\,\S} \]
             are consistent with each other as well as the declared bounds
             $l'$ and $u'$.
             However, \S might be constrained by the unification variable \T,
             and not all constraints on \T are known, for $t' <: t_2^{\T}$
             has not been processed yet.
-            Thus, \textbf{the subtyping algorithm \algo is stuck.}
+            Thus, \emph{the subtyping algorithm \algo is stuck.}
         \end{enumerate}
     \end{enumerate}
   %\item Check that all the constraints
@@ -930,7 +943,7 @@ not straightforward if not undecidable.
 % S --> T <-- Q
 % ^-----------|
 %
-Therefore, instead, I suggest \textbf{eliminating mutually constraining
+Therefore, instead, I suggest \textbf{eliminating mutual constraints on
 unification variables}.
 For this, I consider two possible angles of attack.
 \begin{enumerate}
@@ -962,7 +975,7 @@ For this, I consider two possible angles of attack.
     constructors) will appear on the left-hand side. Once that happens,
     existential types bound \emph{inside} invariant constructors will be the
     only source of new unification variables on the right.
-    Thus, eliminating variable-introducing existential types inside 
+    Thus, the elimination of variable-introducing existential types inside 
     invariant constructors would prevent unwanted
     dependencies between unification variables.
 \end{enumerate}
@@ -973,9 +986,9 @@ follows the strategy \ref{item:remove-uni-vars} by \emph{restricting}
 existential types inside invariant constructors.
 A simpler approach would be to entirely eliminate impredicative existentials,
 that is, allow only top-level existential types such as
-\[ \wheret{\vectyp{\vectyp{\T}}}{\T} \]
+\[ \wheret{\vectyp{\mattyp{\T}}}{\T} \]
 but not
-\[ \vectyp{\wheret{\vectyp{\T}}{\T}}. \]
+\[ \vectyp{\wheret{\mattyp{\T}}{\T}}. \]
 However, as discussed previously, %impredicative existential types
 types like the latter \jlname{Vector} type above are used by Julia programmers 
 to represent heterogeneous data, so the simple approach appears unsatisfactory.

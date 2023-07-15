@@ -267,6 +267,7 @@ but the interpretation is not well defined.
 Furthermore, the treatment of invariant parametric types
 in the interpretation does not match
 the subtype relation. In particular, for concrete nominal \cjl{Name},
+the interpretation
 \[
   \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}} =
   \{ x\ |\ \text{\cjl{typeof}}(x) = \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}   
@@ -277,17 +278,21 @@ Thus, for example, types \cjl{Vector\{Union\{Int,Any\}\}} and \cjl{Vector\{Any\}
 are not equivalent according to the interpretation,
 but they are equivalent in Julia.
 
+\subsection{Tuples and Unions}
+%% *********************************************************
+
 In \cite{bib:belyakova:minijl-sub:ftfjp:2019}, I proposed and mechanized in Coq
 a semantic interpretation of (a subset of) Julia
 types \ty as \textbf{sets of concrete value types} \gty
-(or type tags) rather than values.
+(or type tags) rather than values, with semantic subtyping defined as
+$\interp{\ty} \subseteq \interp{\ty'}$.
 For the type language of non-parametric nominal types, tuples, and unions,
-a decidable syntactic subtyping based on disjunctive normal form
+a decidable syntactic subtype relation based on disjunctive normal form
 coincides with the set inclusion of interpretations.
 %$\interp{\ty} \subseteq \interp{\ty'}$.
-\figref{fig:sem:ty-simple} presents the interpretation and the corresponding
-syntactic, decidable subtyping in the style of \chapref{chap:dec-sub}
-for that language of types.
+\figref{fig:sem:ty-simple} presents the interpretation and corresponding
+syntactic subtyping in the style of \chapref{chap:dec-sub}
+for the type language of base types \iname, covariant tuples, and unions.
 $\Sigma$ denotes the set of all value types \gty.
 
 \begin{figure}[t]
@@ -301,7 +306,7 @@ Grammar
     \\
     \gty &::=& 
         \iname \Alt
-        \typair{\ty_1}{\ty_2}
+        \typair{\gty_1}{\gty_2}
         & \textit{Concrete value type} \\
     \\
     \dctx &::=& \square \Alt
@@ -316,13 +321,12 @@ Interpretation $\interp{\cdot}$
         \interp{\iname} &=& \{ \iname \} \\
         \interp{\typair{\ty_1}{\ty_2}} &=& 
             \{ \typair{\gty_1}{\gty_2} \ | \ 
-            \gty_1 \in \interp{\ty_1}, \gty_2 \in \interp{\ty_2} \} \\
+            \gty_1 \in \interp{\ty_1},\,\gty_2 \in \interp{\ty_2} \} \\
         \interp{\tyunion{\ty_1}{\ty_2}} &=& 
             \interp{\ty_1} \cup \interp{\ty_2} \\
     \end{array}
 \]
-Subtyping $\ty \symsub \ty'$
-
+Subtyping $\ty \symsub \ty'$\\
 \makebox[\textwidth][c]{
 \begin{minipage}{\ruleswidth}  
 \begin{mathpar}
@@ -357,6 +361,227 @@ Subtyping $\ty \symsub \ty'$
 }
 \caption{Semantic interpretation and decidable subtyping for simple types
 }\label{fig:sem:ty-simple}
+\end{figure}
+
+In \cite{bib:belyakova:minijl-sub:ftfjp:2019}, I show that the decidable 
+syntactic subtype relation is sound and complete with respect
+to the interpretation.
+
+\begin{theorem}{}
+    $\forall \ty, \ty'.$
+    \[
+        \begin{array}{c}
+            \ty <: \ty' \\
+            \iff \\
+            (\forall \gty.\quad \gty \in \interp{\ty} \iff
+                \gty \in \interp{\ty'}).
+        \end{array}
+    \]
+\end{theorem}
+
+\subsection{Invariant Constructors}
+%% *********************************************************
+
+The interpretation in \figref{fig:sem:ty-simple} can be extended to support
+invariant type constructors such as \cjl{Vector\{...\}}.
+To account for the issue of multiple syntactic representations of types,
+in the new system, types are given an indexed interpretation $\interp{\cdot}_n$.
+This approach was also mechanized in Coq.
+
+\begin{figure}[t]
+\footnotesize
+Grammar
+\[\begin{array}{rcll}
+    \ty &::=& \ldots \Alt \tyinv\iname{\ty_1,\ldots,\ty_n}
+        & \textit{Type} \\
+    \\
+    \gty &::=& \ldots \Alt \tyinv\iname{\ty_1,\ldots,\ty_n}
+        & \textit{Concrete value type} \\
+\end{array}\]
+Interpretation $\interp{\cdot}_w$
+\[
+    \begin{array}{ccl}
+        \interp{\tyany}_w &=& \Sigma \\
+        \interp{\tybot}_w &=& \varnothing \\
+        \interp{\typair{\ty_1}{\ty_2}}_w &=& 
+            \{ \typair{\gty_1}{\gty_2} \ | \ 
+            \gty_1 \in \interp{\ty_1}_w,\,\gty_2 \in \interp{\ty_2}_w \} \\
+        \interp{\tyunion{\ty_1}{\ty_2}}_w &=& 
+            \interp{\ty_1}_w \cup \interp{\ty_2}_w \\
+        \\
+        \interp{\tyinv\iname{\ty_1,\ldots,\ty_n}}_0 &=& 
+            \{ \tyinv\iname{\ty'_1,\ldots,\ty'_n} \} \\
+        \interp{\tyinv\iname{\ty_1,\ldots,\ty_n}}_{w+1} &=& 
+            \{ \tyinv\iname{\ty'_1,\ldots,\ty'_n} \ |\ 
+                \forall i.\; \interp{\ty'_i}_w = \interp{\ty_i}_w \} \\
+    \end{array}
+\]
+Subtyping $\ty \symsub \ty'$\\
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
+\begin{mathpar}
+    ...
+
+    \inferrule[]
+    { \ty_i \symsub \ty'_i \and \ty'_i \symsub \ty_i }
+    { \tyinv\iname{\ty_1,\ldots,\ty_n} \symsub 
+        \tyinv\iname{\ty'_1,\ldots,\ty'_n} }
+\end{mathpar}
+\end{minipage}
+}
+\caption{Semantic interpretation and decidable subtyping for
+invariant constructors}\label{fig:sem:ty-inv}
+\end{figure}
+
+\figref{fig:sem:ty-inv} defines the extension.
+Intuitively, the $0$-interpretation is not allowed to look inside invariant
+type constructor and contains all value types with the same constructor name.
+The higher the interpretation, the more spurious elements are filtered out;
+since the equality of the arguments is checked in the lower interpretation,
+the definition is well formed.
+Then, semantic subtyping is defined as:
+\[
+  \forall w.\ \interp{\ty}_w \subseteq \interp{\ty'}_w.
+\]
+Despite the more complex indexed interpretation, the syntactic subtype relation
+is still sound and complete.
+
+\begin{theorem}{}
+    $\forall \ty, \ty'.$
+    \[
+        \begin{array}{c}
+            \ty <: \ty' \\
+            \iff \\
+            (\forall w.\ \forall \gty.\quad \gty \in \interp{\ty}_w \iff
+                \gty \in \interp{\ty'}_w).
+        \end{array}
+    \]
+\end{theorem}
+
+\subsection{Existential Types}
+%% *********************************************************
+
+To match the intuition described in \chapref{chap:julia-sub},
+an existential type and type variable can be interpreted as:
+\[
+\begin{array}{ccl}
+    \interpexdflt{\tyexist{\vx}{\tylb}{\tyub}{\ty}} &=& 
+        \bigcup_{\interpexdflt{\tylb}\, \subseteq\, \gtyset\,
+            \subseteq\, \interpexdflt{\tyub}}
+        \interp{\ty}^{\subst{\semsubstvars}{\substel{\vx\,}{\,\gtyset}}}_w \\
+    \interpexdflt{\vx} &=& \semsubstvars(\vx), \\
+\end{array}
+\]
+where %$\gtyset \subseteq \Sigma$ and 
+\semsubstvars maps variables to interpretation sets.
+
+However, because of invariant constructors, an interpretation cannot be simply 
+a set of value type tags\footnote{Tags are assumed to be closed, i.e. do not 
+contain free variables.}.
+Consider the following example:
+\[
+    \begin{array}{cl}
+        & \interp{\tyexist{\vx}{\tyinv\nref\tyint}{\tyinv\nref\tyint}
+            {\tyinv\nvec\vx}}_1 \\
+        = & \\
+        & \bigcup_{\gtyset = \interp{\tyinv\nref\tyint}_1}
+        \interp{\tyinv\nvec\vx}^{\subst{}{\substel{\vx\,}{\,\gtyset}}}_1 \\
+        = & \\
+        & \{\ 
+            \tyinv\nvec\ty \ |\ \interp{\ty}_0 = 
+            \interp{\tyinv\nref\tyint}_1
+        \ \} \\
+        = & \\
+        & \{\ 
+            \tyinv\nvec\ty \ |\ \interp{\ty}_0 = 
+            \{ \tyinv\nref{\ty'}\,|\, \interp{\ty'}_0 = \{ \tyint \} \}
+        \ \} \\
+        = & \\
+        & \{\ 
+            \tyinv\nvec\ty \ |\ \interp{\ty}_0 = 
+            \{ \tyinv\nref{\tyint}, \tyinv\nref{\tyunion{\tyint}{\tybot}}, \ldots \}
+        \ \} \\
+    \end{array}
+\]
+Note that there are no closed types \ty such that
+\[
+    \interp{\ty}_0 = 
+    \{ \tyinv\nref{\tyint}, \tyinv\nref{\tyunion{\tyint}{\tybot}}, 
+        \tyinv\nref{\tyunion{\tyint}{\tyint}}, \ldots \},
+\]
+because the $0$-interpretation of any \nref-type includes arbitrary 
+\tyinv\nref{\ty'}, not just \tyint-interpreted $\ty'$.
+Therefore, the existential type 
+\[
+    \tyexist{\vx}{\tyinv\nref\tyint}{\tyinv\nref\tyint}{\tyinv\nvec\vx}
+\]
+is not a supertype of 
+\[ \tyinv\nvec{\tyinv\nref\tyint}, \]
+which does not match Julia subtyping.
+The crux of the problem is that \vx can be interpreted in a smaller $w$
+than it was instantiated with.
+
+In the spirit of~\cite{bib:ahmed:impr-poly:2003},
+the domain of interpretation can be redefined as a set of indexed tags
+instead of just tags, as presented in \figref{fig:sem:ty-inv-exist}.
+In this case, whenever a variable is interpreted in $w$,
+all tags originally produced by the potentially higher interpretation
+are removed. It is easy to see by induction on \ty that
+\[ 
+    w' \leq w \quad\implies\quad
+    \interp{\ty}^{\semsubstvars}_{w'} \subseteq \interpexdflt{\ty}.
+\]
+
+The semantic interpretation can be used to examine soundness
+of decidable syntactic subtyping presented in \chapref{sec:dec-sub:defs},
+as well as equivalent rewritings discussed in \chapref{sec:eval:results}.
+
+\begin{figure}[t]
+\footnotesize
+Grammar
+\[\begin{array}{rcll}
+    \ty, \tylb, \tyub &::=& \ldots \Alt \vx \Alt
+        \tyexist{\vx}{\tylb}{\tyub}{\ty}
+        & \textit{Type} \\
+    \\
+    \gty &::=& \ldots \text{ where } \fv{\gty} = \varnothing
+        & \textit{Concrete value type} \\
+\end{array}\]
+Domain
+\[
+    \hat{\Sigma} = \{ \gty^k \ \Alt\ \gty \in \Sigma,\; k \in \mathbb{N} \}
+\]
+Interpretation $\interpexdflt{\cdot}$
+\[
+\begin{array}{ccl}
+    \interpexdflt{\tyany} &=& \{ \gty^k \ |\ k \leq w \} \\
+    \interpexdflt{\tybot} &=& \varnothing \\
+    \interpexdflt{\typair{\ty_1}{\ty_2}} &=& 
+        \{ {(\typair{\gty_1}{\gty_2})}^k \ | \ 
+        {\gty_1}^k \in \interpexdflt{\ty_1},\,
+        {\gty_2}^k \in \interpexdflt{\ty_2} \} \\
+    \interpexdflt{\tyunion{\ty_1}{\ty_2}} &=& 
+        \interpexdflt{\ty_1} \cup \interpexdflt{\ty_2} \\
+    \\
+    \interp{\tyinv\iname{\ty_1,\ldots,\ty_n}}^{\semsubstvars}_0 &=& 
+        \{ \tyinv\iname{\ty'_1,\ldots,\ty'_n}^0 \} \\
+    \interp{\tyinv\iname{\ty_1,\ldots,\ty_n}}^{\semsubstvars}_{w+1} &=& 
+        \{ \tyinv\iname{\ty'_1,\ldots,\ty'_n}^{w+1} \ |\ 
+            \forall i.\; \interpexdflt{\ty'_i} = \interpexdflt{\ty_i} \}
+        \ \cup\ \interp{\tyinv\iname{\ty_1,\ldots,\ty_n}}^{\semsubstvars}_w \\
+    \\
+    \interpexdflt{\tyexist{\vx}{\tylb}{\tyub}{\ty}} &=& 
+        \bigcup\limits_{0 \leq w' \leq w}
+        \bigcup\limits_{\interp{\tylb}^{\semsubstvars}_{w'}
+            \, \subseteq\, \gtyset\,
+            \subseteq\, \interp{\tyub}^{\semsubstvars}_{w'}}
+        \interp{\ty}^{\subst{\semsubstvars}{\substel{\vx\,}{\,\gtyset}}}_{w'} \\
+    \interpexdflt{\vx} &=& \{ \gty^k \ |\ 
+        \gty^k \in \semsubstvars(\vx)\ \land\ k \leq w \} \\
+\end{array}
+\]
+\caption{Semantic interpretation for
+existential types}\label{fig:sem:ty-inv-exist}
 \end{figure}
 
 

@@ -349,3 +349,13 @@ on page \pageref{#1}.}
 \newcommand{\uniontyp}[1]{\jlname{Union}\{#1\}}
 \newcommand{\cstrt}[2]{\tytext{#1}\{#2\}}
 \newcommand{\wheret}[2]{\ensuremath{#1\;\textbf{\texttt{where}}\;#2}}
+
+%% Semantic Subtyping
+%% *********************************************************
+
+\newcommand{\semsubstvars}{\EM{\eta}}
+\newcommand{\gtyset}{\EM{s}}
+
+\newcommand{\interpexdflt}[1]{\EM{\interp{#1}^{\semsubstvars}_w}}
+
+\newcommand{\gtyi}{\EM{\hat{\gty}}}

@@ -16,7 +16,17 @@
 
 \input{metainfo.tex}
 
+%\cleardoublepage
+\addcontentsline{toc}{chapter}{Contents}
 \tableofcontents
+
+%\cleardoublepage
+\addcontentsline{toc}{chapter}{\listfigurename}
+\listoffigures
+
+%\cleardoublepage
+\addcontentsline{toc}{chapter}{\listtablename}
+\listoftables
 
 %% ======================================================================
 %% *********************************************************
@@ -41,6 +51,7 @@
 \input{chapters/chap-dec-sub.tex}
 \input{chapters/chap-evaluation.tex}
 \input{chapters/chap-related.tex}
+\input{chapters/chap-conclusion.tex}
 
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{bib/non-jb,bib/jb}

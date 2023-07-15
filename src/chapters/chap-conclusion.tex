@@ -1,0 +1,48 @@
+\chapter{Conclusions and Future Work}
+
+The reconstruction of a \textbf{specification of Julia subtyping}
+(\chapref{sec:julia-sub:lambda-julia})
+proved essential for improving Julia's subtyping algorithm, 
+finding bugs, and detecting the undecidability.
+The specification can still be used by Julia programmers to better understand
+subtyping and multiple dispatch, although it no longer captures all aspects of 
+subtyping due to changes between versions 0.6.2 and 1.9.2.
+
+Because of the run-time cost of undecidability of subtyping,
+finding a decidable subtype relation without sacrificing \emph{too much}
+expressive power is a desirable direction for evolving the Julia language.
+The proposed \textbf{restriction} and its corresponding 
+\textbf{decidable subtyping} (\chapref{chap:dec-sub})
+provide a good candidate for such evolution: 
+\textbf{less than 0.01\%} of statically
+identifiable type annotations do not satisfy the restriction, and most of them
+can be rewritten without affecting program behavior
+(\chapref{chap:eval}).
+Furthermore, the proposed subtype relation can serve as a specification
+to evaluate the correctness of an implementation of subtyping,
+should Julia maintainers choose to use this work.
+
+The results of the static corpus analysis are highly promising,
+but further evaluation of the restriction is needed. 
+First, since macro-generated code is prevalent in Julia's codebase,
+some of that code might be relying on the full expressive power
+of impredicative existential types.
+Second, Julia internally relies on a data-flow analysis
+to infer types and generate optimized, type-specialized code. Therefore,
+not only user-defined code can be impacted by the restriction, but multiple 
+components of the compiler, too. 
+Thus, I am interested in multiple directions of \textbf{future work}:
+\begin{itemize}
+    \item Conduct a comprehensive dynamic analysis of the restriction.
+    \item Examine the interaction of the restricted language with relevants
+        parts of the compiler.
+    \item Provide a correct and efficient implementation of the subtyping
+        algorithm.
+\end{itemize}
+
+Finally, decidable subtyping proposed in this work can be of interest for
+languages other than Julia, as it extends use-site-variance subtyping 
+with more expressive, top-level existential types.
+However, the framework I presented should be applied with care:
+for example, its interaction with more expressive nominal subtyping
+may not be straightforward.

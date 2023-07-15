@@ -1,22 +1,26 @@
 \chapter{Introduction}
 
-% Julia is a dynamic, high-level, high-performance programming
-% language~\cite{bib:bezanson:julia-fresh:2017},
-% originally designed for scientific computing.
-% Julia aims to solve the two-language problem, combining the convenience of
-% productivity languages such as Python and R and the performance of languages
-% such as Fortran and C~\cite{bib:bezanson:julia-dyn-perf:oopsla:2018}.
-% Notably, despite the lack of a static type system,
-% Julia supports an expressive language of type annotations, which have a direct 
-% impact on program semantics. In particular, function call resolution relies on 
-% subtyping between run-time types and type annotations.
-% However, the subtype relation is undecidable, which causes some programs to
-% fail at run time with an uninformative \cjl{StackOverflowError}.
-% In this thesis, I propose a restriction on the undecidable fragment of
-% Julia types, define a decidable subtype relation for the restricted fragment,
-% and show that the impact of the restriction on the existing code is limited.
-\TODO{intro}
+Julia is a dynamic, high-level, high-performance programming
+language~\cite{bib:bezanson:julia-fresh:2017},
+originally designed for scientific computing.
+At the core of Julia's design is multiple dynamic dispatch, which relies
+on an expressive language of type annotations to tailor function implementations
+to different argument types. The type language includes set-theoretic unions, 
+distributive tuples, parametric invariant types, and impredicative existential 
+types. Multiple dispatch is resolved at run time
+with a complex subtyping algorithm.
+However, subtyping in Julia is undecidable. In practice, when an undecidable
+subtyping check is encountered, program execution fails 
+with an uninformative \cjl{StackOverflowError}.
 
+In this dissertation, I propose a decidable subtype relation for a restricted
+language of Julia types. Namely, the restriction limits existential types 
+inside invariant constructors to existential types expressible with 
+use-site variance, similar to Java wildcards.
+In a corpus of 9K registered Julia packages, 99.99\% of 2M 
+statically identifiable type annotations satisfy the proposed restriction.
+Thus, the restriction provides a viable approach for evolving the Julia
+language towards decidable subtyping.
 
 \section{Subtyping in Julia}
 %% ======================================================================
@@ -195,4 +199,7 @@ and makes the following contributions:
     In the corpus of all 9K registered Julia packages, 99.99\% of source code 
     type annotations satisfy the restriction.
 \end{itemize}
-\TODO{mention my other work that's related}
+Furthermore, \appref{sec:app:sem-sub} discusses a semantic interpretation
+of types, extending \cite{bib:belyakova:minijl-sub:ftfjp:2019}.
+
+%\TODO{mention my other work on Julia?}

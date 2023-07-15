@@ -15,29 +15,28 @@ August 2023
 
 
 \begin{abstract}
-\TODO{abstract}
-% Julia is a dynamic, high-level, yet high-performance programming language
-% for scientific computing.
-% To encourage a high level of code reuse and extensibility, Julia is
-% designed around symmetric multiple dynamic dispatch, which allows functions
-% to have multiple implementations tailored to different argument types.
-% To resolve multiple dispatch, Julia relies on a subtype relation over a complex
-% language of run-time types and type annotations, which include parametric types,
-% untagged unions that distribute over covariant tuples, and impredicative
-% existential types.
-% Notably, Julia's subtyping is undecidable.
-% Unlike in statically typed languages
-% with undecidable subtyping, e.g. Scala, where the undecidability manifests at
-% compile time, in Julia, it leads to a run-time stack overflow error. 
-% This can happen
-% at almost any point during the program execution, as subtyping is used to
-% resolve every function call.
-% In this thesis, I propose to develop a decidable subtype relation
-% for the Julia language,
-% such that migrating existing code would require minimal effort.
-% In particular, to provide for decidability, I will restrict the language of type
-% annotations. To evaluate the migration effort, I will check whether
-% type annotations used in registered Julia packages conform to the proposed
-% restriction.
+
+Julia is a dynamic, high-performance programming language
+for scientific computing.
+To encourage a high level of code reuse and extensibility, Julia is
+designed around symmetric multiple dynamic dispatch, which allows functions
+to have multiple implementations tailored to different argument types.
+To resolve multiple dispatch, Julia relies on a subtype relation over a complex
+language of run-time types and type annotations, 
+which include set-theoretic unions, distributive tuples, parametric invariant 
+types, and impredicative existential types.
+Notably, subtyping in Julia is undecidable, which
+manifests with a run-time stack-overflow error when program execution encounters
+an undecidable subtyping check.
+
+In this dissertation, I propose a decidable subtype relation for a restricted
+language of Julia types where existential types inside invariant constructors
+are limited to ones expressible with use-site variance.
+To estimate migration effort that would be required for switching to the 
+restricted type language, I analyze type annotations in the corpus of 9K
+registered Julia packages.
+Out of 2M statically identifiable type annotations in the corpus,
+99.99\% satisfy the restriction, making it a viable candidate for
+evolving Julia towards decidable subtyping.
 
 \end{abstract}

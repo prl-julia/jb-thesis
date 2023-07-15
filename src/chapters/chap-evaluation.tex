@@ -1,57 +1,68 @@
 \chapter{Evaluation of Migration Effort}\label{chap:eval}
 
-How would the proposed restriction of Julia's type language
-impact existing Julia programs and programmers?
-Julia programmers have a history of writing complex
-types~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018} and might be relying on
-the expressive power of existential types inside of invariant constructors.
-%non-trivial variable introduction inside of invariant constructors.
-To examine this concern and estimate how much user code
-would be impacted, we performed a corpus analysis of all 9K packages
+To estimate the effort required for migrating existing Julia code
+to a version of Julia with the restriction on existential types,
+I performed a corpus analysis of all 9K packages
 from the official Julia registry.
-Namely, we extracted type annotations from the source code of the packages
-and checked how many of those annotations satisfy the restriction
-described in \secref{sec:subtyping-decidable}.
+Namely, I developed an automated analysis that extracts type annotations
+from the source code of the packages
+and checks how many of those satisfy the restriction
+described in \secref{chap:dec-sub}.
 
-Out of more than 2M successfully extracted type annotations, only two
-method type signatures
-do not have an equivalent type that is expressible under the restriction;
-4 more annotations have an expressible semantic equivalent, but the equivalence
+Out of more than 2M successfully extracted, \emph{statically} identifiable
+type annotations, only two do not have an equivalent type signature
+that is expressible under the restriction;
+one more annotation has an expressible semantic equivalent, but the equivalence
 is not currently derivable in Julia.
-These results are encouraging and suggest that the restricted type language
-allows for a desirable trade-off between expressiveness and decidability.
+These results are encouraging and suggest that in practice,
+%the proposed restriction does not lose much expressiveness in exchange
+%for decidability.
+the cost of expressiveness lost in exchange for decidability is very low.
+%allows for a desirable trade-off between expressiveness and decidability.
 
-\paragraph{Corpus}
-% We evaluate our proposed subtyping restriction by seeing what impact it might
-% have on Julia packages. Package authors use many type annotations and rely on
-% said annotations to specialize implementations for specific values. As a result,
-% we want to see how badly our change might affect existing definitions.
-Our package corpus is the entire official Julia registry, which
-is the default source of packages used by Julia programs; it contains
-the majority of all public Julia packages.
-The list of packages from the registry was obtained using JuliaHub\footnote{
-\url{https://juliahub.com/app/packages/info}, processed by
-\url{https://github.com/julbinb/JuliaPkgsList.jl}} tool. 
-There were 9355 entries listed on JuliaHub as of 2023-05-20. %our tool
-%extracts the package name and latest registered version of each. 
-We successfully downloaded\footnote{using
-\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}} tool
-9315 packages: some JuliaHub entries were not valid registered packages,
-e.g. the entry for Julia itself, some were no longer publicly available
-or could not be processed for other reasons.
-%or could not be automatically for  and were inaccessible or did not have a
-%version. In total, we extracted and downloaded 9315 packages using another
-%tool\footnote{\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}}.
-The resulting corpus consists of 172,024 files with 19,476,938 lines of code.
+\paragraph{Corpus.}
+The chosen corpus of packages is the entire official \emph{General
+registry}\footnote{\url{https://github.com/JuliaRegistries/General}}:
+this registry is the default source of packages used by Julia programs
+and contains the majority of all public Julia packages.
+The list of packages was obtained using
+the JuliaHub service\footnote{
+  JuliaHub (\url{https://juliahub.com/ui/Packages}) is listed on
+  \url{https://julialang.org/packages/}
+  as one of the services for browsing Julia packages.
+}:
+JuliaHub conveniently provides a JSON file\footnote{
+  \url{https://juliahub.com/app/packages/info}
+}, which I processed with \code{JuliaPkgsList.jl}\footnote{
+  \url{https://github.com/julbinb/JuliaPkgsList.jl}
+} to extract information about packages and latest registered versions.
+There were \numprint{9355} entries listed on JuliaHub as of 2023-05-20.
+Out of those, using \code{JuliaPkgDownloader.jl}\footnote{
+  \url{https://github.com/julbinb/JuliaPkgDownloader.jl/}
+}, I successfully downloaded \numprint{9315} packages.
+Some JuliaHub entries were not valid registered packages,
+e.g. the entry for Julia itself, some did not contain a version,
+some were no longer publicly available or could not be processed
+for other reasons.
+
+Thus, the resulting corpus consists of 172K files with 19.5M lines of code
+across 9K packages (\tabref{tab:corpus}).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|c}
+ packages & files & lines of code \\ 
+ \midrule
+ \numprint{9315} & \numprint{172024} & \numprint{19476938}
+\end{tabular}
+\caption{Corpus of Julia packages from General registry (May 2023)
+}\label{tab:corpus}
+\begin{tablenotes}[para]
+\small
+Lines of code exclude comments.
+\end{tablenotes}
+\end{table}
 %as determined by \code{cloc}.
-
-%to fin
-%Used to get a list of
-%Julia packages.
-%The info is taken from a JSON file at
-%\url{https://juliahub.com/app/packages/info}.
-%(JuliaHub is listed as a service for searching all registered packages
-%here: \url{https://julialang.org/packages/}).
 
 %There were 9355 entries listed as of 2022-05-28.
 %The tool extracts package name and latest version.
@@ -60,53 +71,72 @@ The resulting corpus consists of 172,024 files with 19,476,938 lines of code.
 %Some repositories are no longer open and cannot be accessed.
 %Some repos did not have a version (31).
 
-%9315 packages were successfully downloaded usin
-%\url{https://github.com/julbinb/JuliaPkgDownloader.jl/}.
+\section{Methodology} 
 
-\subsection{Methodology} 
-Our analysis, written in Julia, extracts type annotations from all \code{.jl}
+The analysis\footnote{
+  \url{https://github.com/prl-julia/julia-sub
+  }
+}, written in Julia and performed in Julia 1.8.5, 
+extracts type annotations from all \code{.jl}
 files in the corpus and reports annotations that cannot be trivially rewritten 
 into equivalent ones admitted by the restricted type language.
-To extract type annotations, we rely on the Julia parser and 
-the MacroTools.jl\footnote{\url{https://github.com/FluxML/MacroTools.jl}} package.
-%We performed several analyses on this corpus to examine how it uses  types. In
-%aggregate, the corpus consists of 172,024 files with 19,476,938 lines of code
-%as determined by \verb|cloc|. To provide a more granular analysis we then performed
-%Julia-level analysis to extract the types used in each package.
+To extract type annotations, the analysis relies on the Julia parser and 
+the MacroTools.jl\footnote{
+  \url{https://github.com/FluxML/MacroTools.jl}
+} package, which allows for convenient pattern matching over Julia's abstract
+syntax tree. 
+The analysis is static and as such, does not process dynamically generated code.
 
-% Our type extraction process uses the Julia parser to convert each .jl file into an
-% AST representation, then analyze that using the MacroTools.jl package. 
-
-We identify and extract the following kinds of type annotations:
+I identify and extract the following kinds of type annotations:
 \begin{itemize}
     \item method type signatures: for example, 
-    \cjl{f(x::T, v::Vector\{T\}) where T} becomes
-    \cjl{Tuple\{T, Vector\{T\}\} where T};
-    \item return type annotations: for example, \cjl{Bool} from \cjl{f() :: Bool};
-    \item all uses of explicit type assertions \cjl{::t} outside method
+      \cjl{f(x::T, v::Vector\{T\}) where T} is extracted as
+      \cjl{Tuple\{T, Vector\{T\}\} where T};
+    \item return type annotations: for example, \cjl{Bool} from 
+      \cjl{f(x) :: Bool};
+    \item all uses of explicit type assertions \cjl{:: t} outside method
       signatures: these include field
       type annotations, run-time type assertions, and local variable
       type annotations.
 \end{itemize}
 
-The following kinds of existential types inside invariant constructors
-\emph{not} admitted by the restriction (that is, not satisfying the \ty grammar)
-have a trivially equivalent restricted representation (according to Julia
-subtyping) and as such, are not flagged by the analysis:
+Type annotations are analyzed as follows:
 \begin{itemize}
-  \item The variable occurs once covariantly, for example,
+  \item For each bound variable, the analysis records information about the
+    position of the \cjl{where}-binding in a type, as well as positions of all
+    occurrences of the variable relative to the binding.
+    Position is defined by a list of constructors.
+    For example, in the type \cjl{Tuple\{Ref\{T\}, S where S\} where T},
+    variable \cjl{T} is bound in \cjl{[]} and occurs in \cjl{[Tuple, Ref]};
+    \cjl{S} is bound in \cjl{[Tuple]} and occurs in \cjl{[]}.
+  \item All variable occurrences are checked against the restriction,
+    using the binding position to identify more permissive top-level variables.
+\end{itemize}
+%The shorthand notation is unrolled ahead of time
+\figref{fig:tests:ta-analysis} provides a list of examples from 
+the analysis test suit.
+
+Some types not syntactically representable by the restriced grammar of \ty
+(\figref{fig:ty-grammar})
+have a representable, trivially \emph{equivalent} counterpart (according
+to Julia subtyping).
+Such unrepresentable types are not flagged by the analysis, and they
+fall into one of the following two categories:
+\begin{itemize}
+  \item An existential variable occurs once covariantly, for example,
     \cjl{Tuple\{T\} where T<:u}: this type is equivalent to \cjl{Tuple\{u\}},
     which is a valid \ty.
-  \item The variable occurs only once in an invariant position, but the occurrence
+  \item An existential variable occurs only once in an invariant position, 
+    but the occurrence
     is separated from the binding by covariant constructors, for example,
     \cjl{Tuple\{Vector\{T\}\} where T} or
     \cjl{Union\{Vector\{T\}, Missing\} where T}: these types are equivalent
-    to the types \cjl{Tuple\{Vector\{T\} where T\}} and
+    to \cjl{Tuple\{Vector\{T\} where T\}} and
     \cjl{Union\{Vector\{T\} where T, Missing\}}, respectively,
     which are valid restricted types \ty.
 \end{itemize}
-In Julia, the first kind of benign unsupported types is already automatically 
-rewritten into the equivalent existential-free form: for example,
+In Julia, the first kind of benign unrepresentable types is already 
+automatically rewritten into the equivalent existential-free form: for example,
 \cjl{Vector\{Tuple\{T\} where T<:Number\}} is evaluated
 to \cjl{Vector\{Tuple\{Number\}\}} in the REPL.
 % \begin{center}
@@ -118,23 +148,23 @@ to \cjl{Vector\{Tuple\{Number\}\}} in the REPL.
 % \end{minipage}
 % \end{center}
 
-\subsection{Results}
+\section{Results}\label{sec:eval:results}
+
 The majority of the source code was processed without failures.
-206 packages had at least one file that could not be parsed by Julia.
-%\figref{fig:evaluation-parse-errors} gives an example of a parsing error
-%encountered.
-In successfully parsed files, we identified 2,316,609 type annotations.
+206 packages had at least one file that could not be parsed by Julia:
+an example of a parsing error is given in \figref{fig:evaluation-parse-errors}.
+In successfully parsed files, the analysis identified a total of
+\numprint{2136609} type annotations.
 Out of these annotations:
 \begin{itemize}
-  \item 1,573 could not be processed at all, usually because a type variable
-    binding contained a macro or quoted expression;
+  \item \numprint{1573} were not be processed at all, usually because 
+    a type variable binding contained a macro or quoted expression;
     several examples of that are given
     in \figref{fig:evaluation-process-errors};
-    % which our analysis couldn't be parsed % BC can we put numbers on this?
-  \item 22,396 were partially processed: this happens when all type variable
-    bindings can be analyzed, but a part of the type cannot be processed due to
-    a macro or quoted expression; in this case, the analysis can miss 
-    some occurrences of type variables.
+  \item \numprint{22396} were partially processed: this happened when all 
+    type variable bindings were processed successfully, but a part of the type
+    could not be processed due to a macro or quoted expression; in this case, 
+    the analysis could miss some occurrences of type variables.
   %For example, partial processing occurs when an unquote is used to
   %splice an AST into a generated type, in which
   %case we do not attempt binding analysis into that unquoted expression.
@@ -142,98 +172,196 @@ Out of these annotations:
 In total, 1629 packages had at least one %macro-related type 
 parsing or processing error.
 
-% Furthemore,
-% some type annotations could not be properly processed, e.g. because of macros
-% \begin{verbatim}
-% Error: Couldn't process type annotation
-%   tastr = "(Tuple{A} where Base.IteratorSize(A)::Base.SizeUnknown) where A"
-%   err = AssertionError: Unsupported lb-var-ub format
-
-% Error: Couldn't process type annotation
-%   tastr = "(((Tuple{(\$T_nameparam){\$N, \$M, \$FT}} where \$FT) where \$M) where \$N) where \$(T_params...)"
-%   err = AssertionError: Unsupported lb-var-ub format
-% \end{verbatim}
-
-% Overall, we identified 2,316,609 type annotations. Out of these annotations:
-% \begin{itemize}
-%     \item 1,573 couldn't be processed at all, usually because a type variable binding couldn't be parsed % BC can we put numbers on this?
-%     \item 22,396 were partially processed. For example, partial processing occurs when an unquote is used to splice an AST into a generated type, in which
-%     case we do not attempt binding analysis into that unquoted expression.
-% \end{itemize}
-% Types that syntactically do not fit the restriction but are trivially
-% equivalent (involve tuples) were considered good by the analysis.
-% Of the examined annotations 2,135,030 (99.999\% of the fully-or-partially
-% analyzable 2,135,036 annotations) were mechanically verifiable as satisfying
-% our proposed restriction. 6 annotations were automatically identified as potentially
-% being impacted by our restriction.
-
-Of the 2,135,036 fully-or-partially analyzable type annotations,
-2,135,030 (i.e. 99.999\%) were identified as satisfying the proposed restriction,
+Of the \numprint{2135036} statically identifiable, 
+fully-or-partially analyzable type annotations,
+\numprint{2135030} (i.e. \textbf{99.999\%}) were identified as satisfying
+the proposed restriction,
 and 6 annotations were flagged as potentially being impacted---they are listed
 in \figref{fig:evaluation-unsup-ty-anns}.
 
+\begin{figure}
+\begin{minipage}{6cm}
+\begin{lstlisting}
+# false positive, package ForneyLab.jl
+# src/algorithms/
+#   posterior_factorization.jl
+Tuple{
+  Vararg{
+    Union{
+      T, Set{T}, Vector{T}
+    } where T <: Variable
+  }, Any}
+# equivalent to:
+Tuple{
+  Vararg{
+    Union{
+      Variable,
+      Set{<:Variable},
+      Vector{<:Variable}
+    }
+  }, Any}
+
+
+
+# false positive, package Tries.jl
+# src/Tries.jl
+Tuple{
+  Vararg{
+    Pair{NTuple{N, K}, T} where N
+  }
+} where T where K
+# equivalent to:
+Tuple{
+  Vararg{
+    Pair{NTuple{N, K}, T} 
+  } where N
+} where T where K
+
+# false positive, package Tries.jl
+# src/Tries.jl
+Tuple{
+  Vararg{
+    Pair{NTuple{N, K}, <:Any} where N
+  }
+} where K
+# equivalent to:
+Tuple{
+  Vararg{
+    Pair{NTuple{N, K}, <:Any} 
+  } where N
+} where K
+\end{lstlisting}
+\end{minipage}
+\hspace{0.5cm}
+\begin{minipage}{6.4cm}
+\begin{lstlisting}
+# false positive (semantically)
+# package Muon.jl
+# src/alignedmapping.jl
+Dict{K,
+  Union{
+    AbstractArray{<:Number}, 
+    AbstractArray{
+      Union{Missing, T}
+    } where T <: Number, 
+    DataFrame
+}}
+# semantically equivalent to,
+# and admitted by the code:
+Dict{K,
+  Union{
+    AbstractArray{<:Number}, 
+    AbstractArray{T} where 
+      Missing<:T<:Union{Missing, Number}, 
+    DataFrame
+}}
+
+# true positive, package Alicorn.jl
+# test/Utils/UtilsTests.jl 
+Array{
+  Tuple{T, 
+    Array{T, N} where N, 
+    Bool
+  } where T
+}
+# admitted by the code:
+Array{
+  Tuple{Any, 
+    Array{<:Any, <:Any},
+    Bool
+}}
+
+# true positive
+# package UnitfulEquivalences.jl
+# src/UnitfulEquivalences.jl
+Tuple{Type{
+  Union{
+    Quantity{T, D, U}, 
+    Level{L, S, 
+      Quantity{T, D, U}
+    } where {L, S}
+  } where {T, U}
+}} where D
+# cannot be easily rewritten
+\end{lstlisting}
+\end{minipage}
+\caption{Type annotations flagged by the analysis:\\ 
+false positives (left) and true positive (right)
+}\label{fig:evaluation-unsup-ty-anns}
+\end{figure}
+
 Three of these six annotations %identified as contravening our restriction were
-were, semantically, false positives related to \cjl{Vararg}. 
+were false positives related to \cjl{Vararg}. 
 In Julia, variadic arguments are represented as
 \cjl{Vararg}-in-\cjl{Tuple} types: for example, \cjl{Tuple\{Vararg\{Int\}\}}
 stands for a tuple of arbitrarily many integers. 
-According to Julia subtyping, \cjl{Vararg} is covariant in its argument,
-whereas our analysis reported it as if it were invariant. 
+According to Julia subtyping, \cjl{Vararg} is covariant in its type argument,
+whereas our analysis reported it as if it were invariant.
 
 Furthermore, one of the remaining three type annotations can be rewritten
 into a semantically equivalent
 type that does satisfy our restriction. The flagged type in 
-question\footnote{In the example,
-type \cjl{AbstractArray} is denoted by \cjl{AbsArray} for brevity.}, 
-\[\text{\cjl{Dict\{K,Union\{AbsArray\{<:Number\}, AbsArray\{Union\{Missing, T\}\} where T <:
-Number, DataFrame\}\}}},\]
-describes dictionaries of arbitrary key type whose
-elements are either arrays of numbers, arrays of elements that are either of
-homogeneous numeric type or missing, or a generic data frame. This type can be
-rewritten as a satisfying our restriction type
-\[\text{\cjl{Dict\{K,
-Union\{AbsArray\{<:Number\}, AbsArray\{Missing << Union\{Missing, Number\}\}, DataFrame\}\}}},\] 
-but the equivalence of the two types is not currently derivable in Julia.
-
-%% TODO
-%% Ross Tate
-%% I'd recommend making a table of the packages and some associated metrics;
-%it'll give an impression of thoroughness, and some reviewers might like to know
-%about some specific packages (you can put it in an appendix if you don't have
-%space). I believe I also found an important error to fix: "the type in
-%question" you mention appear to only be *semantically* equivalent to the
-%replacement you suggest for it—in particular, for the type system to determine
-%the two types are equivalent, it seems to need to be able to express and reason
-%about the type X&~Missing (where ~ is "not"). I think this is fine, and I
-%expect reviewers would find the observation interesting. It would also be
-%interesting to know if replacing it with your suggested weakening works in the
-%code at hand (and same goes for the other examples—it sounds like it works for
-%the second, but the phrasing is unclear). (By the way, in one of your examples
-%you have Array{T,N}, with no discussion of what the second parameter is for.
-%You might want to talk briefly about how you handle these index parameters.) 
+question---the top \cjl{Dict} type on the right of
+\figref{fig:evaluation-unsup-ty-anns}---contains an unrepresentable type:
+\begin{codeenvd}
+\begin{lstlisting}
+      AbstractArray{Union{Missing, T}} where T<:Number
+\end{lstlisting}
+\end{codeenvd}
+The above type is semantically equivalent to:
+\begin{codeenvd}
+\begin{lstlisting}
+    AbstractArray{T} where Missing<:T<:Union{Missing, Number}
+\end{lstlisting}
+\end{codeenvd}
+However, In Julia 1.8.5, the former type is a subtype of the latter
+but not vice versa.
 
 Thus, only two remaining types truly cannot be expressed under
-the proposed restriction. In both cases, a type variable bound by an existential
-type inside invariant constructor occurs more than once in the type:
-\begin{itemize}
-  \item \cjl{Array\{Tuple\{T, Array\{T, N\} where N, Bool\} where
-  T\}\}}, which requires that the array
-  contains tuples where the type of the first element invariantly matches the second element's element typing.
-  Under our restriction, this type could be replaced with the more permissive 
-  type\\ \cjl{Array\{Tuple\{<:Any, Array\{<:Any, <:Any\}, Bool\}\}} and
-  would require runtime checks to enforce the original equality.
-  \item
-  \cjl{Tuple\{Type\{Union\{Quantity\{T,D,U\},Level\{L,S,Quantity\{T,D,U\}\}
-  where\{L,S\}\} where\{T,U\}\}\} where D}\\
-  which is used by the \code{UnitfulEquivalences.jl} package to define a method that extracts the dimension \cjl{D} of the
-  quantity (or log-quantity, in the \cjl{Level}-of-\cjl{Quantity} case) that has units attached. Contextually,
-  this can be %equivalently 
-  rewritten as the restriction-abiding
-  \cjl{Tuple\{Type\{Union\{Quantity\{<:Any, D, <:Any\}, Level\{<:Any, <:Any, Quantity\{<:Any, D, <:Any\}\}\}\}\} where D}
-  without %any semantic differences
-  impacting the semantics of the method.
-\end{itemize}
+the proposed restriction.
+%
+In the first case, 
+\begin{codeenvd}
+\begin{lstlisting}
+    Array{Tuple{Any, Array{T, N} where N, Bool} where T}
+\end{lstlisting}
+\end{codeenvd}
+the problem is that variable \cjl{T} occurs twice.
+%
+In the second case, which seemingly has the same problem as above,
+\begin{codeenvd}
+\begin{lstlisting}
+    Tuple{Type{Union{
+        Quantity{T, D, U}, 
+        Level{L, S, Quantity{T, D, U}} where {L, S}
+      } where {T, U}
+    }} where D
+\end{lstlisting}
+\end{codeenvd}
+the type is equivalent to
+\begin{codeenvd}
+\begin{lstlisting}
+    Tuple{Type{Union{
+        Quantity{T, D, U} where {T, U}, 
+        Level{L, S, Quantity{T, D, U}} where {L, S, T, U}
+      }
+    }} where D
+\end{lstlisting}
+\end{codeenvd}
+where all variables occur exactly once.
+However, in the second component of the union, variables \cjl{T, U}
+are not bound immediately outside the invariant \cjl{Quantity}.
 
+Additionally, I extracted and analyzed type declarations.
+There were a total of \numprint{141232} declarations,
+239 of which could not be processed and \numprint{3804} were partially
+processed (similarly to the case of type annotations). 
+Only one type declaration did not satisfy the restriction in its supertype
+declaration, which was in the same package and with the same type as the
+semantic false positive \cjl{Dict\{...Union\{T,Missing\}...\}}.
+
+%% BARE DATA
+%% ======================================================================
 
 % \paragraph{Packages.}
 % Used \url{https://github.com/julbinb/JuliaPkgsList.jl} to get a list of
@@ -305,3 +433,195 @@ type inside invariant constructor occurs more than once in the type:
 
 % Types that syntactically do not fit the restriction but are trivially
 % equivalent (involve tuples) were considered good by the analysis.
+
+\section{Migration Strategies}
+
+In general, in case where an equivalent representable type does not exist,
+I suggest that two migration strategies are available:
+\begin{enumerate}
+  \item Use more permissive types. For example, replace unrepresentable
+    \cjl{Ref\{Dict\{T, T\} where T\}} with \cjl{Ref\{Dict\{<:Any,<:Any\}\}}.
+    This approach may require changing type annotations in method signatures as
+    well as sites where type-annotated values are created:
+    \begin{codeenvd}
+    \begin{lstlisting}
+f(r :: Ref{Dict{T,T} where T}) = ...
+r = Ref{Dict{T,T} where T}(...)
+f(r)
+
+# transforms to
+
+f(r :: Ref{Dict{<:Any,<:Any}}) = ...
+r = Ref{Dict{<:Any,<:Any}}(...)
+f(r)
+    \end{lstlisting}
+    \end{codeenvd}
+    If it is necessary that the type arguments of the dictionary are the same,
+    a dynamic check can be added. For instance, if \cjl{d} is a dictionary
+    value, the following code ensures that the type parameters are
+    equivalent:
+    \begin{codeenvd}
+    \begin{lstlisting}
+typeof(d).parameters[1] == typeof(d).parameters[2]
+    \end{lstlisting}
+    \end{codeenvd}
+    If there is already a method definition for the more permissive type,
+    it needs to be merged with the no-longer-supported definition:
+    to ``dispatch'' to the right code, a dynamic check akin to the above
+    can be used.
+  \item Define a wrapper type and use it instead of the unrepresentable one.
+    For example:
+    \begin{codeenvd}
+    \begin{lstlisting}
+struct EqDict{T}
+  d :: Dict{T,T}
+end
+    \end{lstlisting}
+    \end{codeenvd}
+    Then, instead of \cjl{Ref\{Dict\{T, T\} where T\}}, the representable type
+    \cjl{Ref\{EqDict\{<:Any\}\}} can be used, but the data needs to wrapped.
+    %All sites 
+    %This approach may require changing sites where data flows into the method,
+    %since the data needs to be wrapped.
+\end{enumerate}
+
+\paragraph{Migrating the three examples.}
+
+For the three examples identified by the analysis (listed on the right of
+\figref{fig:evaluation-unsup-ty-anns} in \chapref{sec:eval:results}),
+I performed a manual inspection and attempted migrating the code,
+which included the following steps:
+\begin{itemize}
+  \item run tests;
+  \item insert \cjl{@info "inside"} near the impacted type annotation and run
+    tests again to ensure that the affected part of the program is exercised by
+    the tests (macro \cjl{@info} simply prints its argument);
+  \item modify the code and run tests again, compare the result.
+\end{itemize}
+
+Two out of the three examples were successfully migrated with a single
+change---in the problematic type annotation.
+In both cases, the problematic type annotations were
+field/type variable annotations, and one of those cases also included
+the above mentioned problematic supertype declaration.
+
+The first successful migration was done for \code{Muon.jl}:
+\figref{fig:evaluation-migrate-muon} depicts relevant code
+and shows two necessary changes in comments.
+There, one change is in a supertype declaration, and another
+is in a field type annotation.
+
+The second successful migration was done for \code{Alicorn.jl}:
+\figref{fig:evaluation-migrate-alicorn} depicts relevant code
+and shows one necessary changes in a comment.
+There, the change is in a variable type annotation.
+
+\begin{figure}
+\begin{minipage}{12cm}
+\begin{lstlisting}
+struct AlignedMapping{T <: Tuple, K, R} <: 
+AbstractAlignedMapping{
+  T,
+  K,
+  Union{
+    AbstractArray{<:Number},
+    # MIGRATION: replace with
+    # AbstractArray{T} where Missing <: T <: Union{Number,T}
+    AbstractArray{Union{Missing, T}} where T <: Number,
+    AbstractDataFrame,
+  },
+}
+  ref::R # any type as long as it supports size()
+  d::Dict{K,
+    Union{
+        AbstractArray{<:Number},
+        # MIGRATION: replace with
+        # AbstractArray{T} where Missing <: T <: Union{Number,T}
+        AbstractArray{Union{Missing, T}} where T <: Number,
+        DataFrame,
+    },
+  }
+  
+  function AlignedMapping{T, K}(r, d::AbstractDict{K}) 
+      where {T <: Tuple, K}
+    @info "inside AlignedMapping"
+    for (k, v) in d
+        checkdim(T, v, r, k)
+    end
+    return new{T, K, typeof(r)}(r, d)
+  end
+end
+\end{lstlisting}
+\end{minipage}
+\caption{\code{Muon.jl} code fragment with unrepresentable types
+}\label{fig:evaluation-migrate-muon}
+\end{figure}
+
+\begin{figure}
+\begin{minipage}{12cm}
+\begin{lstlisting}
+function _getExamplesFor_isElementOf()
+  # MIGRATION: replace with
+  # examples::Array{ Tuple{Any, Array, Bool} } = [
+  examples::Array{ Tuple{T, Array{T,N} where N, Bool} where T } = [
+    ("a", ["a" "b" "c" "d"], true),
+    (1, [2 3; 4 5], false),
+  ]
+  @info "inside _getExamplesFor_isElementOf"
+  return examples
+end
+\end{lstlisting}
+\end{minipage}
+\caption{\code{Alicorn.jl} code fragment with unrepresentable type
+}\label{fig:evaluation-migrate-alicorn}
+\end{figure}
+
+The final example, depicted in \figref{fig:evaluation-migrate-unitful}, 
+involves \cjl{Type} and dispatch on type values.
+Because the problematic type annotation appears in a method that is used
+to macro-generate other methods, I could not easily
+track all the uses of the method and migrate it.
+The example also suggests that the case of \cjl{Type\{T\}} might need
+special treatment to allow \cjl{T} to be instantiated with type signatures
+\tysig rather than \ty. To ensure decidability, an incomplete equality
+relation could likely be used in place of left-to-right and right-to-left
+checks.
+
+\begin{figure}
+\begin{minipage}{12cm}
+\begin{lstlisting}
+# COULD NOT MIGRATE
+dimtype(::Type{
+  Union{
+    Quantity{T,D,U}, 
+    Level{L,S,Quantity{T,D,U}} where {L,S}
+  } where {T,U}
+}) where D = begin
+	@info "inside dimtype"
+	typeof(D)
+end
+
+macro eqrelation(name, relation)
+  ...
+  quote
+    UnitfulEquivalences.edconvert(
+      ::dimtype($(esc(a))), x::$(esc(b)), ::$(esc(name))
+    ) = x * $(esc(rhs))
+    UnitfulEquivalences.edconvert(
+      ::dimtype($(esc(b))), x::$(esc(a)), ::$(esc(name))
+    ) = x / $(esc(rhs))
+    nothing
+  end
+  ...
+end
+
+\end{lstlisting}
+\end{minipage}
+\caption{\code{UnitfulEquivalences.jl} code fragment with unrepresentable type
+(could not be migrated easily)
+}\label{fig:evaluation-migrate-unitful}
+\end{figure}
+
+Overall, the results of the static analysis of type annotations
+are encouraging: in practice, the impact of the restriction appears to be
+extremely limited.

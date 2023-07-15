@@ -1,21 +1,21 @@
 \chapter{Introduction}
 
-Julia is a dynamic, high-level, high-performance programming
-language~\cite{bib:bezanson:julia-fresh:2017},
-originally designed for scientific computing.
-Julia aims to solve the two-language problem, combining the convenience of
-productivity languages such as Python and R and the performance of languages
-such as Fortran and C~\cite{bib:bezanson:julia-dyn-perf:oopsla:2018}.
-Notably, despite the lack of a static type system,
-Julia supports an expressive language of type annotations, which have a direct 
-impact on program semantics. In particular, function call resolution relies on 
-subtyping between run-time types and type annotations.
-However, the subtype relation is undecidable, which causes some programs to
-fail at run time with an uninformative \cjl{StackOverflowError}.
-In this thesis, I propose a restriction on the undecidable fragment of
-Julia types, define a decidable subtype relation for the restricted fragment,
-and show that the impact of the restriction on the existing code is limited.
-\TODO{more info/update}
+% Julia is a dynamic, high-level, high-performance programming
+% language~\cite{bib:bezanson:julia-fresh:2017},
+% originally designed for scientific computing.
+% Julia aims to solve the two-language problem, combining the convenience of
+% productivity languages such as Python and R and the performance of languages
+% such as Fortran and C~\cite{bib:bezanson:julia-dyn-perf:oopsla:2018}.
+% Notably, despite the lack of a static type system,
+% Julia supports an expressive language of type annotations, which have a direct 
+% impact on program semantics. In particular, function call resolution relies on 
+% subtyping between run-time types and type annotations.
+% However, the subtype relation is undecidable, which causes some programs to
+% fail at run time with an uninformative \cjl{StackOverflowError}.
+% In this thesis, I propose a restriction on the undecidable fragment of
+% Julia types, define a decidable subtype relation for the restricted fragment,
+% and show that the impact of the restriction on the existing code is limited.
+\TODO{intro}
 
 
 \section{Subtyping in Julia}

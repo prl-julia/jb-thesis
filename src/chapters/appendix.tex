@@ -256,6 +256,109 @@
     \end{itemize}
 \end{proof}
 
+\clearpage
+\section{Semantic Model}\label{sec:app:sem-sub}
+%% ======================================================================
+
+Julia's subtype relation was inspired by semantic subtyping.
+The description of the original Julia design~\cite{bib:bezanson:julia:2015}
+suggested an intuitive interpretation of types as sets of values,
+but the interpretation is not well defined.
+Furthermore, the treatment of invariant parametric types
+in the interpretation does not match
+the subtype relation. In particular, for concrete nominal \cjl{Name},
+\[
+  \interp{\text{\cjl{Name\{}}\ty\text{\cjl{\}}}} =
+  \{ x\ |\ \text{\cjl{typeof}}(x) = \text{\cjl{Name\{}}\ty\text{\cjl{\}}} \}   
+\]
+does not account for the fact that there are multiple syntactic
+representations $\ty'$ corresponding to the same interpretation as \ty.
+Thus, for example, types \cjl{Vector\{Union\{Int,Any\}\}} and \cjl{Vector\{Any\}}
+are not equivalent according to the interpretation,
+but they are equivalent in Julia.
+
+In \cite{bib:belyakova:minijl-sub:ftfjp:2019}, I proposed and mechanized in Coq
+a semantic interpretation of (a subset of) Julia
+types \ty as \textbf{sets of concrete value types} \gty
+(or type tags) rather than values.
+For the type language of non-parametric nominal types, tuples, and unions,
+a decidable syntactic subtyping based on disjunctive normal form
+coincides with the set inclusion of interpretations.
+%$\interp{\ty} \subseteq \interp{\ty'}$.
+\figref{fig:sem:ty-simple} presents the interpretation and the corresponding
+syntactic, decidable subtyping in the style of \chapref{chap:dec-sub}
+for that language of types.
+$\Sigma$ denotes the set of all value types \gty.
+
+\begin{figure}[t]
+\footnotesize
+Grammar
+\[\begin{array}{rcll}
+    \ty &::=& 
+        \tyany \Alt \tybot \Alt \iname \Alt
+        \typair{\ty_1}{\ty_2} \Alt \tyunion{\ty_1}{\ty_2}
+        & \textit{Type} \\
+    \\
+    \gty &::=& 
+        \iname \Alt
+        \typair{\ty_1}{\ty_2}
+        & \textit{Concrete value type} \\
+    \\
+    \dctx &::=& \square \Alt
+        \typair{\dctxty}{\ty} \Alt \typair{\ty}{\dctxty} 
+        & \textit{Distributivity context} \\
+\end{array}\]
+Interpretation $\interp{\cdot}$
+\[
+    \begin{array}{ccl}
+        \interp{\tyany} &=& \Sigma \\
+        \interp{\tybot} &=& \varnothing \\
+        \interp{\iname} &=& \{ \iname \} \\
+        \interp{\typair{\ty_1}{\ty_2}} &=& 
+            \{ \typair{\gty_1}{\gty_2} \ | \ 
+            \gty_1 \in \interp{\ty_1}, \gty_2 \in \interp{\ty_2} \} \\
+        \interp{\tyunion{\ty_1}{\ty_2}} &=& 
+            \interp{\ty_1} \cup \interp{\ty_2} \\
+    \end{array}
+\]
+Subtyping $\ty \symsub \ty'$
+
+\makebox[\textwidth][c]{
+\begin{minipage}{\ruleswidth}  
+\begin{mathpar}
+    \inferrule[]
+    { }
+    { \ty \symsub \tyany }
+
+    \inferrule[]
+    { }
+    { \plug\dctx\tybot \symsub \ty' }
+
+    \inferrule[]
+    {  }
+    { \iname \symsub \iname }
+    \\
+
+    \inferrule[]
+    { \ty_1 \symsub \ty'_1 \and 
+        \ty_2 \symsub \ty'_2 }
+    { \typair{\ty_1}{\ty_2} \symsub \typair{\ty'_1}{\ty'_2} }
+
+    \inferrule[]
+    { \plug\dctx{\ty_1} \symsub \ty' \and 
+        \plug\dctx{\ty_2} \symsub \ty' }
+    { \plug\dctx{\tyunion{\ty_1}{\ty_2}} \symsub \ty' }
+
+    \inferrule[]
+    { \exists i.\ \ty \symsub \ty'_i }
+    { \ty \symsub \tyunion{\ty'_1}{\ty'_2} }
+\end{mathpar}
+\end{minipage}
+}
+\caption{Semantic interpretation and decidable subtyping for simple types
+}\label{fig:sem:ty-simple}
+\end{figure}
+
 
 \clearpage
 \section{Evaluation}\label{sec:app:eval}

@@ -947,7 +947,8 @@ Therefore, instead, I suggest \textbf{eliminating mutual constraints on
 unification variables}.
 For this, I consider two possible angles of attack.
 \begin{enumerate}
-  \item \emph{Prevent unification variables from moving to the left-hand side
+  \item\label{item:use-equality} 
+    \emph{Prevent unification variables from moving to the left-hand side
     of subtyping.} Recall that unification variables are introduced by
     existential types on the right. The only way for a unification variable to
     ``travel'' to the left is a right-to-left subtyping check for an

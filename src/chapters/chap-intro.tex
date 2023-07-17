@@ -198,7 +198,7 @@ and makes the following contributions:
     types~\citep*{bib:belyakova:julia-sub-dec:draft} (\chapref{chap:dec-sub}).
     The restriction retains most of Julia types, limiting only existential types
     inside invariant constructors.
-  \item \textbf{Evaluation of a migration effort} required to switch to 
+  \item \textbf{Evaluation of the migration effort} required to switch to 
     the restricted type language (\chapref{chap:eval}). 
     In the corpus of all 9K registered Julia packages, 99.99\% of source code 
     type annotations satisfy the restriction.
@@ -206,4 +206,13 @@ and makes the following contributions:
 Furthermore, \appref{sec:app:sem-sub} discusses a semantic interpretation
 of types, extending \cite{bib:belyakova:minijl-sub:ftfjp:2019}.
 
-%\TODO{mention my other work on Julia?}
+Related to this dissertation, I worked on formalizing several aspects of the
+Julia language:
+\begin{itemize}
+  \item \citep*{bib:belyakova:world-age:oopsla:2020} presents 
+    world-age semantics, which enables dispatch optimization in the presence
+    of \texttt{eval} by delaying visibility of dynamically generated methods.
+  \item \citep*{bib:pelenitsyn:type-stability:oopsla:2021} defines type
+    stability---the property which allows for efficient compilation of code with
+    multiple dispatch.
+\end{itemize}

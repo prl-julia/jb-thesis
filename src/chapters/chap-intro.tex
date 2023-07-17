@@ -51,7 +51,8 @@ adding work for the dispatch mechanism.
 Multiple dispatch is resolved with the use of a subtype relation.
 Namely, for every function call, subtyping is checked between
 the argument types and method type signatures,
-as well as between method type signatures.
+as well as between method type signatures
+to pick the most specific applicable method.
 While most run-time value types are nominal, %e.g. \cjl{Vector\{Int64\}},
 the language of type annotations is more complex and expressive. 
 In particular, inspired by semantic subtyping
@@ -75,7 +76,9 @@ is provided in~\chapref{chap:background}.
 %choosing an unusual combination of type language features.
 
 Despite intentional simplifications in the type language,
-e.g. the lack of recursive bounds on type variables,
+e.g. the lack of recursive bounds\footnote{
+  For example, \texttt{X \textbf{implements} Comparable<X>} in Java. 
+} on type variables,
 subtyping in Julia is
 \emph{undecidable}~\cite{bib:chung:type-julia-thesis:2023}.
 %due to %the support for
@@ -86,14 +89,15 @@ subtyping in Julia is
 % describes a heterogeneous vector of vectors of numeric values
 % where inner vectors can have different element types.
 Although relying on undecidable subtyping is not unprecedented
-for a statically typed language, e.g. Scala~\cite{bib:hu:dot-undec:2020},
+for a statically typed language (see Scala~\cite{bib:hu:dot-undec:2020}
+for an example),
 %with an expressive type system such as
 the price of undecidability
 is higher in Julia, since it
-can manifest at almost any point during the program \emph{execution}.
+can manifest at almost any point during program \emph{execution}.
 %as subtyping over a complex language of run-time types and type annotations
 %is an integral part of Julia's dynamic semantics.
-Namely, the run-time system relies on undecidable subtyping
+In particular, the run-time system relies on undecidable subtyping
 to resolve function calls,
 process new method definitions~\cite{bib:belyakova:world-age:oopsla:2020},
 manipulate data (e.g. when adding an element to a container),
@@ -126,7 +130,7 @@ e.g. the aforementioned
 for example, there are 8 open/86 closed ``codegen'' bugs
 and 1 open/15 closed ``GC'' bugs.
 Thus, type-related concerns, including the undecidability of subtyping,
-are not purely theoretical and
+%are not purely theoretical and
 constitute a non-negligible portion of problems in the Julia implementation.
 
 \begin{table}[t]
@@ -191,10 +195,10 @@ and makes the following contributions:
     The specification covers most of Julia, with the only exception being
     variable-length tuples.
   \item \textbf{Decidable subtyping} for a restricted language of Julia 
-    types~[a collaboration with Ross Tate] (\chapref{chap:dec-sub}).
+    types~\citep*{bib:belyakova:julia-sub-dec:draft} (\chapref{chap:dec-sub}).
     The restriction retains most of Julia types, limiting only existential types
     inside invariant constructors.
-  \item \textbf{Evaluation of migration effort} required to switch to 
+  \item \textbf{Evaluation of a migration effort} required to switch to 
     the restricted type language (\chapref{chap:eval}). 
     In the corpus of all 9K registered Julia packages, 99.99\% of source code 
     type annotations satisfy the restriction.

@@ -6,7 +6,7 @@
 \subsection{Decidable Subtyping}\label{subsec:app:proofs:dec}
 %% *********************************************************
 
-\begin{lemma}{Context weakening in $\msrop$ (\textbf{\lemref{lem:msr-weakening}}).}%
+\begin{lemma}[Context weakening in $\msrop$ (\textbf{\lemref{lem:msr-weakening}})]%
 \label{lem:msr-weakening:app}
     The measure of a type signature does not change if the environment
     is extended (in any position) with a variable that occurs neither
@@ -100,8 +100,8 @@
 \subsection{Unification-Free Subtyping}\label{subsec:app:proofs:subty}
 %% *********************************************************
 
-\begin{lemma}{Subtyping of \tybot implies arbitrary subtyping
-    (\textbf{\lemref{lem:sub-of-bot}}).}\label{lem:sub-of-bot:app}
+\begin{lemma}[Subtyping of \tybot implies arbitrary subtyping
+    (\textbf{\lemref{lem:sub-of-bot}})]\label{lem:sub-of-bot:app}
     \[
     \forall \ty, \dctx_{\tybot}, \AEnv.\quad 
     \subtydflt{\ty}{\plug{\dctx_{\tybot}}\tybot}
@@ -156,8 +156,8 @@
     are not possible.
 \end{proof}
 
-\begin{lemma}{Subtyping of inner union on the right
-    (\textbf{\lemref{lem:sub-inner-union-right}}).}%
+\begin{lemma}[Subtyping of inner union on the right
+    (\textbf{\lemref{lem:sub-inner-union-right}})]%
 \label{lem:sub-inner-union-right:app}
     $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }$\\
     $\tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
@@ -222,7 +222,7 @@
     are not possible.
 \end{proof}
 
-\begin{lemma}{Adding inner union on the right (\textbf{\lemref{}}).}%
+\begin{lemma}[Adding inner union on the right (\textbf{\lemref{}})]%
 \label{lem:add-inner-union-right:app}
     $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
     tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
@@ -367,7 +367,7 @@ In \cite{bib:belyakova:minijl-sub:ftfjp:2019}, I show that the decidable
 syntactic subtype relation is sound and complete with respect
 to the interpretation.
 
-\begin{theorem}{}
+\begin{theorem}[]
     $\forall \ty, \ty'.$
     \[
         \begin{array}{c}
@@ -446,7 +446,7 @@ Then, semantic subtyping is defined as:
 Despite the more complex indexed interpretation, the syntactic subtype relation
 is still sound and complete.
 
-\begin{theorem}{}
+\begin{theorem}[]
     $\forall \ty, \ty'.$
     \[
         \begin{array}{c}

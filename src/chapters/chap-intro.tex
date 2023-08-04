@@ -51,7 +51,7 @@ adding work for the dispatch mechanism.
 Multiple dispatch is resolved with the use of a subtype relation.
 Namely, for every function call, subtyping is checked between
 the argument types and method type signatures,
-as well as between method type signatures
+as well as among method type signatures
 to pick the most specific applicable method.
 While most run-time value types are nominal, %e.g. \cjl{Vector\{Int64\}},
 the language of type annotations is more complex and expressive. 
@@ -101,7 +101,7 @@ In particular, the run-time system relies on undecidable subtyping
 to resolve function calls,
 process new method definitions~\cite{bib:belyakova:world-age:oopsla:2020},
 manipulate data (e.g. when adding an element to a container),
-as well as during JIT compilation~\cite{bib:pelenitsyn:type-stability:oopsla:2021}.
+as well as JIT compile methods~\cite{bib:pelenitsyn:type-stability:oopsla:2021}.
 In practice, the undecidability
 leads to a run-time crash with a \cjl{StackOverflowError}.
 Such an issue can be particularly hard to debug,
@@ -116,7 +116,7 @@ on the Julia bug tracker. For example,
 which is likely linked to undecidability;
 \href{https://github.com/JuliaLang/julia/issues/33137}{\code{\#33137}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/33137}
-} points out an inconsistency in subtyping; % related to the diagonal rule.
+} points out an inconsistency in subtyping; and % related to the diagonal rule.
 \href{https://github.com/JuliaLang/julia/issues/24166}{\code{\#24166}}\footnote{
     \url{https://github.com/JuliaLang/julia/issues/24166} 
 } (now fixed) reports a problem with reflexivity and transitivity.
@@ -136,6 +136,9 @@ constitute a non-negligible portion of problems in the Julia implementation.
 \begin{table}[t]
 \begin{threeparttable}
 \centering\footnotesize
+\caption{Open/closed issues on the Julia bug tracker
+(March~2023)}\label{tab:julia-issues-stats}
+
 \begin{tabular}{c|ccccc}
  & types and dispatch & codegen & GC & macros & <any label> \\
 \midrule
@@ -144,8 +147,7 @@ constitute a non-negligible portion of problems in the Julia implementation.
 bug &
   13/138 & 8/86 & 1/15 & 5/11 & 226/2664
 \end{tabular}
-\caption{Open/closed issues on the Julia bug tracker
-(March~2023)}\label{tab:julia-issues-stats}
+
 \begin{tablenotes}[para]
 \small
 Axes represent labels the issues are marked with: for example, the cell
@@ -161,10 +163,9 @@ issues labeled with {``GC''}, whereas 1/15 in the row \emph{bug} and column
 
 Due to Julia's ubiquitous use of subtyping at run time,
 the undecidability of subtyping is consequential.
-Unfortunately, as I discuss in \chapref{sec:julia-sub:undec},
-a compatible decidable subtype relation for the entirety of Julia types
-is unlikely to exist.
-However, my thesis is that
+It is unlikely, as I discuss in \chapref{sec:julia-sub:undec},
+that a compatible decidable subtype relation exists for the entirety of Julia
+types. However, my thesis is that
 \begin{quotation}\emph{
   the Julia language can be evolved to provide for decidable subtyping while
   requiring minimal effort for migrating existing code.
@@ -173,8 +174,8 @@ However, my thesis is that
 Because the type language and its associated subtype relation 
 impact the set of valid Julia programs and their dynamic semantics,
 replacing subtyping can have profound effects on programmer experience 
-as well the ability to migrate existing code.
-Thus, not any decidable subtyping would be a viable candidate for
+as well as the ability to migrate existing code.
+Thus, not every decidable subtyping would be a viable candidate for
 Julia's evolution.
 
 In this dissertation, I show that there is

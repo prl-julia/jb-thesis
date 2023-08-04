@@ -27,7 +27,7 @@ which include set-theoretic unions, distributive tuples, parametric invariant
 types, and impredicative existential types.
 Notably, subtyping in Julia is undecidable, which
 manifests with a run-time stack-overflow error when program execution encounters
-an undecidable subtyping check.
+a subtyping query that causes the subtype checker to loop.
 
 In this dissertation, I propose a decidable subtype relation for a restricted
 language of Julia types where existential types inside invariant constructors

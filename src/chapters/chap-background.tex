@@ -316,12 +316,12 @@ Field \cjl{specializations} stores compiled method specializations.
 
 Method resolution for a dispatched function call \cjl{f(a1, a2, ...)}
 relies on tuple subtyping~\cite{bib:leavens:tuple-dispatch:1998}
-between run-time argument types and method type signatures.
+between run-time argument types and method signatures.
 Namely, argument types are combined into a tuple of concrete types
 \begin{center}
   $\gty =$ \cjl{Tuple\{typeof(a1), typeof(a2), ...\}},
 \end{center}
-and every method type signature is either a tuple of declared argument types
+and every method signature is either a tuple of declared argument types
 if the method definition is not parametric, or a union-all of that tuple
 if the definition is parametric.
 For example, consider \figref{fig:code:subtraction}: method in line~1
@@ -330,7 +330,7 @@ is represented by the signature \cjl{Tuple\{BigInt\}}, line~4 by
 \cjl{Tuple\{T, T\} where T <: Union\{...\}}.
 %Thus, for the purpose of dispatch resolution, arguments of a function call
 %are represented with a single concrete type \gty,
-%and every method type signature is represented as a type \ty.
+%and every method signature is represented as a type \ty.
 Because tuple subtyping gives all elements equal consideration,
 multiple dispatch in Julia is \emph{symmetric}.
 
@@ -346,7 +346,7 @@ type~\gty, the process can be described as follows:
     the applicable methods $\{\ty_1, \ldots, \ty_n\}$,
     pick the method with the most specific type signature,
     i.e., $\ty_k$ such that $\forall i\in1..n, \ty_k <: \ty_i$.
-    %(method type signature is a subtype of all other applicable method
+    %(method signature is a subtype of all other applicable method
     %signatures).
     If there is no such single best method, a method-is-ambiguous
     error is raised.\footnote{Requested by language users over the years,

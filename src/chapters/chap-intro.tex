@@ -50,8 +50,8 @@ adding work for the dispatch mechanism.
 
 Multiple dispatch is resolved with the use of a subtype relation.
 Namely, for every function call, subtyping is checked between
-the argument types and method type signatures,
-as well as among method type signatures
+the argument types and method signatures,
+as well as between method signatures,
 to pick the most specific applicable method.
 While most run-time value types are nominal, %e.g. \cjl{Vector\{Int64\}},
 the language of type annotations is more complex and expressive. 
@@ -60,15 +60,15 @@ where types are interpreted as sets,
 Julia supports covariant tuples that distribute over unions.
 For example, according to the semantic approach, the type 
 \cjl{Tuple\{String, Union\{Int64, UInt64\}\}} represents a set of binary
-tuples where the first component is either a signed or unsigned integer,
-and the second component is a string. Therefore, both
+tuples where the first component is a string, and the second component is
+either a signed or unsigned integer. Therefore, both
 \cjl{Tuple\{String, Int64\}} and \cjl{Tuple\{String, UInt64\}} are subtypes
 of the above type, and that type is equivalent to the union of the two
 tuples, \cjl{Union\{Tuple\{String, Int64\}, Tuple\{String, UInt64\}\}}.
 In addition to finite unions, Julia supports existential types, referred to as
 union-all types or iterated unions in the language. 
 For example, \cjl{Vector\{T\} where T}
-represents an infinite union of vectors \cjl{Vector\{t\}} for all valid
+represents an infinite union of vectors \cjl{Vector\{t\}} for all
 instantiations \cjl{t} of the type variable \cjl{T}.
 A~more detailed account of Julia types and subtyping
 is provided in~\chapref{chap:background}.
@@ -164,9 +164,12 @@ issues labeled with {``GC''}, whereas 1/15 in the row \emph{bug} and column
 Due to Julia's ubiquitous use of subtyping at run time,
 the undecidability of subtyping is consequential.
 It is unlikely, as I discuss in \chapref{sec:julia-sub:undec},
-that a compatible decidable subtype relation exists for the entirety of Julia
+that a compatible\footnote{\emph{Compatible} means \emph{compatible with the
+current Julia subtyping}, i.e., produces the same answer
+as Julia subtyping whenever Julia subtyping terminates without an error.}
+decidable subtype relation exists for the entirety of Julia
 types. However, my thesis is that
-\begin{quotation}\emph{
+\begin{quotation}\noindent\emph{%
   the Julia language can be evolved to provide for decidable subtyping while
   requiring minimal effort for migrating existing code.
 }\end{quotation}

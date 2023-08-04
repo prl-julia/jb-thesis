@@ -93,7 +93,7 @@ The analysis is static and as such, does not process dynamically generated code.
 
 I identify and extract the following kinds of type annotations:
 \begin{itemize}
-    \item method type signatures: for example, 
+    \item method signatures: for example, 
       \cjl{Tuple\{T, Vector\{T\}\} where T} is extracted from method
       \cjl{f(x::T, v::Vector\{T\}) where T = ...};
     \item return type annotations: for example, \cjl{Bool} from 
@@ -409,7 +409,7 @@ false positive \cjl{Dict\{...Union\{T,Missing\}...\}}.
 %     \item method signatures, e.g. \cjl{f(x::T, v::Vector\{T\}) where T}
 %       is transformed into \cjl{Tuple\{T, Vector\{T\}\} where T}
 %     \item if there is a return type anotation, it is counted as a separate type
-%     \item with the exception of method type signatures, all \cjl{t} from
+%     \item with the exception of method signatures, all \cjl{t} from
 %         \cjl{::t}, which includes field type annotations, run-time type assertions,
 %         and local variable type annotations
 % \end{itemize}

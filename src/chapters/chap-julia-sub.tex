@@ -525,9 +525,9 @@ for all instances of \(T\) there is a matching type for \(S\):
 \]
 However, we must instead find an instance of \(\S\) such that 
 the judgment holds forall \T: perhaps surprisingly, the outer invariant
-construct \(\jlname{Vector}\) forces the inversion of the order of quantifications.
+construct \(\jlname{Vector}\) forces the the form of the rule of the order of quantifications.
 Instead of a forall/exist query we must solve an \emph{exist/forall} one.
-To correctly account for inversion in the order of quantifications,
+To correctly account for the form of the rule in the order of quantifications,
 derivations must keep track of the relative ordering of
 variable introductions and invariant constructors.  For this, the
 environment \(E.curr\) is kept ordered, and
@@ -729,7 +729,7 @@ to compute intersection in simple cases.
 As of May 2023, the problematic judgment above no longer holds.
 
 To account for the exist/forall
-quantification inversion, the \RLJ{R\_Right} rule does not apply
+quantification the form of the rule, the \RLJ{R\_Right} rule does not apply
 if the type on the left is
 a left variable, and the variables are in the exists/forall quantification
 (the check \(\lnot\mathit{outside}(\T,\S,E)\) is responsible for this).
@@ -829,7 +829,7 @@ $\t$ and $\t'$ are equivalent
 if both $\t <: \t'$ and $\t' <: \t$ hold.
 To check for equivalence, one can either rely on subtyping directly,
 or use a separate relation $\t \approx \t'$ such that 
-$\t \approx \t' \ \implies\ \t <: \t'\ \land\ \t' <: \t$.
+$\t \approx \t' \ \implies\ \t <: \t'\ \text{ and }\ \t' <: \t$.
 
 Next, recall that an existential type $\wheret{\t}{l{<:}\T{<:}u}$ is meant to 
 represent a union of types $\t[\t'/\T]$ for all possible valid instantiations

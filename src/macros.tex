@@ -309,15 +309,15 @@ on page \pageref{#1}.}
 \DeclareMathOperator{\symrexvarsub}{\ll}        %% restricted existential bounds
 
 %% Subtyping signatures Γ|Δ |- s1 <: s2
-\newcommand{\subtysig}[4]{\EM{#1\Alt#2\ \vdash\ #3 \symsub #4}}
+\newcommand{\subtysig}[4]{\EM{#1\Alt#2\;\vdash\;#3 \symsub #4}}
 \newcommand{\subtysigdflt}[2]{\subtysig{\AEnv}{\UEnv}{#1}{#2}}
 
 %% Subtyping Γ |- t1 <: t2
-\newcommand{\subty}[3]{\EM{#1\ \vdash\ #2 \symsub #3}}
+\newcommand{\subty}[3]{\EM{#1\;\vdash\;#2 \symsub #3}}
 \newcommand{\subtydflt}[2]{\subty{\AEnv}{#1}{#2}}
 
 %% Constrained subtyping Γ|H |- t1 ⊲ t2 -> Κ
-\newcommand{\subtyctrtmplt}[6]{\EM{#2\Alt#3\ \vdash\ #4 #1 #5\ \rightsquigarrow\ #6}}
+\newcommand{\subtyctrtmplt}[6]{\EM{#2\Alt#3\;\vdash\;#4 #1 #5\ \rightsquigarrow\ #6}}
 \newcommand{\subtyctr}[5]{\subtyctrtmplt{\symsubctr}{#1}{#2}{#3}{#4}{#5}}
 \newcommand{\subtyctrdflt}[2]{\subtyctr{\AEnv}{\UEnvD}{#1}{#2}{\CSet}}
 \newcommand{\subtyctrdfltenv}[3]{\subtyctr{\AEnv}{\UEnvD}{#1}{#2}{#3}}

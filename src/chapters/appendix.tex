@@ -12,9 +12,9 @@
     is extended (in any position) with a variable that occurs neither
     in the signature nor in the environment, i.e.,
     $\forall \tysig, \AEnv, \AEnv'. 
-    \forall \varbound{\vany}{\tylb}{\tyub} \text{ s.t. } 
-    \lnot \occdflt{\tysig} \land 
-    \lnot \occdflt{\AEnv} \land \lnot \occdflt{\AEnv'}.$
+    \forall \varbound{\vany}{\tylb}{\tyub} \text{ with } 
+    \lnot \occdflt{\tysig} \text{ and } 
+    \lnot \occdflt{\AEnv} \text{ and } \lnot \occdflt{\AEnv'}.$
     \[\tymsr{\concat{\AEnv}{\AEnv'}}{\tysig} = 
         \tymsr{\concat{\AEnv,\varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tysig},\]
     where \concat{\AEnv}{\AEnv''} denotes the concatenation of lists,
@@ -32,11 +32,11 @@
     \tymsr{\varbound{\vany}{\tylb}{\tyub}}{\vany'}.\]
     
     In the inductive step for $n$, the induction hypothesis (IH) states that
-    $\forall n'<n. \forall \tysig', \AEnv'', \AEnv'''  \text{ s.t. }
+    $\forall n'<n. \forall \tysig', \AEnv'', \AEnv'''  \text{ with }
     n' = \size{\AEnv''} + \size{\AEnv'''} + \size{\tysig'}.
-    \forall \varbound{\vany}{\tylb}{\tyub} \text{ s.t. } 
-    \lnot \occdflt{\tysig'} \land 
-    \lnot \occdflt{\AEnv''} \land \lnot \occdflt{\AEnv'''}.$
+    \forall \varbound{\vany}{\tylb}{\tyub} \text{ with } 
+    \lnot \occdflt{\tysig'} \text{ and } 
+    \lnot \occdflt{\AEnv''} \text{ and } \lnot \occdflt{\AEnv'''}.$
     \[\tymsr{\concat{\AEnv''}{\AEnv'''}}{\tysig'} = 
     \tymsr{\concat{\AEnv'',\varbound{\vany}{\tylb}{\tyub}}{\AEnv'''}}{\tysig'}.\]
     
@@ -122,7 +122,7 @@
         \item Case \RST{VarLeft}
             \subtydflt{\plug\dctx\vany}{\plug{\dctx_{\tybot}}{\tybot}}.
 
-            By inversion, \subtydflt{\plug\dctx\tyub}{\plug{\dctx_{\tybot}}{\tybot}}.
+            By the form of the rule, \subtydflt{\plug\dctx\tyub}{\plug{\dctx_{\tybot}}{\tybot}}.
             By IH, \subtydflt{\plug{\dctx'}{\plug\dctx\tyub}}{\ty'}.
             Thus, the case concludes by \RST{VarLeft}: 
             \subtydflt{\plug{\dctx'}{\plug\dctx\vany}}{\ty'}.
@@ -135,7 +135,7 @@
             \subtydflt{\typair{\ty_1}{\ty_2}}
             {\typair{\plug{\dctx'_{\tybot}}{\tybot}}{\ty'_2}}.
 
-            By inversion, \subtydflt{\ty_1}{\plug{\dctx'_{\tybot}}{\tybot}}.
+            By the form of the rule, \subtydflt{\ty_1}{\plug{\dctx'_{\tybot}}{\tybot}}.
             By IH, \subtydflt{\plug{\dctx'^h}{\ty_1}}{\ty'} for all $\dctx'^h$,
             so we can take it to be \plug{\dctx'}{\typair{\square}{\ty_2}}.
             Thus, the case concludes by IH: 
@@ -143,7 +143,7 @@
         \item Case \RST{UnionLeft}
             \subtydflt{\plug\dctx{\tyunion{\ty_1}{\ty_2}}}{\plug{\dctx_{\tybot}}{\tybot}}
             where $\ty = \tyunion{\ty_1}{\ty_2}$.
-            By inversion, 
+            By the form of the rule, 
             \subtydflt{\plug\dctx{\ty_1}}{\plug{\dctx_{\tybot}}{\tybot}} and
             \subtydflt{\plug\dctx{\ty_2}}{\plug{\dctx_{\tybot}}{\tybot}}.
             By IH, \subtydflt{\plug{\dctx'}{\plug\dctx{\ty_1}}}{\ty'} and
@@ -159,14 +159,14 @@
 \begin{lemma}{Subtyping of inner union on the right
     (\textbf{\lemref{lem:sub-inner-union-right}}).}%
 \label{lem:sub-inner-union-right:app}
-    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ s.t. }$\\
-    $\tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
+    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }$\\
+    $\tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
     \[
         \begin{array}{ccc}
         \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}\\
         \quad\implies\quad\\
-        (\forall \dctx_1, \dctx_2, \text{ s.t. }
-        \tyvlddflt{\dctx_1, \dctx_2} \land
+        (\forall \dctx_1, \dctx_2, \text{ with }
+        \tyvlddflt{\dctx_1, \dctx_2} \text{ and }
         \subtydflt{\dctx_1}{\dctx_2}.\quad
         \subtydflt
             {\plug{\dctx_1}{\ty}}
@@ -182,12 +182,12 @@
     \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}.
     \begin{itemize}
         \item Case \RST{Bot} by \RST{Bot}.
-        \item Case \RST{VarLeft} by inversion, IH, and \RST{VarLeft}.
+        \item Case \RST{VarLeft} by the form of the rule, IH, and \RST{VarLeft}.
         \item Case \RST{Tuple}, subcase where
             $\dctx' = \typair{\dctx''}{\ty'}$:
             \subtydflt{\typair{\ty_1}{\ty_2}}
                 {\typair{\plug{\dctx''}{\tyunion{\ty'_1}{\ty'_2}}}{\ty'}}.
-            By inversion,
+            By the form of the rule,
             \subtydflt{\ty_1}{\plug{\dctx''}{\tyunion{\ty'_1}{\ty'_2}}} and
             \subtydflt{\ty_2}{\ty'}. 
             
@@ -207,10 +207,10 @@
                     {\plug{\dctx_2}{\typair{\plug{\dctx''}{\ty'_1}}{\ty_2}}}
                     {\plug{\dctx_2}{\typair{\plug{\dctx''}{\ty'_2}}{\ty'}}}
                 }
-        \item Case \RST{UnionLeft} by inversion, IH, and \RST{UnionLeft}.
+        \item Case \RST{UnionLeft} by the form of the rule, IH, and \RST{UnionLeft}.
         \item Case \RST{UnionRight}, subcase $i = 1$ where $\dctx' = \square$:
             \subtydflt{\ty}{\tyunion{\ty'_1}{\ty'_2}}.
-            By inversion, \subtydflt\ty{\ty'_1}.
+            By the form of the rule, \subtydflt\ty{\ty'_1}.
             By assumption, \subtydflt{\dctx_1}{\dctx_2}, and thus,
             \subtydflt{\plug{\dctx_1}{\ty}}{\plug{\dctx_2}{\ty'_1}}.
             The case concludes by \RST{UnionRight} with $i=1$:
@@ -224,8 +224,8 @@
 
 \begin{lemma}{Adding inner union on the right (\textbf{\lemref{}}).}%
 \label{lem:add-inner-union-right:app}
-    $\forall \ty, \dctx', \ty', \AEnv, \text{ s.t. }
-    tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'}.$
+    $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
+    tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
     \[
         \subtydflt{\ty}{\plug{\dctx'}{\ty'}}
         \quad\implies\quad
@@ -242,15 +242,15 @@
         \item Case \RST{Bot} by \RST{Bot}.
         \item Case \RST{VarRefl} where $\dctx'=\square$
             by assumption and \RST{UnionRight} with $i=1$.
-        \item Case \RST{VarLeft} by inversion, IH, and \RST{VarLeft}.
+        \item Case \RST{VarLeft} by the form of the rule, IH, and \RST{VarLeft}.
         \item Case \RST{VarRight} where $\dctx'=\square$
             by assumption and \RST{UnionRight} with $i=1$.
         \item Case \RST{Tuple}. 
             Subcase $\dctx'$ by assumption and \RST{UnionRight} with $i=1$.
-            The other two subcases by inversion, IH, and \RST{Tuple}.
+            The other two subcases by the form of the rule, IH, and \RST{Tuple}.
         \item Case \RST{Inv} where $\dctx'=\square$
             by assumption and \RST{UnionRight} with $i=1$.
-        \item Case \RST{UnionLeft} by inversion, IH, and \RST{UnionLeft}.
+        \item Case \RST{UnionLeft} by the form of the rule, IH, and \RST{UnionLeft}.
         \item Case \RST{UnionRight} where $\dctx'=\square$
             by assumption and \RST{UnionRight} with $i=1$.
     \end{itemize}
@@ -577,7 +577,7 @@ Interpretation $\interpexdflt{\cdot}$
             \subseteq\, \interp{\tyub}^{\semsubstvars}_{w'}}
         \interp{\ty}^{\subst{\semsubstvars}{\substel{\vx\,}{\,\gtyset}}}_{w'} \\
     \interpexdflt{\vx} &=& \{ \gty^k \ |\ 
-        \gty^k \in \semsubstvars(\vx)\ \land\ k \leq w \} \\
+        \gty^k \in \semsubstvars(\vx)\ \text{ and }\ k \leq w \} \\
 \end{array}
 \]
 \caption{Semantic interpretation for

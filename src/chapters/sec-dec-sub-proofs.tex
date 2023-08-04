@@ -207,7 +207,7 @@ will be used implicitly (proofs are straightforward by induction):
     \item $\plug{\dctx}{\dctx'} = \dctx'';$
     \item $\plug{\dctx}{\plug{\dctx'}{\ty}} = 
         \plug{(\plug{\dctx}{\dctx'})}{\ty};$
-    \item $\subtydflt{\dctx}{\dctx'} \land \subtydflt{\ty}{\ty'}
+    \item $\subtydflt{\dctx}{\dctx'} \text{ and } \subtydflt{\ty}{\ty'}
         \implies \subtydflt{\plug{\dctx}{\ty}}{\plug{\dctx'}{\ty'}};$
     \item $\size{\plug{\dctx}{\ty}} = \size{\dctx} + \size{\ty};$
     \item $\size{\plug{\dctxsig}{\tysig}} = \size{\dctxsig} + \size{\tysig};$
@@ -362,9 +362,9 @@ This section presents the following key properties:
     is extended (in any position) with a variable that occurs neither
     in the signature nor in the environment, i.e.,
     $\forall \tysig, \AEnv, \AEnv'. 
-    \forall \varbound{\vany}{\tylb}{\tyub} \text{ s.t. } 
-    \lnot \occdflt{\tysig} \land 
-    \lnot \occdflt{\AEnv} \land \lnot \occdflt{\AEnv'}.$
+    \forall \varbound{\vany}{\tylb}{\tyub} \text{ with } 
+    \lnot \occdflt{\tysig} \text{ and } 
+    \lnot \occdflt{\AEnv} \text{ and } \lnot \occdflt{\AEnv'}.$
     \[\tymsr{\concat{\AEnv}{\AEnv'}}{\tysig} = 
         \tymsr{\concat{\AEnv,\varbound{\vany}{\tylb}{\tyub}}{\AEnv'}}{\tysig},\]
     where \concat{\AEnv}{\AEnv''} denotes the concatenation of lists,
@@ -441,14 +441,14 @@ This section presents the following key properties:
 This section presents the following key properties:
 \begin{itemize}
     \item reflexivity \subtydflt{\ty}{\ty} (\thmref{thm:sub-ty-refl});
-    \item transitivity $\subtydflt{\ty_1}{\ty_2} \ \ \land\ \ 
+    \item transitivity $\subtydflt{\ty_1}{\ty_2} \ \ \text{ and }\ \ 
         \subtydflt{\ty_2}{\ty_3} \implies \subtydflt{\ty_1}{\ty_3}$
         (\thmref{thm:sub-ty-trans});
     \item soundness with respect to substitution (\thmref{thm:subty-sound-subst}).
 \end{itemize}
 
 \begin{theorem}{Reflexivity of subtyping of types.}\label{thm:sub-ty-refl}
-    $\forall \ty, \AEnv, \text{ s.t. } \tyvlddflt{\ty}.$
+    $\forall \ty, \AEnv, \text{ with } \tyvlddflt{\ty}.$
     \[\subtydflt{\ty}{\ty}.\]
 \end{theorem}
 \begin{proof}
@@ -481,14 +481,14 @@ This section presents the following key properties:
 
 \begin{lemma}{Subtyping of inner union on the right.}%
 \label{lem:sub-inner-union-right}
-    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ s.t. }$\\
-    $\tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
+    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }$\\
+    $\tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
     \[
         \begin{array}{ccc}
         \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}\\
         \quad\implies\quad\\
-        (\forall \dctx_1, \dctx_2, \text{ s.t. }
-        \tyvlddflt{\dctx_1, \dctx_2} \land
+        (\forall \dctx_1, \dctx_2, \text{ with }
+        \tyvlddflt{\dctx_1, \dctx_2} \text{ and }
         \subtydflt{\dctx_1}{\dctx_2}.\quad
         \subtydflt
             {\plug{\dctx_1}{\ty}}
@@ -507,8 +507,8 @@ This section presents the following key properties:
 
 \begin{lemma}{Adding inner union on the right.}%
 \label{lem:add-inner-union-right}
-    $\forall \ty, \dctx', \ty', \AEnv, \text{ s.t. }
-    \tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'}.$
+    $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
+    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
     \[
         \subtydflt{\ty}{\plug{\dctx'}{\ty'}}
         \quad\implies\quad
@@ -523,8 +523,8 @@ This section presents the following key properties:
 
 \begin{lemma}{Subtyping of union on the right.}%
 \label{lem:sub-union-right}
-    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ s.t. }
-    \tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
+    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }
+    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
     \[
         \subtydflt{\ty}{\tyunion{\plug{\dctx'}{\ty'_1}}{\plug{\dctx'}{\ty'_2}}}
         \quad\implies\quad
@@ -537,23 +537,23 @@ This section presents the following key properties:
     Four cases are possible: \RST{Bot}, \RST{VarLeft}, \RST{UnionLeft}, and
     \RST{UnionRight}. The first three are analogous to the cases of
     \lemref{lem:sub-inner-union-right} (subtyping inner union on the right): 
-    inversion, IH, constructor.
+    the form of the rule, IH, constructor.
     The remaining case is \RST{UnionRight}, subcase $i=1$.
-    By inversion, \subtydflt{\ty}{\plug{\dctx'}{\ty'_1}}.
+    By the form of the rule, \subtydflt{\ty}{\plug{\dctx'}{\ty'_1}}.
     Thus, the case concludes by \lemref{lem:add-inner-union-right} (adding inner
     union on the right):
     \subtydflt{\ty}{\plug{\dctx'}{\tyunion{\ty'_1}{\ty'_2}}}.
     % bot by bot
-    % VarLeft by inversion, IH, VarLeft
-    % UnionLeft by inversion, IH, UnionLeft
+    % VarLeft by the form of the rule, IH, VarLeft
+    % UnionLeft by the form of the rule, IH, UnionLeft
 \end{proof}
 
 \begin{lemma}{Context weakening in subtyping of types.}%
 \label{lem:subty-weakening}
-    $\forall \AEnv, \ty, \ty'.\ \forall \AEnv' \text{ s.t. }$\\
-    $\dom{\AEnv'} \cap \dom{\AEnv} = \varnothing \land 
+    $\forall \AEnv, \ty, \ty'.\ \forall \AEnv' \text{ with }$\\
+    $\dom{\AEnv'} \cap \dom{\AEnv} = \varnothing \text{ and } 
     (\forall \vany \in \dom{\AEnv'}. 
-        \lnot \occ{\vany}{\ty} \land \lnot \occ{\vany}{\ty'}),$
+        \lnot \occ{\vany}{\ty} \text{ and } \lnot \occ{\vany}{\ty'}),$
     \[ \subtydflt{\ty}{\ty'} \quad\implies\quad 
     \subty{\concat{\AEnv}{\AEnv'}}{\ty}{\ty'}. \]
 \end{lemma}
@@ -561,12 +561,77 @@ This section presents the following key properties:
     Straightforward induction on the derivation of \subtydflt{\ty}{\ty'}.
 \end{proof}
 
+\begin{lemma}{Subtyping of upper bound.}%
+\label{lem:sub-var-right-sub-ub}
+    $\forall \AEnv, \ty, \dctx, \vany, \text{ with }
+    \tyvld{}{\AEnv},\ \tyvlddflt{\ty},$ 
+    $\tyvlddflt{\plug\dctx\vany},  
+    \varbound{\vany}{\tylb}{\tyub} \in \AEnv,
+    \text{ and }
+    (\forall \ty' \text{ with } \tyvlddflt{\ty'} \text{ and } 
+    \tymsrdflt{\ty'} \leq \tymsrdflt{\ty}.\ 
+    \subtydflt{\ty'}{\tylb} \implies \subtydflt{\ty'}{\tyub}).$
+    \[
+        \subtydflt{\ty}{\plug\dctx\vany}
+        \quad\implies\quad
+        \subtydflt{\ty}{\plug\dctx\tyub}.
+    \] 
+\end{lemma}
+\begin{proof}
+    By induction on \subtydflt{\ty}{\plug\dctx\vany}.
+    The transitivity assumption
+    ($\forall \ty'\ldots\ \subtydflt{\ty'}{\tylb} \implies \subtydflt{\ty'}{\tyub}$)
+    carries to the induction hypothesis because for each premise
+    \subtydflt{\ty'}{\ty''} of \subtydflt{\ty}{\plug\dctx\vany},
+    it holds that $\tymsrdflt{\ty'} \leq \tymsrdflt{\ty}.$
+    The most interesting case of the proof is highlighted in \textbf{bold}.
+    \begin{itemize}
+        \item Case \RST{Bot}. By \RST{Bot}.
+        \item Case \RST{VarRefl}. \subtydflt{\vany}{\vany}.
+            By \thmref{thm:sub-ty-refl} (reflexivity),
+            \subtydflt{\tyub}{\tyub}.
+            Thus, by \RST{VarLeft}, \subtydflt{\vany}{\tyub}.
+        \item Case \RST{VarLeft}. 
+            \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\vany}.
+            By the form of the rule, $\varbound{\vany'}{\tylb'}{\tyub'} \in \AEnv$
+            and \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\vany}.
+            By IH,
+            \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\tyub}.
+            Thus, by \RST{VarLeft},
+            \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\tyub}.
+        \item \textbf{Case \RST{VarRight}}. \subtydflt{\ty}{\vany}.
+            By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$
+            and \subtydflt{\ty}{\tylb}.
+            Since $\tymsrdflt{\ty} \leq \tymsrdflt{\ty},$ by the transitivity 
+            assumption, \subtydflt{\ty}{\tyub}.
+        \item Case \RST{Tuple}, subcase
+            $\dctx = \typair{\dctx'}{\ty_{22}}$
+            ($\dctx = \square$ is not possible, and
+            $\dctx = \typair{\ty_{21}}{\dctx'}$
+            is proved analogously), i.e.
+            \subtydflt
+                {\typair{\ty_{11}}{\ty_{12}}}
+                {\typair{\plug{\dctx'}\vany}{\ty_{22}}}.
+            By the form of the rule, \subtydflt{\ty_{11}}{\plug{\dctx'}\vany}
+            and \subtydflt{\ty_{12}}{\ty_{22}}.
+            By IH, \subtydflt{\ty_{11}}{\plug{\dctx'}\tyub}.
+            By \RST{Tuple},
+            \subtydflt
+                {\typair{\ty_{11}}{\ty_{12}}}
+                {\typair{\plug{\dctx'}\tyub}{\ty_{22}}}.
+        \item Case \RST{UnionLeft} is proved analogously 
+            to \RST{Tuple}: by the form of the rule, IH, and \RST{UnionLeft}.
+    \end{itemize}
+    The remaining cases
+    (\RST{Top}, \RST{Tuple}, \RST{Inv}, \RST{UnionRight}) 
+    are not possible.
+\end{proof}
 
 \begin{theorem}{Transitivity of subtyping of types.}\label{thm:sub-ty-trans}
-    $\forall \ty_1, \ty_2, \ty_3, \AEnv, \text{ s.t. }
-    \tyvld{}{\AEnv}\ \land\ \tyvlddflt{\ty_1, \ty_2, \ty_3}.$
+    $\forall \ty_1, \ty_2, \ty_3, \AEnv,$\\ $\text{with }
+    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty_1, \ty_2, \ty_3}.$
     \[
-        \subtydflt{\ty_1}{\ty_2} \ \ \land\ \  \subtydflt{\ty_2}{\ty_3}
+        \subtydflt{\ty_1}{\ty_2} \ \ \text{ and }\ \  \subtydflt{\ty_2}{\ty_3}
         \quad\implies\quad
         \subtydflt{\ty_1}{\ty_3}.
     \]
@@ -574,18 +639,23 @@ This section presents the following key properties:
 \begin{proof}
     By strong induction on
     $n = \tymsrdflt{\ty_1} + 2\times\tymsrdflt{\ty_2} + \tymsrdflt{\ty_3}$.
+    The summand $2\times\tymsrdflt{\ty_2}$ accounts for the fact that $\ty_2$ 
+    occurs twice, in the derivation of \subtydflt{\ty_1}{\ty_2} and 
+    \subtydflt{\ty_2}{\ty_3}; this fact is needed in the case \RST{VarLeft}
+    of \subtydflt{\ty_2}{\ty_3}.
+
     Cases $n = 1..3$ are not possible as the minimal measure of a type is 1.
     In the inductive step for $n$, the induction hypothesis (IH) states that
-    $\forall n'<n. \forall \ty'_1, \ty'_2, \ty'_3 \text{ s.t. }
+    $\forall n'<n.\ \forall \ty'_1, \ty'_2, \ty'_3 \text{ with }
     n' = \tymsrdflt{\ty'_1} + 2\times\tymsrdflt{\ty'_2} + \tymsrdflt{\ty'_3},$
     it holds that
     \[
-        \subtydflt{\ty'_1}{\ty'_2} \ \ \land\ \  \subtydflt{\ty'_2}{\ty'_3}
+        \subtydflt{\ty'_1}{\ty'_2} \ \ \text{ and }\ \  \subtydflt{\ty'_2}{\ty'_3}
         \quad\implies\quad
         \subtydflt{\ty'_1}{\ty'_3}.
     \]
-    Case analysis on \subtydflt{\ty_2}{\ty_3} (the most interesting cases are
-    highlighted in \textbf{bold}).
+    Proceed by case analysis on \subtydflt{\ty_2}{\ty_3} (the most interesting 
+    cases are highlighted in \textbf{bold}).
     \begin{itemize}
         \item Case \RST{Top} \subtydflt{\ty_2}{\tyany} where $\ty_3 = \tyany$
             concludes by \RST{Top}: \subtydflt{\ty_1}{\tyany}.
@@ -601,77 +671,34 @@ This section presents the following key properties:
             \subtydflt{\ty_1}{\vany}.
         \item \textbf{Case \RST{VarLeft}} \subtydflt{\plug\dctx\vany}{\ty_3} 
             where $\ty_2 = \plug\dctx\vany$.
-            By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
+            By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
             \subtydflt{\plug\dctx{\tyub}}{\ty_3}.
             By assumption, \subtydflt{\ty_1}{\plug\dctx\vany}.
-            We will need the following auxiliary fact.
 
-            \begin{lemma}\label{lem:sub-var-right-sub-ub}
-                \subtydflt{\ty_1}{\plug\dctx\tyub}.
-            \end{lemma}
-            \begin{proof}
-                By induction on \subtydflt{\ty_1}{\plug\dctx\vany}.
-                \begin{itemize}
-                    \item Case \RST{Bot} by \RST{Bot}.
-                    \item Case \RST{VarRefl} \subtydflt{\vany}{\vany}.
-                        By \thmref{thm:sub-ty-refl} (reflexivity),
-                        \subtydflt{\tyub}{\tyub}.
-                        Thus, by \RST{VarLeft}, \subtydflt{\vany}{\tyub}.
-                    \item Case \RST{VarLeft} 
-                        \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\vany}.
-                        By inversion, $\varbound{\vany'}{\tylb'}{\tyub'} \in \AEnv$
-                        and \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\vany}.
-                        By IH,
-                        \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\tyub}.
-                        Thus, by \RST{VarLeft},
-                        \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\tyub}.
-                    \item \textbf{Case \RST{VarRight}} \subtydflt{\ty_1}{\vany}.
-                        By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$
-                        and \subtydflt{\ty_1}{\tylb}.
-                        By inversion of the assumptions \tyvlddflt{\vany} and
-                        \tyvld{\,}{\AEnv} and by~\lemref{lem:subty-weakening}
-                        (context weakening), we have \subtydflt{\tylb}{\tyub}.
+            First, we will use \lemref{lem:sub-var-right-sub-ub} 
+            (subtyping of upper bound) to derive
+            \subtydflt{\ty_1}{\plug\dctx\tyub}. To use the lemma, we need to
+            show that $\forall \ty' \text{ with } 
+            \tymsrdflt{\ty'} \leq \tymsrdflt{\ty_1}.\ 
+            \subtydflt{\ty'}{\tylb} \implies \subtydflt{\ty'}{\tyub}.$
+            Since $\ty_2$ contains \vany,
+            $\tymsrdflt{\vany} \leq \tymsrdflt{\ty_2},$
+            and $\tymsrdflt{\vany} = 
+            1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}$, we have
+            $\tymsrdflt{\ty_1} + 2\times\tymsrdflt{\tylb} + 
+            \tymsrdflt{\tyub} < \tymsrdflt{\ty_1} + 
+            2\times\tymsrdflt{\ty_2} + \tymsrdflt{\ty_3}$. Thus,
+            the IH is applicable to \subtydflt{\ty'}{\tylb} and
+            \subtydflt{\tylb}{\tyub} for any $\ty'$ with
+            $\tymsrdflt{\ty'} \leq \tymsrdflt{\ty_1}$.
 
-                        Since $\ty_2 = \vany$ and $\tymsrdflt{\vany} = 
-                        1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}$, we have
-                        $\tymsrdflt{\ty_1} + 2\times\tymsrdflt{\tylb} + 
-                        \tymsrdflt{\tyub} < \tymsrdflt{\ty_1} + 
-                        2\times\tymsrdflt{\vany} + \tymsrdflt{\ty_3}$. Thus,
-                        IH for \emph{transitivity} is applicable to 
-                        \subtydflt{\ty_1}{\tylb} and \subtydflt{\tylb}{\tyub},
-                        which concludes the case with \subtydflt{\ty_1}{\tyub}.
-                    \item Case \RST{Tuple}, subcase
-                        $\dctx = \typair{\dctx'}{\ty_{22}}$
-                        ($\dctx = \square$ is not possible, and
-                        $\dctx = \typair{\ty_{21}}{\dctx'}$
-                        is proved analogously), i.e.
-                        \subtydflt
-                            {\typair{\ty_{11}}{\ty_{12}}}
-                            {\typair{\plug{\dctx'}\vany}{\ty_{22}}}.
-                        By inversion, \subtydflt{\ty_{11}}{\plug{\dctx'}\vany}
-                        and \subtydflt{\ty_{12}}{\ty_{22}}.
-                        By IH, \subtydflt{\ty_{11}}{\plug{\dctx'}\tyub}.
-                        Thus, by \RST{Tuple},
-                        \subtydflt
-                            {\typair{\ty_{11}}{\ty_{12}}}
-                            {\typair{\plug{\dctx'}\tyub}{\ty_{22}}}.
-                    \item Case \RST{UnionLeft} is proved analogously 
-                        to \RST{Tuple}: by inversion, IH, and \RST{UnionLeft}.
-                \end{itemize}
-                The remaining cases
-                (\RST{Top}, \RST{Tuple}, \RST{Inv}, \RST{UnionRight}) 
-                are not possible.
-            \end{proof}
-
-            Be \lemref{lem:sub-var-right-sub-ub} above,
-            \subtydflt{\ty_1}{\plug\dctx\tyub}.
-            Since $\ty_2 = \plug\dctx\vany$ and 
+            Finally, since $\ty_2 = \plug\dctx\vany$ and 
             $\tymsrdflt{\tyub} < \tymsrdflt{\vany}$,
-            IH is applicable to \subtydflt{\ty_1}{\plug\dctx\tyub} and 
+            the IH is applicable to \subtydflt{\ty_1}{\plug\dctx\tyub} and 
             \subtydflt{\plug\dctx\tyub}{\ty_3}, which concludes the case with
             \subtydflt{\ty_1}{\ty_3}.
         \item Case \RST{VarRight} \subtydflt{\ty_2}{\vany}.
-            By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
+            By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
             \subtydflt{\ty_2}{\tylb}.
             Since $\tymsrdflt{\tylb} < \tymsrdflt{\vany}$, by IH,
             \subtydflt{\ty_1}{\tylb}.
@@ -682,16 +709,16 @@ This section presents the following key properties:
             Case analysis on \subtydflt{\ty_1}{\typair{\ty_{21}}{\ty_{22}}}.
             \begin{itemize}
                 \item Case \RST{Bot} by \RST{Bot}.
-                \item Case \RST{VarLeft} by inversion, IH on 
+                \item Case \RST{VarLeft} by the form of the rule, IH on 
                     \subtydflt{\plug\dctx\tyub}{\ty_2} and
                     \subtydflt{\ty_2}{\ty_3}, and \RST{VarLeft} on
                     \subtydflt{\plug\dctx\tyub}{\ty_3}.
-                \item Case \RST{Tuple} by inversion, IH on
+                \item Case \RST{Tuple} by the form of the rule, IH on
                     \subtydflt{\ty_{1j}}{\ty_{2j}} and 
                     \subtydflt{\ty_{2j}}{\ty_{3j}}, and \RST{Tuple}.
                 \item Case \RST{UnionLeft} 
                     \subtydflt{\plug\dctx{\tyunion{\ty_{11}}{\ty_{12}}}}{\ty_2}
-                    by inversion, IH on
+                    by the form of the rule, IH on
                     \subtydflt{\plug\dctx{\ty_{1j}}}{\ty_2} and
                     \subtydflt{\ty_2}{\ty_3}, and \RST{UnionLeft}.
             \end{itemize}
@@ -711,7 +738,7 @@ This section presents the following key properties:
             \begin{itemize}
                 \item Case \RST{Bot} by \RST{Bot}.
                 \item Case \RST{VarLeft} where $\ty_1 = \plug{\dctx'}\vany$.
-                    By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
+                    By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
                     \subtydflt{\plug{\dctx'}\tyub}
                     {\tyunion{\plug\dctx{\ty_{21}}}{\plug\dctx{\ty_{22}}}}.
                     By \lemref{lem:sub-union-right} applied to the latter,
@@ -724,8 +751,8 @@ This section presents the following key properties:
                     \subtydflt{\plug{\dctx'}\vany}{\ty_3}.
                 \item Case \RST{UnionLeft} similarly to \RST{VarLeft}.
                 \item Case \RST{UnionRight}, subcase $i=1$.
-                    By inversion, \subtydflt{\ty_1}{\plug\dctx{\ty_{21}}}.
-                    By inversion of the outer case assumption
+                    By the form of the rule, \subtydflt{\ty_1}{\plug\dctx{\ty_{21}}}.
+                    By the form of the rule of the outer case assumption
                     \subtydflt{\plug\dctx{\tyunion{\ty_{21}}{\ty_{22}}}}{\ty_3},
                     \subtydflt{\plug\dctx{\ty_{21}}}{\ty_3}.
                     Since $\tymsrdflt{\plug\dctx{\ty_{21}}} < 
@@ -738,7 +765,7 @@ This section presents the following key properties:
         \item Case \RST{UnionRight} 
             \subtydflt{\ty_2}{\tyunion{\ty_{31}}{\ty_{32}}} where 
             $\ty_3 = \tyunion{\ty_{31}}{\ty_{32}}$, subcase $i=1$.
-            By inversion, \subtydflt{\ty_2}{\ty_{31}}. Since
+            By the form of the rule, \subtydflt{\ty_2}{\ty_{31}}. Since
             $\tymsrdflt{\ty_{31}} < \tymsrdflt{\tyunion{\ty_{31}}{\ty_{32}}}$,
             by IH, \subtydflt{\ty_1}{\ty_{31}}.
             Thus, the case concludes by \RST{UnionRight}.
@@ -789,9 +816,9 @@ This section presents the following key properties:
 
 \begin{theorem}{Soundness of subtyping of types with respect to subsitution.}%
 \label{thm:subty-sound-subst}
-    $\forall \AEnv, \ty, \ty' \text{ s.t. } \tyvld{}{\AEnv}\ \land\ 
+    $\forall \AEnv, \ty, \ty' \text{ with } \tyvld{}{\AEnv}\ \text{ and }\ 
         \tyvlddflt{\ty, \ty'}.\ 
-     \forall \AEnv', \substvars \text{ s.t. } \tyvld{}{\AEnv'}\ \land\ 
+     \forall \AEnv', \substvars \text{ with } \tyvld{}{\AEnv'}\ \text{ and }\ 
         \vldinenvdflt{\substvars}.$
      \[ 
         \subtydflt{\ty}{\ty'} \quad\implies\quad
@@ -810,10 +837,10 @@ This section presents the following key properties:
     \subty{\AEnv'}{\substvars(\vany)}{\substvars(\vany)}.
 
     Cases \RST{Tuple}, \RST{Inv}, \RST{UnionLeft}, and \RST{UnionRight} are
-    straightforward using inversion, the induction hypothesis, and constructor.
+    straightforward using the form of the rule, the induction hypothesis, and constructor.
     For example, consider the case \RST{Tuple}
     \subtydflt{\typair{\ty_1}{\ty_2}}{\typair{\ty'_1}{\ty'_2}}.
-    By inversion, \subtydflt{\ty_i}{\ty'_i}.
+    By the form of the rule, \subtydflt{\ty_i}{\ty'_i}.
     By IH, \subty{\AEnv'}{\substvars(\ty_i)}{\substvars(\ty'_i)}.
     The case concludes by \RST{Tuple} with 
     \[\subty{\AEnv'}{\typair{\substvars(\ty_1)}{\substvars(\ty_2)}}
@@ -823,10 +850,10 @@ This section presents the following key properties:
 
     The remaining cases \RST{VarLeft} and \RST{VarRight} are similar.
     For example, consider \RST{VarLeft} \subtydflt{\plug{\dctx}\vany}{\ty'}.
-    By inversion, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
+    By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$ and
     \subtydflt{\plug\dctx{\tyub}}{\ty'}.
     By IH, \subty{\AEnv'}{\substvars(\plug\dctx{\tyub})}{\substvars(\ty')}.
-    By inversion of the assumption \vldinenvdflt{\substvars}, we know
+    By the form of the rule of the assumption \vldinenvdflt{\substvars}, we know
     \subty{\AEnv'}{\substvars(\vany)}{\substvars(\tyub)}.
     Since $\substvars(\plug\dctx{\tyub}) = 
     \plug{\substvars(\dctx)}{\substvars(\tyub)}$ and
@@ -982,12 +1009,12 @@ This section presents the following key properties:
 \begin{lemma}{Constrained subtyping coincides with subtyping on
     unification-free types.}%
 \label{lem:subtyctr-subty}
-    $\forall \AEnv, \ty, \ty' \text{ s.t. } 
-    \tyvld{}{\AEnv} \ \land\ \tyvlddflt{\ty} \ \land\ \tyvlddflt{\ty'}$ 
+    $\forall \AEnv, \ty, \ty' \text{ with } 
+    \tyvld{}{\AEnv} \ \text{ and }\ \tyvlddflt{\ty} \ \text{ and }\ \tyvlddflt{\ty'}$ 
     the following holds:
     \begin{enumerate}
         \item $\forall \UEnvD.\ \subtyctrdflt{\ty}{\ty'} \quad\implies\quad
-            \CSet = \EmptyCSet\ \land\ \subtydflt{\ty}{\ty'};$
+            \CSet = \EmptyCSet\ \text{ and }\ \subtydflt{\ty}{\ty'};$
         \item $\subtydflt{\ty}{\ty'} \quad\implies\quad 
             \forall \UEnvD.\ \subtyctrdfltenv{\ty}{\ty'}{\EmptyCSet}.$
     \end{enumerate}
@@ -1017,15 +1044,15 @@ This section presents the following key properties:
 
 \begin{theorem}{Soundness of constrained subtyping.}%
 \label{thm:subtyctr-sound}
-    $\forall \AEnv, \UEnvD, \ty, \ty' \text{ s.t. } \tyvld{}{\AEnv},$ if
-    \[\subtyctrRdflt{\ty}{\ty'} \ \land\ 
-        \tyvlddflt{\ty} \ \land\  \tyunfvlddflt{\ty'}\] 
+    $\forall \AEnv, \UEnvD, \ty, \ty' \text{ with } \tyvld{}{\AEnv},$ if
+    \[\subtyctrRdflt{\ty}{\ty'} \ \text{ and }\ 
+        \tyvlddflt{\ty} \ \text{ and }\  \tyunfvlddflt{\ty'}\] 
     or
-    \[\subtyctrLdflt{\ty}{\ty'} \ \land\ 
-        \tyunfvlddflt{\ty} \ \land\  \tyvlddflt{\ty'},\]
-    then $\forall \substvars \text{ s.t. } 
-        \dom{\substvars} \supseteq \UEnvD \ \land\ 
-        \dom{\substvars} \cap \dom{\AEnv} = \varnothing \ \land\ 
+    \[\subtyctrLdflt{\ty}{\ty'} \ \text{ and }\ 
+        \tyunfvlddflt{\ty} \ \text{ and }\  \tyvlddflt{\ty'},\]
+    then $\forall \substvars \text{ with } 
+        \dom{\substvars} \supseteq \UEnvD \ \text{ and }\ 
+        \dom{\substvars} \cap \dom{\AEnv} = \varnothing \ \text{ and }\ 
         \vldinenv{\AEnv}{\CSet}{\substvars}.$
      \[ 
         \subtydflt{\substvars(\ty)}{\substvars(\ty')}.
@@ -1055,11 +1082,11 @@ This section presents the following key properties:
             \subtydflt{\substvars(\va)}{\ty'}, since $\substvars(\ty') = \ty'$
             due to \tyvlddflt{\ty'}.
         \item Case \RSC{UVarRight} similarly to \RSC{UVarLeft}.
-        \item Case \RSC{VarLeft} (\RSC{VarRight}) by inversion, IH, and
+        \item Case \RSC{VarLeft} (\RSC{VarRight}) by the form of the rule, IH, and
             \RST{VarLeft} (\RST{VarRight}), for $\substvars(\vx) = \vx$
             and $\substvars(\tyub) = \tyub$ ($\substvars(\tylb) = \tylb$).
         \item Cases \RSC{Tuple}, \RSC{Inv}, \RSC{UnionLeft}, and \RSC{UnionRight}
-            are all similar: by inversion, IH, and the corresponding subtyping
+            are all similar: by the form of the rule, IH, and the corresponding subtyping
             constructor.
         \item \textbf{Case \RSC{UVar-UnionRight}} 
             \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
@@ -1068,7 +1095,7 @@ This section presents the following key properties:
             $\substvars(\tyunion{\ty'_1}{\ty'_2}) = \tyunion{\ty'_1}{\ty'_2}.$
             By assumption,
             \vldinenv{\AEnv}{\CSet'_1 \cup \CSet'_2 \cup \CSet'}{\substvars}.
-            By inversion, 
+            By the form of the rule, 
             \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} 
             and
             \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2},
@@ -1123,13 +1150,13 @@ This section presents the following key properties:
 \label{thm:solvectr-sound}
     $\forall \AEnv, \UEnv$ s.t. $\tyvld{}{\AEnv, \UEnv}$.
     $\forall \CSet$ s.t. $\forall \ctrsub{\tylb}{\va} \in \CSet.
-        \ \tyvlddflt{\tylb}\ \land\ \tyvld{\UEnv}{\va}$ and 
+        \ \tyvlddflt{\tylb}\ \text{ and }\ \tyvld{\UEnv}{\va}$ and 
         $\forall \ctrsub{\va}{\tyub} \in \CSet.
-        \ \tyvld{\UEnv}{\va} \ \land\ \tyvlddflt{\tyub}.$
+        \ \tyvld{\UEnv}{\va} \ \text{ and }\ \tyvlddflt{\tyub}.$
     \[
         \solvectrdflt = \substvars
         \quad\implies\quad
-        \vldinenv{\AEnv}{\UEnv}{\substvars}\ \ \land\ \ 
+        \vldinenv{\AEnv}{\UEnv}{\substvars}\ \ \text{ and }\ \ 
         \vldinenv{\AEnv}{\CSet}{\substvars}.
     \]
     where \vldinenv{\AEnv}{\UEnv}{\substvars} and

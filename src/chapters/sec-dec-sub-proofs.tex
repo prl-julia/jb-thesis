@@ -228,7 +228,7 @@ This section presents the following key properties:
     \item termination of \subtysigdflt{\tysig}{\tysig'} (\thmref{thm:subtysig-terminates}).
 \end{itemize}
 
-\begin{theorem}{Termination of\ \ \subtydflt{\ty}{\ty'}.}%
+\begin{theorem}[Termination of\ \ \subtydflt{\ty}{\ty'}]%
 \label{thm:subty-terminates}
     The subtyping algorithm built from the rules of subtyping of types
     \subtydflt{\ty}{\ty'} terminates.
@@ -248,7 +248,7 @@ This section presents the following key properties:
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}.\]
 \end{proof}
 
-% \begin{lemma}{Termination of join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$).}%
+% \begin{lemma}[Termination of join ($\sqcup_{\AEnv}$) and meet ($\sqcap_{\AEnv}$)]%
 % \label{lem:meet-terminates}
 %     $\forall \AEnv, \ty, \ty'$ both
 %     \tyjoindflt{\ty}{\ty'} and \tymeetdflt{\ty}{\ty'} terminate.
@@ -262,7 +262,7 @@ This section presents the following key properties:
 %     \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
 %     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
 % \end{proof}
-\begin{lemma}{Termination of intersection ($\sqcap_{\AEnv}$).}%
+\begin{lemma}[Termination of intersection ($\sqcap_{\AEnv}$)]%
 \label{lem:meet-terminates}
     $\forall \AEnv, \ty, \ty',$
     \tymeetdflt{\ty}{\ty'} terminates.
@@ -274,7 +274,7 @@ This section presents the following key properties:
     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
 \end{proof}
 
-\begin{theorem}{Termination of\ \ \subtyctrdflt{\ty}{\ty'}.}%
+\begin{theorem}[Termination of\ \ \subtyctrdflt{\ty}{\ty'}]%
 \label{thm:subtyctr-terminates}
     The subtyping algorithm built from the rules of
     constrained subtyping of types
@@ -298,7 +298,7 @@ This section presents the following key properties:
     terminate by~\lemref{lem:meet-terminates}.
 \end{proof}
 
-\begin{theorem}{Termination of\ \solvectrdflt.}%
+\begin{theorem}[Termination of\ \solvectrdflt]%
 \label{thm:solvectr-terminates}
     The constraints resolution algorithm \solvectrdflt terminates.
 \end{theorem}
@@ -356,7 +356,7 @@ This section presents the following key properties:
 \caption{Occurrence of a variable}\label{fig:var-occ}
 \end{figure}
 
-\begin{lemma}{Context weakening in $\msrop$.}%
+\begin{lemma}[Context weakening in $\msrop$]%
 \label{lem:msr-weakening}
     The measure of a type signature does not change if the environment
     is extended (in any position) with a variable that occurs neither
@@ -375,7 +375,7 @@ This section presents the following key properties:
     \lemproofrefapp{lem:msr-weakening:app}
 \end{proof}
 
-\begin{theorem}{Termination of\ \ \subtysigdflt{\tysig}{\tysig'}.}%
+\begin{theorem}[Termination of\ \ \subtysigdflt{\tysig}{\tysig'}]%
 \label{thm:subtysig-terminates}
     The subtyping algorithm built from the rules of
     subtyping of type signatures
@@ -447,7 +447,7 @@ This section presents the following key properties:
     \item soundness with respect to substitution (\thmref{thm:subty-sound-subst}).
 \end{itemize}
 
-\begin{theorem}{Reflexivity of subtyping of types.}\label{thm:sub-ty-refl}
+\begin{theorem}[Reflexivity of subtyping of types]\label{thm:sub-ty-refl}
     $\forall \ty, \AEnv, \text{ with } \tyvlddflt{\ty}.$
     \[\subtydflt{\ty}{\ty}.\]
 \end{theorem}
@@ -465,7 +465,7 @@ This section presents the following key properties:
     \end{itemize}
 \end{proof}
 
-\begin{lemma}{Subtyping of \tybot implies arbitrary subtyping.}\label{lem:sub-of-bot}
+\begin{lemma}[Subtyping of \tybot implies arbitrary subtyping]\label{lem:sub-of-bot}
     \[
     \forall \ty, \dctx_{\tybot}, \AEnv.\quad 
     \subtydflt{\ty}{\plug{\dctx_{\tybot}}\tybot}
@@ -479,7 +479,7 @@ This section presents the following key properties:
     \lemproofrefapp{lem:sub-of-bot:app}
 \end{proof}
 
-\begin{lemma}{Subtyping of inner union on the right.}%
+\begin{lemma}[Subtyping of inner union on the right]%
 \label{lem:sub-inner-union-right}
     $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }$\\
     $\tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
@@ -505,7 +505,7 @@ This section presents the following key properties:
     \lemproofrefapp{lem:sub-inner-union-right:app}
 \end{proof}
 
-\begin{lemma}{Adding inner union on the right.}%
+\begin{lemma}[Adding inner union on the right]%
 \label{lem:add-inner-union-right}
     $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
     \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
@@ -521,7 +521,7 @@ This section presents the following key properties:
     \lemproofrefapp{lem:add-inner-union-right:app}
 \end{proof}
 
-\begin{lemma}{Subtyping of union on the right.}%
+\begin{lemma}[Subtyping of union on the right]%
 \label{lem:sub-union-right}
     $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }
     \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
@@ -548,7 +548,7 @@ This section presents the following key properties:
     % UnionLeft by the form of the rule, IH, UnionLeft
 \end{proof}
 
-\begin{lemma}{Context weakening in subtyping of types.}%
+\begin{lemma}[Context weakening in subtyping of types]%
 \label{lem:subty-weakening}
     $\forall \AEnv, \ty, \ty'.\ \forall \AEnv' \text{ with }$\\
     $\dom{\AEnv'} \cap \dom{\AEnv} = \varnothing \text{ and } 
@@ -561,7 +561,7 @@ This section presents the following key properties:
     Straightforward induction on the derivation of \subtydflt{\ty}{\ty'}.
 \end{proof}
 
-\begin{lemma}{Subtyping of upper bound.}%
+\begin{lemma}[Subtyping of upper bound]%
 \label{lem:sub-var-right-sub-ub}
     $\forall \AEnv, \ty, \dctx, \vany, \text{ with }
     \tyvld{}{\AEnv},\ \tyvlddflt{\ty},$ 
@@ -627,7 +627,7 @@ This section presents the following key properties:
     are not possible.
 \end{proof}
 
-\begin{theorem}{Transitivity of subtyping of types.}\label{thm:sub-ty-trans}
+\begin{theorem}[Transitivity of subtyping of types]\label{thm:sub-ty-trans}
     $\forall \ty_1, \ty_2, \ty_3, \AEnv,$\\ $\text{with }
     \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty_1, \ty_2, \ty_3}.$
     \[
@@ -773,7 +773,7 @@ This section presents the following key properties:
 \end{proof}
 
 %% This fact we use implicitly
-% \begin{lemma}{Preservation of subtyping by distributivity context.}%
+% \begin{lemma}[Preservation of subtyping by distributivity context]%
 %     \[
 %         \forall \AEnv, \dctx, \ty, \ty'.\quad
 %         \subtydflt{\ty}{\ty'} \quad\implies\quad
@@ -814,7 +814,7 @@ This section presents the following key properties:
 \label{fig:substuvars-validity}
 \end{figure}
 
-\begin{theorem}{Soundness of subtyping of types with respect to subsitution.}%
+\begin{theorem}[Soundness of subtyping of types with respect to subsitution]%
 \label{thm:subty-sound-subst}
     $\forall \AEnv, \ty, \ty' \text{ with } \tyvld{}{\AEnv}\ \text{ and }\ 
         \tyvlddflt{\ty, \ty'}.\ 
@@ -870,7 +870,7 @@ This section presents the following key properties:
 \label{subsec:props-join-meet-proof}
 %% ======================================================================
 
-% \begin{theorem}{Soundness of join.}%
+% \begin{theorem}[Soundness of join]%
 % \label{thm:join-sound}
 %     \tyjoindflt{\ty}{\ty'} computes a join of $\ty, \ty'$, namely:
 %     $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
@@ -900,7 +900,7 @@ This section presents the following key properties:
 %     \RST{UnionLeft}, and \RST{UnionRight}.
 % \end{proof}
 
-% \begin{lemma}{Symmetry of join.}
+% \begin{lemma}[Symmetry of join]
 %     $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
 %     \[
 %         \subtydflt{(\tyjoindflt{\ty}{\ty'})}{(\tyjoindflt{\ty'}{\ty})}
@@ -914,7 +914,7 @@ This section presents the following key properties:
 %     \RST{UnionLeft}, and \RST{UnionRight}.
 % \end{proof}
 
-\begin{theorem}{Soundness of intersection.}%
+\begin{theorem}[Soundness of intersection]%
 \label{thm:meet-sound}
     \tymeetdflt{\ty}{\ty'} defines an intersection of $\ty, \ty'$, namely:
     $\forall \AEnv, \ty, \ty'$ s.t. \tyvld{}{\AEnv}
@@ -977,7 +977,7 @@ This section presents the following key properties:
     follows from \RST{Bot}.
 \end{proof}
 
-% \begin{lemma}{Symmetry of meet.}
+% \begin{lemma}[Symmetry of meet]
 %     $\forall \AEnv, \ty, \ty'$ s.t. \tyvlddflt{\ty, \ty'}.
 %     \[
 %         \subtydflt{(\tymeetdflt{\ty}{\ty'})}{(\tymeetdflt{\ty'}{\ty})}
@@ -1042,7 +1042,7 @@ This section presents the following key properties:
     \RSC{VarLeft}/\RST{VarLeft} and \RSC{VarRight}/\RST{VarRight}.
 \end{proof}
 
-\begin{theorem}{Soundness of constrained subtyping.}%
+\begin{theorem}[Soundness of constrained subtyping]%
 \label{thm:subtyctr-sound}
     $\forall \AEnv, \UEnvD, \ty, \ty' \text{ with } \tyvld{}{\AEnv},$ if
     \[\subtyctrRdflt{\ty}{\ty'} \ \text{ and }\ 
@@ -1146,7 +1146,7 @@ This section presents the following key properties:
     \end{itemize}
 \end{proof}
 
-\begin{theorem}{Soundness of constrains resolution.}%
+\begin{theorem}[Soundness of constrains resolution]%
 \label{thm:solvectr-sound}
     $\forall \AEnv, \UEnv$ s.t. $\tyvld{}{\AEnv, \UEnv}$.
     $\forall \CSet$ s.t. $\forall \ctrsub{\tylb}{\va} \in \CSet.

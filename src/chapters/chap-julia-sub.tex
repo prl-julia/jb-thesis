@@ -2,17 +2,19 @@
 \label{chap:julia-sub}
 
 In this chapter, I provide a detailed account of Julia subtyping
-(Chapters \ref{sec:julia-sub:overview} and \ref{sec:julia-sub:lambda-julia})
-and discuss its undecidability (\chapref{sec:julia-sub:undec}).
+(Sec\-tions~\ref{sec:julia-sub:overview} and \ref{sec:julia-sub:lambda-julia})
+and discuss its undecidability (\secref{sec:julia-sub:undec}).
 
 \section{Overview of Subtyping}\label{sec:julia-sub:overview}
 %% ======================================================================
+
+The syntax of Julia types is given in \figref{fig:jltypes}.
 
 Subtyping in Julia largely follows the combination of
 \tdef{nominal subtyping} for user-defined nominal types and
 \tdef{semantic subtyping} for covariant tuple and union types.
 For example, for datatype declarations from \figref{fig:code:user-def-types}, 
-\cjl{Int128} is a subtype of \cjl{Signed}, and, transitively, of \cjl{Integer};
+\cjl{Int128} is a subtype of \cjl{Signed} and, transitively, of \cjl{Integer};
 \cjl{BitSet} is a subtype of \cjl{AbstractSet\{Int\}}.
 %but not \cjl{AbstractSet\{String\}}.
 A~union type \cjl{Union\{t1, t2, ...\}} describes a set-theoretic union of
@@ -22,9 +24,27 @@ components \cjl{t1 <: t, t2 <: t, ...}.
 Tuples in Julia are immutable, and tuple types are covariant:
 \cjl{Tuple\{t1, t2, ...\}} is a subtype of \cjl{Tuple\{t1', t2'...\}} if
 their corresponding components are subtypes, i.e., \cjl{t1 <: t1', t2 <: t2', ...}.
-Following semantic subtyping, tuple types distribute over unions,
+Following semantic subtyping~\cite{bib:frisch:sem-sub:2008}
+where types are interpreted as sets,
+tuple types distribute over unions,
 so types \cjl{Tuple\{Union\{Int,String\}\}} and
 \cjl{Union\{Tuple\{Int\},Tuple\{String\}\}} are equivalent.
+
+\begin{figure}[t]
+\footnotesize
+\[
+\begin{array}{ccll}
+  \t &::=& & \\
+     &\mid& \anytyp & \text{top} \\
+     &\mid& \uniontyp{\t_1, \ldots, \t_n} & \text{union} \\
+     &\mid& \tupletyp{\t_1, \ldots, \t_n} & \text{tuple} \\
+     &\mid& \cstrt{name}{\t_1, \ldots, \t_n} & \text{user-defined type} \\
+     &\mid& \wheret{\t}{l <: \T <: u} & \text{union-all} \\
+     &\mid& \T & \text{type variable} \\
+\end{array}
+\]
+\caption{Syntax of Julia types}\label{fig:jltypes}
+\end{figure}
 
 User-defined parametric datatypes are invariant in the type parameter
 regardless of whether the datatype is
@@ -49,7 +69,7 @@ Intuitively, an existential type denotes a union of \cjl{t[t'/T]} for all
 instantiations of the type variable \cjl{T} such that \cjl{l <: t' <: u}.
 Similarly to subtyping of finite union types, the intent is that:
 \begin{itemize}
-  \item \cjl{(t where l<:T<:u) <: t2} if \emph{for all} valid instantiations
+  \item \cjl{(t where l<:T<:u) <: t2} if, \emph{for all} valid instantiations
     \cjl{l<:t'<:u}, it holds that \cjl{t[t'/T] <: t2}, and
   \item \cjl{t1 <: (t where l<:T<:u)} if \emph{there exists} at least one 
     \cjl{l<:t'<:u} such that \cjl{t1 <: t[t'/T]}.
@@ -116,7 +136,8 @@ because \cjl{Tuple\{Bool\}} is a subtype of \cjl{Tuple\{T\} where T>:Int}:
 there are, in fact, multiple possible instantiations \cjl{t} of \cjl{T}
 such that \cjl{Tuple\{Bool\} <: Tuple\{t\}},
 e.g. \cjl{Any} or \cjl{Union\{Int, Bool\}}.
-But rather than pick one instantiation, Julia throws an error:
+But rather than pick one instantiation, Julia throws an error as soon as the
+program tries to access type variable \cjl{T}:
 \begin{codeenvd}
 \begin{julia}
 > g(x::T) where T>:Int = begin
@@ -186,10 +207,10 @@ In this section, I present a fragment of the specification of
 Julia~0.6.2 subtyping from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 In that work, my collaborators and I defined, implemented, and empirically
 validated a subtype relation for Julia's type language,
-thus providing the first complete\footnote{The only omitted feature is the
+thus providing the first complete specification of Julia subtyping.
+The only omitted feature is the
 \cjl{Vararg\{T,N\}} construct, which can be used as the last
-parameter of a tuple to denote N trailing arguments of type \cjl{T}.}
-specification of Julia subtyping.
+parameter of a tuple to denote N trailing arguments of type \cjl{T}.
 Having reconstructed the subtype relation,
 we were able to identify multiple issues such as
 counterexamples to reflexivity and transitivity,
@@ -214,16 +235,8 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 
 \begin{figure}
 \footnotesize
-\makebox[\textwidth][c]{
-\begin{minipage}{\ruleswidth}
-\[
- \t\ ::=\ \anytyp 
-    \Alt \uniontyp{\t_1, \ldots, \t_n}
-    \Alt \tupletyp{\t_1, \ldots, \t_n}
-    \Alt \cstrt{name}{\t_1, \ldots, \t_n}
-    \Alt \wheret{\t}{l <: \T <: u}
-    \Alt \T
-\]
+%\makebox[\textwidth][c]{
+%\begin{minipage}{\ruleswidth}
 \begin{mathpar}
 \\
 \fbox{\ljsub{E}{t}{t}{E}}
@@ -291,7 +304,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
   { E \vdash \t <: \T \vdash E' }
 \\
 \inferrule[R\_Left]{
-  \mathit{search}(\T, E) = {^R \T}_{l}^{u} \\\\
+  \mathit{search}(\T, E) = {^R \T}_{l}^{u} \\
   E \vdash l <: \t \vdash E' }
   { E \vdash \T <: \t \vdash \mathit{upd}({^R \T}_{l}^{t}, E') }
 
@@ -311,7 +324,7 @@ in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
     { E \vdash \T_1 <: \T_2 \vdash 
     \mathit{upd}(^R {\T_1}_{\uniontyp{\T_1, l_1}}^{u_1}, E') }
 \end{mathpar}
-\end{minipage}}
+%\end{minipage}}
 \caption{Julia subtyping (excerpt from
 \cite{bib:zappa-nardelli:julia-sub:oopsla:2018})}
 \label{fig:jlsubex}
@@ -324,7 +337,7 @@ In~\figref{fig:jlsubex}, subtyping is defined in the form of a judgment
 which should be read as:
 \emph{in the environment $E$, type $t$ is a subtype of~$t'$,
 with updated constraints $E'$}.
-$E$ is a type variable environment that contains two kinds of variables,
+$E$ is a type variable environment that contains two kinds of variables:
 forall (also called left, introduced by existential types on the left
 and recorded as $^L \T$) and exist (also called right, introduced by 
 existential types on the right and recorded as $^R \T$).
@@ -333,7 +346,7 @@ as $\T_l^u$; bounds on exist (right) variables can get tighter during subtype
 checking, which is reflected in the updated environment $E'$.
 For example, consider the following judgment:
 \[ 
-  \tupletyp{\inttyp} <: \wheret{\tupletyp{\T}}{\uniontyp{}{<:}\T{<:}\anytyp}.
+  \tupletyp{\inttyp} <: \wheret{\tupletyp{\T}}{\uniontyp{}\,{<:}\,\T\,{<:}\,\anytyp}.
 \]
 First, the right variable \T is introduced into the environment with its
 declared bounds $\uniontyp{}$ and \anytyp:
@@ -353,7 +366,7 @@ constraint is recorded in an updated environment as $^R \T_{\inttyp}^{\anytyp}$
   ^R \T_{\uniontyp{}}^{\anytyp} \vdash \inttyp <: \T 
   \vdash ^R\!\T_{\inttyp}^{\anytyp},
 \]
-and the new environment is propagated to the tuples:
+and the new environment is propagated back to the judgment for tuples:
 \[ 
   ^R \T_{\uniontyp{}}^{\anytyp} \vdash \tupletyp{\inttyp} <: \tupletyp{\T}
   \vdash ^R\!\T_{\inttyp}^{\anytyp}.
@@ -382,7 +395,7 @@ the \Barrier construct is discussed later.
 Because the same right variable can appear in multiple positions, environment
 updates $E'_i$ need to be propagated across all the elements of
 a tuple/union/invariant constructor.
-For instance, consider the following judgment:
+For instance, consider the following example:
 \[ 
   ^R \T_{\uniontyp{}}^{\anytyp} \vdash 
   \tupletyp{\anytyp, \reftyp{\inttyp}} \nless: \tupletyp{\T, \reftyp{\T}}.
@@ -390,9 +403,9 @@ For instance, consider the following judgment:
 After the first recursive call to subtyping,
 \[ 
   ^R \T_{\uniontyp{}}^{\anytyp} \vdash \anytyp <: \T 
-  \vdash ^R\!\T_{\anytyp}^{\anytyp},
+  \vdash ^R\!\T_{\anytyp}^{\anytyp}
 \]
-the variable \T is know to be a supertype of \anytyp.
+the variable \T is known to be a supertype of \anytyp.
 Thus, subtyping between $\reftyp{\inttyp}$ and $\reftyp{\T}$ is invoked
 in the updated environment:
 \[ 
@@ -402,12 +415,12 @@ in the updated environment:
 The left-to-right check succeeds, but the right-to-left check fails because
 the lower bound of \T---$\anytyp$---is not a subtype of $\inttyp$:
 \[ 
-  ^R \T_{\anytyp}^{\anytyp} \vdash \inttyp <: \T \vdash ^R \T_{\anytyp}^{\anytyp},
+  ^R \T_{\anytyp}^{\anytyp} \vdash \inttyp <: \T \vdash ^R\!\T_{\anytyp}^{\anytyp}
   \qquad 
   ^R \T_{\anytyp}^{\anytyp} \vdash \T \nless: \inttyp.
 \]
 Without environment propagation, the constraint $\anytyp{<:}\T$ would have been
-lost and the subtyping check succeeded.
+lost and the subtyping check would have succeeded.
 
 \paragraph{Left and right variables.}
 Left and right variables are treated differently by the subtyping algorithm.
@@ -415,14 +428,14 @@ Left and right variables are treated differently by the subtyping algorithm.
   \item Left variables never change in the environment, and subtyping should
   hold with respect to their declared bounds.
   Thus, if a left variable \T appears on the
-  left of the judgment, then the judgment can be satisfied
+  left of $<:$, then the judgment can be satisfied
   only if the upper bound of \T is smaller than $t$:
-  \[ ^L \T_l^u \vdash \T <: t \vdash ^L\! \T_l^u\ \ \text{ if }\ \ 
+  \[ ^L \T_l^u \vdash \T <: t \vdash ^L\! \T_l^u\ \ \text{ only if }\ \ 
      ^L \T_l^u \vdash u <: t \vdash ^L\!\T_l^u. \]
   If $^L \T$ appears on the right, then
   it is the lower bound of \T that must be a supertype of $t$:
   %
-  \[ ^L \T_l^u \vdash t <: \T \vdash ^L\! \T_l^u \ \ \text{ if }\ \ 
+  \[ ^L \T_l^u \vdash t <: \T \vdash ^L\! \T_l^u \ \ \text{ only if }\ \ 
      ^L \T_l^u \vdash t <: l \vdash ^L\!\T_l^u. \]
   This corresponds to the intuition that for a left-hand side existential type,
   subtyping should hold for all possible instantiations of the type variable.
@@ -431,8 +444,8 @@ Left and right variables are treated differently by the subtyping algorithm.
   updated bounds are recorded in the output environment~$E'$.
   For example, if a right variable \T appears on the right of the judgment,
   its lower bound can become larger (but not larger than the upper bound):
-  \[ ^R \T_l^u \vdash \t <: \T \vdash ^R\!\T_{\uniontyp{l, t}}^u \ \ \text{ if }\ \ 
-     \t <:u. \]
+  \[ ^R \T_l^u \vdash \t <: \T \vdash ^R\!\T_{\uniontyp{l, t}}^u \ \ 
+    \text{ only if }\ \ \t <:u. \]
   If the resulting constraints on a right variable are consistent,
   as checked by $\mathit{consistent}(\T, E)$, subtyping succeeds.
   This corresponds to the intuition that
@@ -451,22 +464,25 @@ reflecting the order in which variables have been added to the scope.
 In addition to variables, $E.curr$ records \emph{barriers}: tags pushed
 to the environment whenever the subtype check encounters an invariant
 constructor.  Barriers will be discussed later.
-The second list, $E.past$,
+In the examples presented in the chapter, $E.curr$ is displayed in place of $E$
+for readability. The second list, $E.past$,
 keeps track of variables that are not any longer in scope.  Consider
 the judgment:
 \[
     \tupletyp{\wheret{\cstrt{\jlname{Ref}}{\S}}{\S <: \jlname{Int}}} \ <:\ 
     \wheret{\tupletyp{\cstrt{\jlname{Ref}}{\T}}}{\T}.
 \]
-In the derivation, the variable
+In the derivation, by~\RLJ{R\_Intro} rule, variable
 \T is introduced before the variable \S, but \T's bounds refer to \S
 in the judgment
 \[ ^R \T_{\uniontyp{}}^{\anytyp}, ^L \S_{\uniontyp{}}^{\jlname{Int}} \vdash
    \cstrt{\jlname{Ref}}{\S} <: \cstrt{\jlname{Ref}}{\T} \vdash 
    ^R\!\T_S^S, ^L \S_{\uniontyp{}}^{\jlname{Int}}, \]
 which appears in the derivation tree.
-Discharged variables are thus stored in \(E.past\) and accessed whenever
-required.  The subtyping rules guarantee that it is never necessary to
+Thus, when \RLJ{L\_Intro} discharges~\S, the variable is removed from 
+\(E.curr\) and stored in \(E.past\), which allows the subtyping algorithm
+to access discharged variables whenever required. 
+The subtyping rules guarantee that it is never necessary to
 update the bounds of a no-longer-in-scope variable.  Relying on a
 separate \(E.past\) environment avoids confusion when rules must
 determine precisely the scope of each variable.
@@ -562,7 +578,7 @@ Note that whenever the forall variable is constrained tightly and
 quantifies over only one type, the exist/forall quantification can still
 correctly succeed, as in the valid judgment below:
 \[ 
-  \reftyp{\wheret{\reftyp{\inttyp{<:}\T{<:}\inttyp}}{\T}} <: 
+  \reftyp{\wheret{\reftyp{\T}}{\inttyp{<:}\T{<:}\inttyp}} <: 
   \wheret{\reftyp{\reftyp{\S}}}{\S}.
 \]
 
@@ -627,7 +643,9 @@ constructors.
 Rewriting is performed by the auxiliary function
 \(\mathit{lift\_union}(\t)\), which pulls unions and existential types out of
 tuples, anticipating
-syntactically the forall quantifications in a derivation.
+syntactically the forall quantifications in a derivation;
+the definition of this function can be found
+in~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 Symmetrically, the rule~\RLJ{Tuple\_Unlift\_Union} performs
 the opposite rewriting, delaying syntactically the exist
 quantifications on union types appearing on the right-hand side of
@@ -637,7 +655,7 @@ a type \(\t'\) such that \(\t = \mathit{lift\_union}(\t')\).
 The need for the
 \RLJ{Tuple\_Unlift\_Union} rule is
 due to the \emph{complex interaction between invariant constructors, union
-types, and existentials}.  For instance, the following judgment
+types, and existentials}.  For instance, the judgment
 \[
   \reftyp{\uniontyp{\tupletyp{\inttyp, \jlname{Bool}}}} <:
   \wheret{\reftyp{\tupletyp{\T}}}{\T}
@@ -666,7 +684,7 @@ environment.  When the variable gets out of scope, it
 is deleted from the \texttt{curr} list and added to the
 \texttt{past} list of the environment. 
 Variables with exist semantics might have had
-their bounds updated in unsatisfiable way; before discarding them, the
+their bounds updated in unsatisfiable way; before moving them to \(E.past\), the
 consistency of their bounds is checked by the \(\mathit{consistent}(\T,E)\)
 auxiliary function.
 
@@ -674,7 +692,8 @@ Note that existential types with inconsistent bounds, such as
 \[
   \wheret{\tupletyp{\T}}{\anytyp{<:}\T{<:}\inttyp},
 \]
-are considered well-formed, but they are not subtypes of $\uniontyp{}$.
+are considered well-formed, but they are not subtypes of $\uniontyp{}$
+despite the fact that there are no values denoted by such types.
 In Julia, attempting to instantiate such a type will produce an error:
 \begin{lstlisting}
 julia> (Tuple{T} where Any<:T<:Int){Int}
@@ -707,8 +726,9 @@ turned out to be false.  Consider the following example:
     <: \\
     \wheret{\vectyp{\uniontyp{\vectyp{\anytyp}, \vectyp{\T}}}}{\T{<:}\inttyp}.  
   \end{array}
-\]\label{juliabug:rleft}
-\noindent This successful judgment contradicts the idea that \(\vectyp{\T}\)
+\]\label{juliabug:rleft}%
+\noindent
+This successful judgment contradicts the idea that \(\vectyp{\T}\)
 can be a subtype of \(\vectyp{\anytyp}\) only if \(\T\) is
 equivalent to \(\anytyp\), which is not possible here.
 Back in 2018,
@@ -731,11 +751,11 @@ As of May 2023, the problematic judgment above no longer holds.
 To account for the exist/forall
 quantification the form of the rule, the \RLJ{R\_Right} rule does not apply
 if the type on the left is
-a left variable, and the variables are in the exists/forall quantification
+a left variable and the variables are in the exists/forall quantification
 (the check \(\lnot\mathit{outside}(\T,\S,E)\) is responsible for this).
 %Similar reasoning works for the rule \ottdrulename{R\_left}.
 Matching R-L
-variables is specially dealt by the \RLJ{R\_L} rule, which
+variables is specially dealt with by the \RLJ{R\_L} rule, which
 also performs the necessary outside check: if the \(R\)-variable is
 outside, then the bounds on the \(L\)-variable must constrain it to
 only one type.  For this, the check \(u_2 <: l_2\) is sufficient, as the
@@ -755,7 +775,7 @@ compiler might not terminate on some programs. Although undesirable,
 such property can be acceptable if it manifests rarely and
 allows for an expressive type system.
 
-In a dynamically typed Julia, however, subtyping is used at run time---for
+In the dynamically typed Julia, however, subtyping is used at run time---for
 dispatch resolution. %Even on rare occasions, consequences of
 %undecidability at run time are of greater concern than at compile time.
 Thus, undecidability is concerning even on rare occasions.
@@ -788,7 +808,7 @@ with $\ty_1 \leq \ty_2$ in \FSubN defined as
 $\interp{\ty_2} <: \interp{\ty_1}$ in Julia.
 In practice, the undecidability %of Julia subtyping 
 manifests itself with a \cjl{StackOverflowError}.
-The reason is that internally, Julia relies on a dedicated stack
+The reason is that, internally, Julia relies on a dedicated stack
 to resolve subtyping
 and terminates the program when the stack reaches a certain limit.
 %Thus, in practice, subtyping checks that showcase undecidability, such as

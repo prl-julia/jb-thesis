@@ -564,26 +564,27 @@ This section presents the following key properties:
 \begin{lemma}[Subtyping of upper bound]%
 \label{lem:sub-var-right-sub-ub}
     $\forall \AEnv, \ty, \dctx, \vany, \text{ with }
-    \tyvld{}{\AEnv},\ \tyvlddflt{\ty},$ 
-    $\tyvlddflt{\plug\dctx\vany},  
-    \varbound{\vany}{\tylb}{\tyub} \in \AEnv,
-    \text{ and }
-    (\forall \ty' \text{ with } \tyvlddflt{\ty'} \text{ and } 
-    \tymsrdflt{\ty'} \leq \tymsrdflt{\ty}.\ 
-    \subtydflt{\ty'}{\tylb} \implies \subtydflt{\ty'}{\tyub}).$
-    \[
-        \subtydflt{\ty}{\plug\dctx\vany}
-        \quad\implies\quad
-        \subtydflt{\ty}{\plug\dctx\tyub}.
-    \] 
+    \varbound{\vany}{\tylb}{\tyub} \in \AEnv,$
+    $\tyvld{}{\AEnv},\ \tyvlddflt{\ty}, \text{ and }
+    \tyvlddflt{\plug\dctx\vany},  
+    \text{ if }$
+    \begin{enumerate}
+        \item $\forall \ty_0 \text{ with } \tyvlddflt{\ty_0} \text{ and } 
+            \tymsrdflt{\ty_0} \leq \tymsrdflt{\ty},$\\
+            $\subtydflt{\ty_0}{\tylb} \implies \subtydflt{\ty_0}{\tyub}$
+        \item \subtydflt{\ty}{\plug\dctx\vany}
+    \end{enumerate}
+    then $\subtydflt{\ty}{\plug\dctx\tyub}.$
 \end{lemma}
 \begin{proof}
-    By induction on \subtydflt{\ty}{\plug\dctx\vany}.
-    The transitivity assumption
-    ($\forall \ty'\ldots\ \subtydflt{\ty'}{\tylb} \implies \subtydflt{\ty'}{\tyub}$)
-    carries to the induction hypothesis because for each premise
-    \subtydflt{\ty'}{\ty''} of \subtydflt{\ty}{\plug\dctx\vany},
-    it holds that $\tymsrdflt{\ty'} \leq \tymsrdflt{\ty}.$
+    Suppose \tyvlddflt{\ty_{inner}, \ty'_{inner}}
+    and \subtydflt{\ty_{inner}}{\ty'_{inner}}.
+    We show by induction on this derivation that, for all $\dctx_{inner},$ if
+    \begin{enumerate}
+        \item $\tymsrdflt{\ty_{inner}} \leq \tymsrdflt{\ty}$ and
+        \item $\ty'_{inner} = \plug{\dctx_{inner}}\vany,$
+    \end{enumerate}
+    then \subtydflt{\ty_{inner}}{\plug{\dctx_{inner}}\tyub}.
     The most interesting case of the proof is highlighted in \textbf{bold}.
     \begin{itemize}
         \item Case \RST{Bot}. By \RST{Bot}.
@@ -592,30 +593,40 @@ This section presents the following key properties:
             \subtydflt{\tyub}{\tyub}.
             Thus, by \RST{VarLeft}, \subtydflt{\vany}{\tyub}.
         \item Case \RST{VarLeft}. 
-            \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\vany}.
+            \subtydflt{\plug{\dctx'}{\vany'}}{\plug{\dctx_{inner}}\vany}.
             By the form of the rule, $\varbound{\vany'}{\tylb'}{\tyub'} \in \AEnv$
-            and \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\vany}.
-            By IH,
-            \subtydflt{\plug{\dctx'}{\tyub'}}{\plug\dctx\tyub}.
+            and \subtydflt{\plug{\dctx'}{\tyub'}}{\plug{\dctx_{inner}}\vany}.
+            Since $\tymsrdflt{\plug{\dctx'}{\tyub'}} < 
+            \tymsrdflt{\plug{\dctx'}{\vany'}},$ by transitivity of $\leq$ on
+            natural numbers, we have $\tymsrdflt{\plug{\dctx'}{\tyub'}}
+            \leq \tymsrdflt{\ty}.$
+            Therefore, the IH is applicable, providing 
+            \subtydflt{\plug{\dctx'}{\tyub'}}{\plug{\dctx_{inner}}\tyub}.
             Thus, by \RST{VarLeft},
-            \subtydflt{\plug{\dctx'}{\vany'}}{\plug\dctx\tyub}.
-        \item \textbf{Case \RST{VarRight}}. \subtydflt{\ty}{\vany}.
+            \subtydflt{\plug{\dctx'}{\vany'}}{\plug{\dctx_{inner}}\tyub}.
+        \item \textbf{Case \RST{VarRight}}. \subtydflt{\ty_{inner}}{\vany}.
             By the form of the rule, $\varbound{\vany}{\tylb}{\tyub} \in \AEnv$
-            and \subtydflt{\ty}{\tylb}.
-            Since $\tymsrdflt{\ty} \leq \tymsrdflt{\ty},$ by the transitivity 
-            assumption, \subtydflt{\ty}{\tyub}.
+            and \subtydflt{\ty_{inner}}{\tylb}.
+            Since by assumption, 
+            $\tymsrdflt{\ty_{inner}} \leq \tymsrdflt{\ty},$
+            the first assumption of the lemma is applicable, 
+            providing \subtydflt{\ty_{inner}}{\tyub}.
         \item Case \RST{Tuple}, subcase
-            $\dctx = \typair{\dctx'}{\ty_{22}}$
-            ($\dctx = \square$ is not possible, and
-            $\dctx = \typair{\ty_{21}}{\dctx'}$
-            is proved analogously), i.e.
+            $\dctx_{inner} = \typair{\dctx'}{\ty_{22}},$ i.e.
+            $\ty_{inner} = \typair{\ty_{11}}{\ty_{12}}$ and
             \subtydflt
                 {\typair{\ty_{11}}{\ty_{12}}}
-                {\typair{\plug{\dctx'}\vany}{\ty_{22}}}.
+                {\typair{\plug{\dctx'}\vany}{\ty_{22}}}
+            ($\dctx_{inner} = \square$ is not possible, and
+            $\dctx_{inner} = \typair{\ty_{21}}{\dctx'}$
+            is proved analogously).
             By the form of the rule, \subtydflt{\ty_{11}}{\plug{\dctx'}\vany}
             and \subtydflt{\ty_{12}}{\ty_{22}}.
-            By IH, \subtydflt{\ty_{11}}{\plug{\dctx'}\tyub}.
-            By \RST{Tuple},
+            Since $\tymsrdflt{\ty_{11}} < \tymsrdflt{\ty_{inner}},$ 
+            by transitivity of $\leq$ on natural numbers,
+            we have $\tymsrdflt{\ty_{11}} \leq \tymsrdflt{\ty}.$
+            Thus, by IH, \subtydflt{\ty_{11}}{\plug{\dctx'}\tyub}.
+            Then, by \RST{Tuple},
             \subtydflt
                 {\typair{\ty_{11}}{\ty_{12}}}
                 {\typair{\plug{\dctx'}\tyub}{\ty_{22}}}.
@@ -625,6 +636,8 @@ This section presents the following key properties:
     The remaining cases
     (\RST{Top}, \RST{Tuple}, \RST{Inv}, \RST{UnionRight}) 
     are not possible.
+    The conclusion of the lemma follows by instantiating $\ty_{inner}$
+    and $\dctx_{inner}$ with \ty and \dctx.
 \end{proof}
 
 \begin{theorem}[Transitivity of subtyping of types]\label{thm:sub-ty-trans}

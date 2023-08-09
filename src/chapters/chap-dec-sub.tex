@@ -1273,7 +1273,7 @@ Note that the constraint resolution algorithm does not need to compute
 \substvars to check the consistency of constraints: the substitution 
 is computed so that multiple dispatch can instantiate type variables
 in parametric method definitions. However, despite \solvectrdflt
-computing the smallest valid substitution with respect to \CSet, 
+computing the smallest valid substitution for the given \CSet, 
 there can be multiple valid
 derivations of constrained subtyping that produce different
 %, possibly incomparable, 
@@ -1284,11 +1284,12 @@ For example,
         {\tyunion{\tyinv\nref\tyint}{\tyinv\nref\tystr}}
         {\tyunion{\tyany}{\tyinv\nref\va}}{\ldots}
 \]
-can be satisfied with $\substel\va\tybot$, $\substel\va\tyint$,
-$\substel\va\tystr$, or any other instantiation of \va, for that matter.
+is derivable with three different sets of constraints, solved by 
+$\substel\va\tybot$, $\substel\va\tyint$, and
+$\substel\va\tystr$. %or any other instantiation of \va, for that matter.
 Therefore, the dispatch mechanism would need to decide which derivation to pick.
-And while in this example, $\substel\va\tybot$ is the smallest valid
-instantiation of \va, the smallest one does not always exist.
+And while, in this example, $\substel\va\tybot$ is the smallest valid
+instantiation of \va, the smallest one does not always exist globally.
 For example,
 \[
     \subtyctrR{\EmptyEnv}{\va,\vb}
@@ -1298,6 +1299,11 @@ For example,
 can be satisfied with either
 \subst{}{\substel{\va}{\tyint}, \substel{\vb}{\tystr\!}\!} or
 \subst{}{\substel{\va}{\tystr}, \substel{\vb}{\tyint\!}\!}.
+Since the number of possible subtyping derivations (and corresponding
+constraint sets) is finite, it would be possible for the dispatch mechanism
+to compare substitutions produced by \solvectrdflt to pick the smallest one
+when it exists, or apply another selection mechanism when substitutions are 
+incomparable.
 
 Examining signature subtyping,
 the rule \RSS{UnionLeft} may seem surprising because the two premises
@@ -1334,7 +1340,8 @@ For example, in the following derivation,\\
 This is correct because the types
 \tyexistnob{\va}{(\tyunion{\tysig_1}{\tysig_2})} and
 \tyunion{(\tyexistnob{\va}{\tysig_1})}{(\tyexistnob{\va}{\tysig_2})}
-are semantically equivalent, which is also the case in Julia:
+are semantically equivalent, with the equivalence being derivable in Julia
+as well:
 \begin{center}
 \begin{minipage}{8cm}
 \begin{lstlisting}
@@ -1342,6 +1349,7 @@ julia> Union{Ref{Int}, Vector{String}} <:
     Union{Ref{T}, Vector{T}} where T
 true
 
+# t1 == t2 holds when t1 <: t2 and t2 <: t1
 julia> Union{Ref{T} where T, Vector{T} where T} == 
     Union{Ref{T}, Vector{T}} where T
 true
@@ -1541,7 +1549,7 @@ In particular:
         concatenates two environments.
 \end{itemize}
 The validity check ensures that free variables are bound in 
-corresponding environments,
+corresponding environments
 and that variable bounds are non-recursive and consistent.
 %i.e., the lower bound is a subtype of the upper bound.
 

@@ -472,9 +472,8 @@ the judgment:
     \tupletyp{\wheret{\cstrt{\jlname{Ref}}{\S}}{\S <: \jlname{Int}}} \ <:\ 
     \wheret{\tupletyp{\cstrt{\jlname{Ref}}{\T}}}{\T}.
 \]
-In the derivation, by~\RLJ{R\_Intro} rule, variable
-\T is introduced before the variable \S, but \T's bounds refer to \S
-in the judgment
+In the derivation variable \T is introduced by~\RLJ{R\_Intro} rule---before
+the variable \S, but \T's bounds refer to \S in the judgment
 \[ ^R \T_{\uniontyp{}}^{\anytyp}, ^L \S_{\uniontyp{}}^{\jlname{Int}} \vdash
    \cstrt{\jlname{Ref}}{\S} <: \cstrt{\jlname{Ref}}{\T} \vdash 
    ^R\!\T_S^S, ^L \S_{\uniontyp{}}^{\jlname{Int}}, \]
@@ -815,12 +814,12 @@ and terminates the program when the stack reaches a certain limit.
 %the Ghelli example, often manifest with a \cjl{StackOverflowError}
 %rather than non-termination.
 
-Although the undecidability of a particular subtyping algorithm
-does not necessarily mean that decidable subtyping for the same
+Although the nontermination of a particular subtyping algorithm
+does not necessarily mean that a terminating algorithm for the same
 language of types does not exist, I {conjecture} that
-\begin{quotation}\emph{
-  in the case of Julia's type language, there is no decidable subtype relation 
-  that would match the intended subtyping behavior
+\begin{quotation}\noindent\emph{%
+  in the case of Julia's type language, there is no terminating subtyping
+  algorithm that would match the intended subtyping behavior
   described in Sections \ref{sec:julia-sub:overview} and
   \ref{sec:julia-sub:lambda-julia}.
 }\end{quotation}
@@ -883,7 +882,7 @@ Let us walk through possible steps of a subtyping algorithm \algo.
         \ <:\ 
         \tupletyp{\vectyp{\t_1^{\T}}, \t_2^{\T}}. 
     \]
-  \item Both sides of the subtyping query are now tuples of the matching length.
+  \item Both sides of the subtyping query are now tuples of matching length.
     Tuples are covariant, so \algo needs to check that their corresponding 
     components are subtypes, i.e.,
     \[ 

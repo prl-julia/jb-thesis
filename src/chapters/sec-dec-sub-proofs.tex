@@ -7,7 +7,7 @@ most importantly:
     \item decidability of subtyping (\thmref{thm:subtysig-terminates});
     \item transitivity of unification-free subtyping (\thmref{thm:sub-ty-trans});
     \item soundness of constrained subtyping (\thmref{thm:subtyctr-sound}) 
-        and constraints resolution (\thmref{thm:solvectr-sound}).
+        and constraint resolution (\thmref{thm:solvectr-sound}).
 \end{itemize}
 
 A detailed discussion of the decidability is given in \secref{subsec:dec-proof}.
@@ -17,7 +17,7 @@ At a high-level, the subtyping algorithm terminates because:
         constrained subtyping, and signature subtyping, the arguments are
         cumulatively smaller with respect to the measure function
         (\figref{fig:ty-measure});
-    \item constraints resolution terminates because consistency checks terminate
+    \item constraint resolution terminates because consistency checks terminate
         and \UEnv argument decreases with each recursive call.
 \end{enumerate}
 
@@ -34,7 +34,7 @@ in \textbf{bold}.
 
 % \textbf{Termination.} The measure of a type includes the measure of its bounds.
 % In all subtyping judgments, every recursive call is made with a smaller measure.
-% For constraints resolution, every recursive call is made with a smaller \UEnv.
+% For constraint resolution, every recursive call is made with a smaller \UEnv.
 
 % \textbf{Notes.}
 % Exists of unions is equivalent to the union of exists (in Julia subtyping),
@@ -288,7 +288,7 @@ This section presents the following key properties:
     of the conclusion \subtyctrdflt{\ty}{\ty'}.
     
     The only interesting case is \RSC{UVar-UnionRight}.
-    By the variable names convention~(\defref{def:var-names}), $\va \notin \AEnv$.
+    By the variable name convention~(\defref{def:var-names}), $\va \notin \AEnv$.
     Therefore, $\tymsrdflt{\va} = \tymsrdflt{\va_1} = \tymsrdflt{\va_2}$
     and the measure of the left-hand side type is the same in both premises
     and the conclusion,
@@ -300,7 +300,7 @@ This section presents the following key properties:
 
 \begin{theorem}[Termination of\ \solvectrdflt]%
 \label{thm:solvectr-terminates}
-    The constraints resolution algorithm \solvectrdflt terminates.
+    The constraint resolution algorithm \solvectrdflt terminates.
 \end{theorem}
 \begin{proof}
     It follows from the fact that:
@@ -428,7 +428,7 @@ This section presents the following key properties:
         \item \RSS{Types}. The first premise,
             \subtyctrR{\AEnv}{\dom\UEnv}{\ty}{\ty'}{\CSet},
             terminates by \thmref{thm:subtyctr-terminates}.
-            Since the constraints resolution \solvectrdflt terminates
+            Since the constraint resolution \solvectrdflt terminates
             by \thmref{thm:solvectr-terminates}, the entire step also terminates.
     \end{itemize}
 \end{proof}

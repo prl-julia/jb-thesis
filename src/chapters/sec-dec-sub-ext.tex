@@ -687,7 +687,7 @@ valid instantiation of the variable is \tyub, it can be used
 instead of \tybot to check subtyping with the concrete variable on the right.
 The same reasoning explains the new cases for intersection $\sqcap_\AEnv$.
 Constraints for concrete unification variables are generated in the same way
-as for regular variables. The key difference is in the constraints resolution
+as for regular variables. The key difference is in the constraint resolution
 algorithm: the smallest type satisfying the constraints, 
 $\ty_{\va} = \mcup_i \tylb_i$,
 needs to be concrete\footnote{
@@ -699,7 +699,7 @@ needs to be concrete\footnote{
     the only necessary condition is that
     $\lnot (\subtydflt{\substvars(\tyub)}{\tybot})$,
     as otherwise, no concrete instantiations would be valid.
-} in order for constraints resolution to succeed.
+} in order for constraint resolution to succeed.
 
 \begin{figure}[t]
 \footnotesize

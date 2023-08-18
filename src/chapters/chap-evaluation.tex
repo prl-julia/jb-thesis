@@ -7,7 +7,7 @@ from the official Julia package registry.
 In particular, the analysis extracts type annotations
 from the source code of the packages
 and checks how many of those satisfy the restriction
-described in \secref{chap:dec-sub}.
+described in \chapref{chap:dec-sub}.
 
 Out of more than 2M successfully extracted, \emph{statically} identifiable
 type annotations, only two do not have an equivalent type signature
@@ -44,9 +44,9 @@ There were \numprint{9355} entries listed on JuliaHub as of 2023-05-20.
 Out of those, using \code{JuliaPkgDownloader.jl}\footnote{
   \url{https://github.com/julbinb/JuliaPkgDownloader.jl/}
 }, \numprint{9315} packages were downloaded successfully.
-Some JuliaHub entries were not valid registered packages,
-e.g. the entry for Julia itself, some did not contain a version,
-some were no longer publicly available or could not be processed
+Some JuliaHub entries were not valid registered packages
+(e.g., the entry for Julia itself), some did not contain a version,
+and some were no longer publicly available or could not be processed
 for other reasons.
 
 Thus, the resulting corpus consists of 172K files with 19.5M lines of code
@@ -89,7 +89,7 @@ the MacroTools.jl\footnote{
   \url{https://github.com/FluxML/MacroTools.jl}
 } package, which allows for convenient pattern matching over Julia's abstract
 syntax tree. 
-The analysis is static and as such, does not process dynamically generated code.
+The analysis is static and, as such, does not process dynamically generated code.
 
 I identify and extract the following kinds of type annotations:
 \begin{itemize}

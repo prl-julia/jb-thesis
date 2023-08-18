@@ -15,13 +15,13 @@ At a high-level, the subtyping algorithm terminates because:
 \begin{enumerate}
     \item for each recursive call of unification-free subtyping, 
         constrained subtyping, and signature subtyping, the arguments are
-        cumulatively smaller with respect to the measure function
-        (\figref{fig:ty-measure});
+        cumulatively smaller with respect to a measure function defined in
+        \figref{fig:ty-measure};
     \item constraint resolution terminates because consistency checks terminate
-        and \UEnv argument decreases with each recursive call.
+        and the \UEnv argument decreases with each recursive call.
 \end{enumerate}
 
-Note: particularly interesting elements of the proofs are highlighted
+Particularly interesting elements of the proofs are highlighted
 in \textbf{bold}.
 
 % \paragraph*{Overview of proofs.}
@@ -96,7 +96,16 @@ in \textbf{bold}.
     \multicolumn{3}{c}{\tymsrdflt{\tysig}} \\ 
     \hline 
     \tymsrdflt{\tyany} &=& 1\\
-    \multicolumn{3}{l}{\ldots} \\
+    \tymsrdflt{\tybot} &=& 1\\
+    \tymsr{\,\EmptyEnv\,}{\vany} &=& 1\\
+    \tymsr{\AEnv, \varbound{\vany}{\tylb}{\tyub}}{\vany} &=& 
+        1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub}\\
+    \tymsr{\AEnv, \varbound{\vany'}{\tylb}{\tyub}}{\vany} &=& 
+        \tymsrdflt{\vany} \\
+    \tymsrdflt{\typair{\tysig_1}{\tysig_2}} &=& 
+        1 + \tymsrdflt{\tysig_1} + \tymsrdflt{\tysig_2}\\
+    \tymsrdflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &=&
+        1 + \tymsrdflt{\rexvar_1} + \ldots + \tymsrdflt{\rexvar_n}\\
     \tymsrdflt{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &=& 
         1 + \tymsrdflt{\tylb} + \tymsrdflt{\tyub} + 
         \tymsr{\AEnv,\varbound{\vany}{\tylb}{\tyub}}{\tysig}\\
@@ -115,8 +124,8 @@ in \textbf{bold}.
 \end{figure}
 
 To show the decidability of the subtyping algorithm,
-I will use the measure $\msrop$ of types and type signatures,
-as defined in \figref{fig:ty-measure}.
+I will use the measure $\msrop$ of types and type signatures
+defined in \figref{fig:ty-measure}.
 The measure function is defined recursively and is
 similar to syntactic size,
 except for the treatment of type variables: for variables from~\AEnv,
@@ -175,7 +184,12 @@ The syntactic size is defined in~\figref{fig:ty-size}.
     \multicolumn{3}{c}{\size{\tysig}} \\ 
     \hline 
     \size{\tyany} &=& 1\\
-    \multicolumn{3}{l}{\ldots} \\
+    \size{\tybot} &=& 1\\
+    \size{\vany}  &=& 1\\
+    \size{\typair{\tysig_1}{\tysig_2}}  &=& 1 + \size{\tysig_1} + \size{\tysig_2}\\
+    \size{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} &=&
+        1 + \size{\rexvar_1} + \ldots + \size{\rexvar_n}\\
+    \size{\tyunion{\tysig_1}{\tysig_2}} &=& 1 + \size{\tysig_1} + \size{\tysig_2}\\
     \size{\tyexist{\vany}{\tylb}{\tyub}{\tysig}} &=& 
         1 + \size{\tylb} + \size{\tyub} + \size{\tysig}\\
     \\
@@ -203,8 +217,8 @@ In the remainder of this chapter, the following facts about
 the distributivity contexts
 will be used implicitly (proofs are straightforward by induction):
 \begin{itemize}
-    \item $\plug{\dctx}{\ty} = \ty';$
-    \item $\plug{\dctx}{\dctx'} = \dctx'';$
+    \item $\plug{\dctx}{\ty} = \ty' \text{ for some } \ty';$
+    \item $\plug{\dctx}{\dctx'} = \dctx'' \text{ for some } \dctx'';$
     \item $\plug{\dctx}{\plug{\dctx'}{\ty}} = 
         \plug{(\plug{\dctx}{\dctx'})}{\ty};$
     \item $\subtydflt{\dctx}{\dctx'} \text{ and } \subtydflt{\ty}{\ty'}
@@ -221,20 +235,20 @@ will be used implicitly (proofs are straightforward by induction):
 
 This section presents the following key properties:
 \begin{itemize}
-    \item termination of \subtydflt{\ty}{\ty'} (\thmref{thm:subty-terminates});
+    \item termination of \subtydflt{\ty}{\ty'} (\lemref{thm:subty-terminates});
     \item termination of \tymeetdflt{\ty}{\ty'} (\lemref{lem:meet-terminates});
-    \item termination of \subtyctrdflt{\ty}{\ty'} (\thmref{thm:subtyctr-terminates});
-    \item termination of \solvectrdflt (\thmref{thm:solvectr-terminates});
+    \item termination of \subtyctrdflt{\ty}{\ty'} (\lemref{thm:subtyctr-terminates});
+    \item termination of \solvectrdflt (\lemref{thm:solvectr-terminates});
     \item termination of \subtysigdflt{\tysig}{\tysig'} (\thmref{thm:subtysig-terminates}).
 \end{itemize}
 
-\begin{theorem}[Termination of\ \ \subtydflt{\ty}{\ty'}]%
+\begin{lemma}[Termination of\ \ \subtydflt{\ty}{\ty'}]%
 \label{thm:subty-terminates}
     The subtyping algorithm built from the rules of subtyping of types
     \subtydflt{\ty}{\ty'} terminates.
-\end{theorem}
+\end{lemma}
 \begin{proof}
-    It follows from the fact that for each subtyping rule, 
+    It follows from the fact that, for each subtyping rule, 
     the measure of each premise \subtydflt{\ty_p}{\ty'_p}
     is strictly smaller than the measure 
     of the conclusion \subtydflt{\ty}{\ty'}, i.e.
@@ -255,31 +269,31 @@ This section presents the following key properties:
 % \end{lemma}
 % \begin{proof}
 %     \tyjoindflt{\ty}{\ty'} terminates because subtyping of types terminates
-%     by~\thmref{thm:subty-terminates}.
+%     by~\lemref{thm:subty-terminates}.
 
 %     \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates
 %     and for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
 %     \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
 %     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
 % \end{proof}
-\begin{lemma}[Termination of intersection ($\sqcap_{\AEnv}$)]%
+\begin{lemma}[Termination of intersection $\sqcap_{\AEnv}$]%
 \label{lem:meet-terminates}
     $\forall \AEnv, \ty, \ty',$
     \tymeetdflt{\ty}{\ty'} terminates.
 \end{lemma}
 \begin{proof}
     \tymeetdflt{\ty}{\ty'} terminates because subtyping of types terminates,
-    and for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
+    and, for each recursive call \tymeetdflt{\ty_r}{\ty'_r} of 
     \tymeetdflt{\ty}{\ty'}, the measure $\tymsrdflt{\ty_r} + \tymsrdflt{\ty'_r}$ 
     is strictly smaller than $\tymsrdflt{\ty} + \tymsrdflt{\ty'}$.
 \end{proof}
 
-\begin{theorem}[Termination of\ \ \subtyctrdflt{\ty}{\ty'}]%
+\begin{lemma}[Termination of\ \ \subtyctrdflt{\ty}{\ty'}]%
 \label{thm:subtyctr-terminates}
     The subtyping algorithm built from the rules of
     constrained subtyping of types
     \subtyctrdflt{\ty}{\ty'} terminates.
-\end{theorem}
+\end{lemma}
 \begin{proof}
     Similarly to the previous theorem, the measure decreases, i.e.
     \[\tymsrdflt{\ty_p} + \tymsrdflt{\ty'_p} \quad<\quad 
@@ -293,19 +307,19 @@ This section presents the following key properties:
     and the measure of the left-hand side type is the same in both premises
     and the conclusion,
     while the measure of the right-hand side type in both premises 
-    is strictly smaller than in conclusion.
+    is strictly smaller than in the conclusion.
     Furthermore, $\msqcap_{i=1}^n \tyub_1^i$ and $\msqcap_{j=1}^m \tyub_2^j$
     terminate by~\lemref{lem:meet-terminates}.
 \end{proof}
 
-\begin{theorem}[Termination of\ \solvectrdflt]%
+\begin{lemma}[Termination of\ \solvectrdflt]%
 \label{thm:solvectr-terminates}
     The constraint resolution algorithm \solvectrdflt terminates.
-\end{theorem}
+\end{lemma}
 \begin{proof}
     It follows from the fact that:
     \begin{enumerate}
-        \item subtyping algorithms \subtydflt{\ty}{\ty'} and 
+        \item the subtyping algorithms \subtydflt{\ty}{\ty'} and 
             \subtyctrdflt{\ty}{\ty'} used to check the consistency of 
             constraints terminate;
         \item the argument \UEnv of the only recursive call to $\solvectrop$
@@ -382,14 +396,14 @@ This section presents the following key properties:
     \subtysigdflt{\tysig}{\tysig'} terminates.
 \end{theorem}
 \begin{proof}
-    It follows from the fact that for each subtyping rule, 
+    It follows from the fact that, for each subtyping rule, 
     the measure of each premise \subtysigdflt{\tysig_p}{\tysig'_p}
     is strictly smaller than the measure 
     of the conclusion \subtysigdflt{\tysig}{\tysig'}, i.e.
     \[\tymsr{\AEnv'}{\tysig_p} + \tymsr{\concat{\AEnv'}{\UEnv'}}{\tysig'_p} \quad<\quad 
     \tymsr{\AEnv}{\tysig} + \tymsr{\concat{\AEnv}{\UEnv}}{\tysig'}.\]
 
-    Most of the cases are similar to the cases of~\thmref{thm:subty-terminates}
+    Most of the cases are similar to the cases of~\lemref{thm:subty-terminates}
     on the termination of \subtydflt{\ty}{\ty'}.
     The remaining cases are:
     \begin{itemize}
@@ -410,10 +424,9 @@ This section presents the following key properties:
                   = & \tymsrdflt{\rexvarbound{\tylb}{\tyub}},
                 \end{array}
             \]
-            which concludes the case.
-        \item \RSS{ExistLeft}. By the variables names
+        \item \RSS{ExistLeft}. By the variables name
             convention~(\defref{def:var-names}), \vx is different from variables
-            in \AEnv, \UEnv, as well as bound variables of \dctxsig, \tysig,
+            in \AEnv, \UEnv, as well as the bound variables of \dctxsig, \tysig,
             and $\tysig'$. Therefore, by~\lemref{lem:msr-weakening} (weakening),
             $\tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\dctxsig} = 
             \tymsrdflt{\dctxsig}$, and similarly for $\tysig'$.
@@ -422,14 +435,13 @@ This section presents the following key properties:
                 \tymsrdflt{\tylb} + \tymsrdflt{\tyub} + 
                 \tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\tysig},\]
             which is strictly larger than
-            \tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\tysig} in the premise,
-            which concludes the case.
+            \tymsr{\AEnv, \varbound{\vx}{\tylb}{\tyub}}{\tysig} in the premise.
         \item \RSS{ExistRight}. Similarly to \RSS{ExistLeft}.
         \item \RSS{Types}. The first premise,
             \subtyctrR{\AEnv}{\dom\UEnv}{\ty}{\ty'}{\CSet},
-            terminates by \thmref{thm:subtyctr-terminates}.
+            terminates by \lemref{thm:subtyctr-terminates}.
             Since the constraint resolution \solvectrdflt terminates
-            by \thmref{thm:solvectr-terminates}, the entire step also terminates.
+            by \lemref{thm:solvectr-terminates}, the entire step also terminates.
     \end{itemize}
 \end{proof}
 
@@ -508,7 +520,8 @@ This section presents the following key properties:
 \begin{lemma}[Adding inner union on the right]%
 \label{lem:add-inner-union-right}
     $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
-    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
+    \tyvld{}{\AEnv}\ \text{ and }$\\
+     $\tyvlddflt{\ty, \dctx', \ty'}.$
     \[
         \subtydflt{\ty}{\plug{\dctx'}{\ty'}}
         \quad\implies\quad
@@ -523,8 +536,8 @@ This section presents the following key properties:
 
 \begin{lemma}[Subtyping of union on the right]%
 \label{lem:sub-union-right}
-    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }
-    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
+    $\forall \ty, \dctx', \ty'_1, \ty'_2, \AEnv, \text{ with }$\\
+    $\tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'_1, \ty'_2}.$
     \[
         \subtydflt{\ty}{\tyunion{\plug{\dctx'}{\ty'_1}}{\plug{\dctx'}{\ty'_2}}}
         \quad\implies\quad
@@ -550,7 +563,7 @@ This section presents the following key properties:
 
 \begin{lemma}[Context weakening in subtyping of types]%
 \label{lem:subty-weakening}
-    $\forall \AEnv, \ty, \ty'.\ \forall \AEnv' \text{ with }$\\
+    $\forall \AEnv, \ty, \ty'.\ \forall \AEnv'$\\ $\text{with }$
     $\dom{\AEnv'} \cap \dom{\AEnv} = \varnothing \text{ and } 
     (\forall \vany \in \dom{\AEnv'}. 
         \lnot \occ{\vany}{\ty} \text{ and } \lnot \occ{\vany}{\ty'}),$
@@ -823,7 +836,7 @@ This section presents the following key properties:
         \subtydflt{\substvars(\va)}{\ty'} }
     { \vldinenv{\AEnv}{\CSet}{\substvars} }
 \end{mathpar}
-\caption{Validity of substitution with respect to environment and constrains}%
+\caption{Validity of substitution with respect to environment and constraints}%
 \label{fig:substuvars-validity}
 \end{figure}
 
@@ -1115,24 +1128,24 @@ This section presents the following key properties:
             where $\CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{\tyub_1^i}}$
             and $\CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{\tyub_2^j}}$.
             
-            When $n=0$ or $m=0$, we can take $\substvars_1 = 
-                \subst{\substvars}{\substel{\va_1}{\substvars(\va)}}$
-            and $\substvars_2 = 
-                \subst{\substvars}{\substel{\va_2}{\substvars(\va)}}$.
-            In both subcases ($n=0$ and $m=0$), we have 
-            \vldinenv{\AEnv}{\CSet_1}{\substvars_1} and
-            \vldinenv{\AEnv}{\CSet_2}{\substvars_2}, because $\substvars(\va)$
-            satisfies the constraints on $\va_1$ and $\va_2$.
-            Therefore, by the induction hypotheses,
-            \subtydflt{\substvars_1(\plug\dctx{\va_1})}{\tyunion{\ty'_1}{\ty'_2}}
-            and
-            \subtydflt{\substvars_2(\plug\dctx{\va_2})}{\tyunion{\ty'_1}{\ty'_2}}.
-            Clearly, $\substvars(\plug\dctx{\va}) = 
-                \substvars_1(\plug\dctx{\va_1}) = 
-                \substvars_2(\plug\dctx{\va_2})$,
-            and thus, the subcases conclude by \RST{UnionRight}.
+            % When $n=0$ or $m=0$, we can take $\substvars_1 = 
+            %     \subst{\substvars}{\substel{\va_1}{\substvars(\va)}}$
+            % and $\substvars_2 = 
+            %     \subst{\substvars}{\substel{\va_2}{\substvars(\va)}}$.
+            % In both subcases ($n=0$ and $m=0$), we have 
+            % \vldinenv{\AEnv}{\CSet_1}{\substvars_1} and
+            % \vldinenv{\AEnv}{\CSet_2}{\substvars_2}, because $\substvars(\va)$
+            % satisfies the constraints on $\va_1$ and $\va_2$.
+            % Therefore, by the induction hypotheses,
+            % \subtydflt{\substvars_1(\plug\dctx{\va_1})}{\tyunion{\ty'_1}{\ty'_2}}
+            % and
+            % \subtydflt{\substvars_2(\plug\dctx{\va_2})}{\tyunion{\ty'_1}{\ty'_2}}.
+            % Clearly, $\substvars(\plug\dctx{\va}) = 
+            %     \substvars_1(\plug\dctx{\va_1}) = 
+            %     \substvars_2(\plug\dctx{\va_2})$,
+            % and thus, the subcases conclude by \RST{UnionRight}.
 
-            The most interesting case is when $n \geq 1, m \geq 1$.
+            % The most interesting case is when $n \geq 1, m \geq 1$.
             Let $\msqcap_{i=1}^n \tyub_1^i$ be denoted with $\tyub_1$
             and $\msqcap_{j=1}^m \tyub_2^j$ with $\tyub_2$.
             By~\thmref{thm:meet-sound} (soundness of intersection), we have
@@ -1159,7 +1172,7 @@ This section presents the following key properties:
     \end{itemize}
 \end{proof}
 
-\begin{theorem}[Soundness of constrains resolution]%
+\begin{theorem}[Soundness of constraints resolution]%
 \label{thm:solvectr-sound}
     $\forall \AEnv, \UEnv$ s.t. $\tyvld{}{\AEnv, \UEnv}$.
     $\forall \CSet$ s.t. $\forall \ctrsub{\tylb}{\va} \in \CSet.

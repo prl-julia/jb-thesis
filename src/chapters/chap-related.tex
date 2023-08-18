@@ -4,12 +4,12 @@ Subtyping is typically associated with object-oriented programming languages and
 static type systems. As a part of a type system, subtyping allows
 an expression of a more specific type (subtype) to be used in place
 where an expression of a more general type (supertype) is expected,
-enabling more benign programs to be typable.
+enabling more programs to be typable.
 Subtyping can also be used at run time
 in both statically and dynamically typed languages to perform
 type tests, casts, and dynamic dispatch.
 
-There is a wide variety of research related to subtyping, but this chapter
+There is a wide variety of research related to subtyping; this chapter
 focuses primarily on work that concerns decidability of subtyping,
 semantic subtyping, and subtyping of Java generics with wildcards,
 as Julia's subtype relation was inspired by the latter
@@ -56,7 +56,7 @@ as discussed in~\secref{sec:julia-sub:undec}.
 %\citet{bib:kennedy:nom-sub-var-dec:2007} showed the undecidability of subtyping
 %by a reduction from the Post correspondence problem.
 
-In practice, benefits of having a more expressive type system might outweigh
+In practice, the benefits of having a more expressive type system might outweigh
 the cost of undecidability, which amounts to the compiler crashing or
 not terminating on some input programs.
 If the undecidability arises only in rare, contrived cases,
@@ -109,9 +109,9 @@ and contravariance in lower bounds of existential types
 %one of the undecidability ingredients of \FSub.
 is akin to the source of undecidability in~\FSub;
 the conjecture relied on the fact that left- and right-hand side variables
-are treated assymetrically in Julia.
+are treated asymetrically in Julia.
 Still, Julia subtyping is powerful enough to encode
-the undecidable \FSub.
+the undecidable~\FSub.
 
 A number of decidable subtype relations,
 e.g. \WyvSelf~\cite{bib:mackay:path-dep-dec:2020}
@@ -120,12 +120,12 @@ adopt subtyping rules inspired by a decidable, restricted variant of \FSub
 called Kernel~\FSub~\cite{bib:cardelli:types-poly:1985}.
 The downside of such relations is their rejecting more subtyping judgments
 than is desirable in practice.
-A strictly more powerful than Kernel \DSub system
-Strong Kernel \DSub~\cite{bib:hu:dot-undec:2020} is also decidable.
+A strictly more powerful than Kernel \DSub system,
+Strong Kernel \DSub~\cite{bib:hu:dot-undec:2020}, is also decidable.
 This relation splits the type variable context into two parts, for the left-
 and right-hand sides of the subtyping judgment, thus avoiding the problematic
 rebounding of type variables in a single context;
-the same idea applies to \FSub to obtain the decidable, Strong Kernel \FSub.
+the same idea applies to \FSub to obtain the decidable Strong Kernel \FSub.
 A similar approach with context splitting is used
 by~\citet{bib:mackay:path-dep-dec:2020} for decidable subtyping in \WyvFix.
 In both \WyvFix and Strong Kernel systems,
@@ -167,7 +167,7 @@ subtype constraints as a part of type inference process in their set-theoretic
 framework with union, intersection, and negation types.
 \citet{bib:schimpf:set-types-erlang:2023} successfully apply the
 same framework to typing Erlang.
-However, the approach to constraint solving does not translate to Julia
+However, their approach to constraint solving does not translate to Julia
 due to the presence of invariant constructors and impredicativity.
 %, which prevents the possibility of rewriting constraints into the right form.
 
@@ -190,7 +190,7 @@ impredicative bounded existential types and invariant type constructors.
 \section{Java wildcards}
 %% ======================================================================
 
-The wildcards mechanism of Java generics~\cite{bib:torgersen:wildcards:2004}
+The wildcard mechanism of Java generics~\cite{bib:torgersen:wildcards:2004}
 provides use-site variance of parametric
 types~\cite{bib:thorup:unif-genericity:1999}.
 For example, a variable of type \code{List<? \textbf{extends} Number>}
@@ -220,5 +220,5 @@ and wildcards being allowed in the inheritance hierarchy;
 by making practical restrictions on the Java language,
 they provide a terminating subtyping algorithm.
 Julia lacks all the Java features that were linked to non-termination of
-subtyping but supports union and existential types that are not present
+subtyping but supports union and existential types, which are not present
 in Java's surface language.

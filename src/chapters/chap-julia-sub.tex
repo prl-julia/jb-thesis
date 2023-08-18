@@ -201,9 +201,10 @@ type constructors and multiple dispatch.
 Initially, an incomplete (and soon outdated) definition of subtyping existed 
 only in~\cite{bib:bezanson:julia:2015}, with the only reference point
 being the actual implementation of subtyping ($\sim$3000 lines 
-of heavily optimized C~code as of May 2023).
+of heavily optimized C~code as of 2018).
 
-In this section, I present a fragment of the specification of
+To build intuition about Julia subtyping, this section presents a fragment
+of the specification of
 Julia~0.6.2 subtyping from~\cite{bib:zappa-nardelli:julia-sub:oopsla:2018}.
 In that work, my collaborators and I defined, implemented, and empirically
 validated a subtype relation for Julia's type language,
@@ -774,7 +775,7 @@ compiler might not terminate on some programs. Although undesirable,
 such property can be acceptable if it manifests rarely and
 allows for an expressive type system.
 
-In the dynamically typed Julia, however, subtyping is used at run time---for
+In Julia, however, subtyping is used at run time---for
 dispatch resolution. %Even on rare occasions, consequences of
 %undecidability at run time are of greater concern than at compile time.
 Thus, undecidability is concerning even on rare occasions.

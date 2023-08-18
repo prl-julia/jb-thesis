@@ -1,6 +1,6 @@
 \chapter{Appendix}
 
-\section{Properties Subtyping}\label{sec:app:proofs}
+\section{Properties of Subtyping}\label{sec:app:proofs}
 %% ======================================================================
 
 \subsection{Decidable Subtyping}\label{subsec:app:proofs:dec}
@@ -35,7 +35,7 @@
     $\forall n'<n. \forall \tysig', \AEnv'', \AEnv'''  \text{ with }
     n' = \size{\AEnv''} + \size{\AEnv'''} + \size{\tysig'}.
     \forall \varbound{\vany}{\tylb}{\tyub} \text{ with } 
-    \lnot \occdflt{\tysig'} \text{ and } 
+    \lnot \occdflt{\tysig'}$\\$\text{and } 
     \lnot \occdflt{\AEnv''} \text{ and } \lnot \occdflt{\AEnv'''}.$
     \[\tymsr{\concat{\AEnv''}{\AEnv'''}}{\tysig'} = 
     \tymsr{\concat{\AEnv'',\varbound{\vany}{\tylb}{\tyub}}{\AEnv'''}}{\tysig'}.\]
@@ -222,10 +222,10 @@
     are not possible.
 \end{proof}
 
-\begin{lemma}[Adding inner union on the right (\textbf{\lemref{}})]%
+\begin{lemma}[Adding inner union on the right (\textbf{\lemref{lem:add-inner-union-right}})]%
 \label{lem:add-inner-union-right:app}
-    $\forall \ty, \dctx', \ty', \AEnv, \text{ with }
-    tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
+    $\forall \ty, \dctx', \ty', \AEnv,$\\$\text{with }
+    \tyvld{}{\AEnv}\ \text{ and }\ \tyvlddflt{\ty, \dctx', \ty'}.$
     \[
         \subtydflt{\ty}{\plug{\dctx'}{\ty'}}
         \quad\implies\quad
@@ -367,13 +367,13 @@ In \cite{bib:belyakova:minijl-sub:ftfjp:2019}, I show that the decidable
 syntactic subtype relation is sound and complete with respect
 to the interpretation.
 
-\begin{theorem}[]
+\begin{theorem}
     $\forall \ty, \ty'.$
     \[
         \begin{array}{c}
             \ty <: \ty' \\
             \iff \\
-            (\forall \gty.\quad \gty \in \interp{\ty} \iff
+            (\forall \gty.\quad \gty \in \interp{\ty} \implies
                 \gty \in \interp{\ty'}).
         \end{array}
     \]
@@ -446,13 +446,13 @@ Then, semantic subtyping is defined as:
 Despite the more complex indexed interpretation, the syntactic subtype relation
 is still sound and complete.
 
-\begin{theorem}[]
+\begin{theorem}
     $\forall \ty, \ty'.$
     \[
         \begin{array}{c}
             \ty <: \ty' \\
             \iff \\
-            (\forall w.\ \forall \gty.\quad \gty \in \interp{\ty}_w \iff
+            (\forall w.\ \forall \gty.\quad \gty \in \interp{\ty}_w \implies
                 \gty \in \interp{\ty'}_w).
         \end{array}
     \]

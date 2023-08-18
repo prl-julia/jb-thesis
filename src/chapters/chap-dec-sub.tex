@@ -259,6 +259,10 @@ are comprised of the subcomponents of its conclusion.
 % when reading the overview for the first time.
 Subtyping holds if there is at least one successful derivation using
 the subtyping rules.
+Due to the presence of distributivity, the algorithm is exponential;
+Julia's efficient implementation of distributive subtyping for unions and 
+covariant tuples, exponential in time but linear in space, is described
+in~\cite{bib:chung:julia-sub-algo:2019}.
 
 % we use \vx, \vy, etc. to denote universal variables
 % and \va, \vb, etc. to denote unification variables.
@@ -773,11 +777,6 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
         \CSet'\ \ =\ \ 
             \ctrsngl{\va}{\tyunion{\msqcap_{i=1}^n \tyub_1^i}
                 {\msqcap_{j=1}^m \tyub_2^j}} 
-            \text{ if } n\geq1,m\geq1
-        \text{\ or\ }
-        \mcup_{i=1}^n \ctrset{\ctrsub{\va}{u_1^i}}\text{ if } m=0
-        \text{\ or\ }
-        \mcup_{j=1}^m \ctrset{\ctrsub{\va}{u_2^j}}\text{ if } n=0
     }
     { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
         {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
@@ -842,6 +841,28 @@ useful for proofs but is not used in the definition of \subtydflt{\ty}{\ty'}.
 %     \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{u_1^i}}\text{ if } m=0
 %     \text{\ or\ }
 %     \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{u_2^j}}\text{ if } n=0
+% }
+% { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
+%     {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
+% $}
+%%
+% \colorbox{light-gray}{$
+% \inferrule[\RSC{UVar-UnionRight}]
+% {   \va \in \UEnvD \and \va_1, \va_2 \text{ fresh} \and
+%     \subtyctrL{\AEnv}{\UEnvD,\va_1}{\plug\dctx{\va_1}}{\ty'_1}{\CSet_1} \and
+%     \subtyctrL{\AEnv}{\UEnvD,\va_2}{\plug\dctx{\va_2}}{\ty'_2}{\CSet_2} \\ 
+%     \CSet_1 = \CSet'_1 \mcup_{i=1}^n \ctrset{\ctrsub{\va_1}{\tyub_1^i}} 
+%         \and \va_1 \notin \CSet'_1 \and
+%     \CSet_2 = \CSet'_2 \mcup_{j=1}^m \ctrset{\ctrsub{\va_2}{\tyub_2^j}} 
+%         \and \va_2 \notin \CSet'_2  \\
+%     \CSet'\ \ =\ \ 
+%         \ctrsngl{\va}{\tyunion{\msqcap_{i=1}^n \tyub_1^i}
+%             {\msqcap_{j=1}^m \tyub_2^j}} 
+%         \text{ if } n\geq1,m\geq1
+%     \text{\ or\ }
+%     \mcup_{i=1}^n \ctrset{\ctrsub{\va}{u_1^i}}\text{ if } m=0
+%     \text{\ or\ }
+%     \mcup_{j=1}^m \ctrset{\ctrsub{\va}{u_2^j}}\text{ if } n=0
 % }
 % { \subtyctrLdfltenv{\plug\dctx{\va}}{\tyunion{\ty'_1}{\ty'_2}}
 %     {\CSet'_1 \cup \CSet'_2 \cup \CSet'} }
@@ -1467,7 +1488,24 @@ true
     { }
     { \tyvlddflt{\tyany} }
 
-    \ldots
+    \inferrule*[]
+    { }
+    { \tyvlddflt{\tybot} }
+
+    \inferrule*[]
+    { \varbound{\vany}{\tylb}{\tyub} \in \AEnv }
+    { \tyvlddflt{\vany} }
+    \\
+
+    \inferrule*[]
+    { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
+    { \tyvlddflt{\typair{\tysig_1}{\tysig_2}} }
+
+    \inferrule*[]
+    { \iname \text{ has arity } n \and
+      \forall i \in 1..n.\ \tyvlddflt{\rexvar_i} }
+    { \tyvlddflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} }
+
 
     \inferrule*[]
     { \tyvlddflt{\tysig_1} \and \tyvlddflt{\tysig_2} }
@@ -1495,7 +1533,19 @@ true
     { }
     { \tyunfvlddflt{\tyany} }
 
-    \ldots
+    \inferrule*[]
+    { }
+    { \tyunfvlddflt{\tybot} }
+
+    \inferrule*[]
+    { \tyunfvlddflt{\ty_1} \and \tyunfvlddflt{\ty_2} }
+    { \tyunfvlddflt{\typair{\ty_1}{\ty_2}} }
+
+    \inferrule*[]
+    { \iname \text{ has arity } n \and
+      \forall i \in 1..n.\ \tyunfvlddflt{\rexvar_i} }
+    { \tyunfvlddflt{\tyinv\iname{\rexvar_1,\ldots,\rexvar_n}} }
+
 
     \inferrule*[]
     { \tyunfvlddflt{\ty_1} \and \tyunfvlddflt{\ty_2} }

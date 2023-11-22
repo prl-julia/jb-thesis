@@ -330,7 +330,7 @@ the proposed restriction.
 In the first case, 
 \begin{codeenvd}
 \begin{lstlisting}
-    Array{Tuple{Any, Array{T, N} where N, Bool} where T}
+    Array{Tuple{T, Array{T, N} where N, Bool} where T}
 \end{lstlisting}
 \end{codeenvd}
 the problem is that variable \cjl{T} occurs twice.

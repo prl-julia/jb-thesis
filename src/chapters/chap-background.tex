@@ -17,7 +17,7 @@ multiple dynamic dispatch.
 \begin{figure}[t]
 %-(x::Date, y::Week) = Date(UTD(value(x) - 7*value(y)))    
 \begin{julia}
--(x::BigInt) = MPZ.neg(x, y)
+-(x::BigInt) = MPZ.neg(x)
 -(x::BigInt, y::BigInt) = MPZ.sub(x, y)
 -(x::T, y::T) where T<:Union{Int16, Int32, ..., UInt128} = sub_int(x, y)
 -(m::Missing, n::Number) = missing
